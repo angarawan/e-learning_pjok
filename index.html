@@ -735,10 +735,13 @@
         const api = async (action, payload = {}) => {
             ui.showLoading();
             try {
-                if (GAS_URL) {
+                if (GAS_URL && GAS_URL !== "" && GAS_URL.startsWith("http")) {
                     // IMPLEMENTASI NYATA KE GAS
                     const response = await fetch(GAS_URL, {
                         method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8', // Mencegah blokir CORS dari Browser
+                        },
                         body: JSON.stringify({ action, ...payload })
                     });
                     const result = await response.json();
@@ -751,6 +754,8 @@
                     
                     switch(action) {
                         case 'getInitialData':
+                            // Peringatan otomatis jika GAS_URL kosong
+                            ui.showModal("Menggunakan Data Uji Coba", "Aplikasi saat ini masih menggunakan data simulasi karena URL Google Apps Script (GAS_URL) belum terbaca atau belum dimasukkan ke dalam kode index.html.", "warning");
                             res.data = { classes: MOCK_DATA.classes };
                             break;
                         case 'getStudentsAndMaterials':
