@@ -180,10 +180,12 @@
     </div>
 
     <!-- MAIN APP WRAPPER (Sidebar + Content) -->
-    <div id="view-main" class="hidden min-h-screen bg-dashboard flex flex-col md:flex-row">
+    <!-- PERUBAHAN: Menjadikan w-full, h-screen (tinggi 100% monitor) dan overflow-hidden agar halaman utama tidak ikut terguncang scroll -->
+    <div id="view-main" class="hidden h-screen w-full bg-dashboard flex flex-col md:flex-row overflow-hidden">
         
         <!-- SIDEBAR -->
-        <aside id="appSidebar" class="md:w-64 glass-card border-r border-white/10 md:min-h-screen flex flex-col transition-all duration-300 z-50">
+        <!-- PERUBAHAN: Sidebar dijadikan h-full agar memenuhi kontainer, dan menjadi shrink-0 agar ukurannya paten -->
+        <aside id="appSidebar" class="md:w-64 glass-card border-r border-white/10 md:h-full flex flex-col transition-all duration-300 z-50 shrink-0">
             <!-- Header -->
             <div class="flex items-center justify-between p-4 border-b border-white/10 md:border-none md:p-6 md:pb-2">
                 <div class="flex items-center gap-3 overflow-hidden">
@@ -233,7 +235,8 @@
         </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 p-4 md:p-8 h-screen overflow-y-auto relative">
+        <!-- PERUBAHAN: overflow-y-auto dan h-full memastikan hanya kotak konten ini saja yang digulir naik turun -->
+        <main class="flex-1 p-4 md:p-8 h-full overflow-y-auto relative">
             
             <!-- DASHBOARD CONTENT -->
             <div id="content-dashboard" class="content-section animate-fade-in">
@@ -633,7 +636,7 @@
          * Jika kosong, aplikasi akan menggunakan MOCK DATA (Simulasi) untuk keperluan preview.
          * Nanti, isi string ini dengan URL Web App Apps Script Anda.
          */
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwja22ynAenJ5b0nGs4VhwK31WkmACct4daVi0P9f6iTJySjoa0M8fR-fHGKeaWodca/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby1nqKdA1m22W8HMdTd0-X_eM3_7hHqh0vUH4kqdBYqQVLai2B03F7Nxj9-qbzGJn8F/exec"; 
 
         // --- MOCK DATA UNTUK PREVIEW CANVAS ---
         const MOCK_DATA = {
