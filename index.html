@@ -636,7 +636,7 @@
          * Jika kosong, aplikasi akan menggunakan MOCK DATA (Simulasi) untuk keperluan preview.
          * Nanti, isi string ini dengan URL Web App Apps Script Anda.
          */
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby1nqKdA1m22W8HMdTd0-X_eM3_7hHqh0vUH4kqdBYqQVLai2B03F7Nxj9-qbzGJn8F/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzmBOJ7Qc0C6yXXpCO5Qvkvb0NAcN9qUO-qLOQMPx9rb4iwRx9tVI3A3S9L_DFwDe-n/exec"; 
 
         // --- MOCK DATA UNTUK PREVIEW CANVAS ---
         const MOCK_DATA = {
@@ -925,14 +925,22 @@
                 document.getElementById('lblMaterialTitle').innerText = state.materialTitle;
                 document.getElementById('lblMotivation').innerText = `"${data.motivation}"`;
                 
-                // Setup Materi Content (Mock injection)
-                document.getElementById('materiIsi').innerHTML = MOCK_DATA.materiContent;
+                // Setup Materi Content
+                if (data.materi) {
+                    if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
+                    if (data.materi.tujuan) document.getElementById('materiTujuan').innerText = data.materi.tujuan;
+                    if (data.materi.isi) document.getElementById('materiIsi').innerHTML = data.materi.isi;
+                    if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerText = data.materi.rangkuman;
+                } else {
+                    document.getElementById('materiIsi').innerHTML = MOCK_DATA.materiContent;
+                }
                 document.getElementById('materiJudul').innerText = state.materialTitle;
                 
-                // Setup LKM (Mock injection)
+                // Setup LKM
                 const lkmContainer = document.getElementById('lkmQuestionsContainer');
                 lkmContainer.innerHTML = '';
-                MOCK_DATA.lkmQuestions.forEach((q, idx) => {
+                const lkmSource = (data.lkm && data.lkm.length > 0) ? data.lkm : MOCK_DATA.lkmQuestions;
+                lkmSource.forEach((q, idx) => {
                     lkmContainer.innerHTML += `
                         <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
                             <label class="block font-medium text-white mb-2">${idx+1}. ${q.text}</label>
@@ -940,6 +948,23 @@
                         </div>
                     `;
                 });
+
+                // Setup Tugas
+                if (data.tugas) {
+                    if (data.tugas.instruksi) document.getElementById('tugasInstruksi').innerHTML = data.tugas.instruksi;
+                    if (data.tugas.deadline) document.getElementById('tugasDeadline').innerText = "Batas waktu: " + data.tugas.deadline;
+                }
+
+                // Setup Formatif
+                state.quizData = (data.formatif && data.formatif.length > 0) ? data.formatif : MOCK_DATA.formatifQuestions;
+
+                // Setup Refleksi (Update label text if provided from spreadsheet)
+                if (data.refleksi && data.refleksi.length > 0) {
+                    const refLabels = document.querySelectorAll('#refleksiForm label.block.font-medium, #refleksiForm label.block.text-sm');
+                    if (data.refleksi[0] && refLabels[0]) refLabels[0].innerText = "1. " + data.refleksi[0].text;
+                    if (data.refleksi[1] && refLabels[4]) refLabels[4].innerText = "2. " + data.refleksi[1].text;
+                    if (data.refleksi[2] && refLabels[5]) refLabels[5].innerText = "3. " + data.refleksi[2].text;
+                }
 
                 // Setup Profil initals
                 let initials = state.studentName.match(/\b\w/g) || [];
@@ -1048,7 +1073,7 @@
                 document.getElementById('formatifIntro').classList.add('hidden');
                 document.getElementById('formatifQuizArea').classList.remove('hidden');
                 
-                state.quiz.questions = MOCK_DATA.formatifQuestions; // Simulated
+                state.quiz.questions = state.quizData || MOCK_DATA.formatifQuestions; 
                 state.quiz.currentIdx = 0;
                 state.quiz.answers = new Array(state.quiz.questions.length).fill(null);
                 
