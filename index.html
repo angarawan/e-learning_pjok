@@ -58,6 +58,12 @@
             white-space: pre-wrap; /* Kunci ajaib agar Enter dan Spasi dari Spreadsheet terbaca langsung */
             word-wrap: break-word;
         }
+        
+        /* Tambahan untuk kerapian teks paragraf */
+        .text-justify-custom {
+            text-align: justify;
+            text-justify: inter-word;
+        }
     </style>
 </head>
 <body class="bg-brand-navy text-white font-sans antialiased overflow-x-hidden min-h-screen">
@@ -227,8 +233,8 @@
                     
                     <div class="p-6 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-8">
                         <div class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
-                            <h4 class="text-blue-400 font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
-                            <p id="materiTujuan" class="text-sm sheet-text">Tujuan pembelajaran akan tampil di sini.</p>
+                            <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
+                            <p id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">Tujuan pembelajaran akan tampil di sini.</p>
                         </div>
 
                         <!-- Render Konten Subbab dari Kolom Spreadsheet (Auto format Spasi/Enter) -->
@@ -236,9 +242,9 @@
                             <!-- Injected by JS -->
                         </div>
 
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 mt-10">
-                            <h4 class="text-white font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-list-check"></i> Rangkuman</h4>
-                            <p id="materiRangkuman" class="text-sm text-gray-300 sheet-text">Inti sari dari pembelajaran ini.</p>
+                        <div class="bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 mt-10">
+                            <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-list-check"></i> Rangkuman</h4>
+                            <p id="materiRangkuman" class="text-base md:text-lg text-gray-300 sheet-text text-justify-custom leading-relaxed">Inti sari dari pembelajaran ini.</p>
                         </div>
                     </div>
                     
@@ -280,9 +286,9 @@
                             <p class="text-gray-400 text-sm" id="tugasDeadline">Batas waktu: -</p>
                         </div>
                     </div>
-                    <div class="bg-orange-900/20 border border-orange-500/30 p-5 rounded-xl mb-6">
-                        <h4 class="font-bold text-orange-400 mb-2">Instruksi Tugas:</h4>
-                        <p id="tugasInstruksi" class="text-gray-300 text-sm leading-relaxed sheet-text">...</p>
+                    <div class="bg-orange-900/20 border border-orange-500/30 p-5 md:p-6 rounded-xl mb-6">
+                        <h4 class="font-bold text-orange-400 mb-3 text-lg">Instruksi Tugas:</h4>
+                        <p id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">...</p>
                     </div>
                     <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-5">
                         <div>
@@ -323,7 +329,7 @@
                             <span class="text-red-400 font-bold tracking-wider text-sm uppercase">Soal <span id="quizCurrentNum">1</span> / <span id="quizTotalNum">5</span></span>
                             <span id="quizTimer" class="bg-slate-800 px-3 py-1 rounded-lg font-mono text-sm text-gray-300"><i class="fa-regular fa-clock"></i> 00:00</span>
                         </div>
-                        <div id="quizQuestion" class="text-xl md:text-2xl font-medium text-white mb-8 leading-relaxed sheet-text">Loading...</div>
+                        <div id="quizQuestion" class="text-xl md:text-2xl font-medium text-white mb-8 leading-relaxed sheet-text text-justify-custom">Loading...</div>
                         <div id="quizOptions" class="space-y-3"></div>
                         <div class="mt-10 flex justify-between border-t border-white/10 pt-6">
                             <button id="btnQuizPrev" onclick="app.quizNav(-1)" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white disabled:opacity-30"><i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya</button>
@@ -398,7 +404,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyIzLAVjzJsohd7HvBuHiuuavYWe6T1yo42eXsXfeThM__xzO180ERWTVdUGCTDKWIA/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwF-UT9VN99n4d08ROsiyT8QG1w4IEzeM5hClNT1--naqxqJrOAPvluXagDLR8bWqA/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -513,8 +519,8 @@
                         if(teksSub && teksSub.trim() !== "") {
                             container.innerHTML += `
                             <div class="bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md">
-                                <h3 class="text-xl font-bold text-brand-orange mb-4">Bagian ${index + 1}</h3>
-                                <div class="sheet-text text-gray-300 leading-relaxed">${teksSub}</div>
+                                <h3 class="text-xl md:text-2xl font-bold text-brand-orange mb-4 border-b border-slate-700/50 pb-3">Bagian ${index + 1}</h3>
+                                <div class="sheet-text text-gray-300 text-base md:text-lg leading-loose text-justify-custom">${teksSub}</div>
                             </div>`;
                         }
                     });
@@ -546,9 +552,9 @@
                 if(data.lkm) {
                     data.lkm.forEach((q, idx) => {
                         lkmContainer.innerHTML += `
-                            <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
-                                <label class="block font-medium text-white mb-2 sheet-text">${idx+1}. ${q.text}</label>
-                                <textarea id="lkm_ans_${idx}" required rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:border-purple-500"></textarea>
+                            <div class="bg-slate-900/50 p-5 md:p-6 rounded-xl border border-slate-700">
+                                <label class="block font-medium text-white mb-3 sheet-text text-base md:text-lg text-justify-custom leading-relaxed">${idx+1}. ${q.text}</label>
+                                <textarea id="lkm_ans_${idx}" required rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-4 text-white focus:border-purple-500"></textarea>
                             </div>
                         `;
                     });
@@ -620,9 +626,9 @@
                     optsContainer.innerHTML += `
                         <label class="block cursor-pointer group">
                             <input type="radio" name="quizOpt" value="${idx}" onchange="app.selectQuizAns(${idx})" class="peer sr-only" ${isChecked}>
-                            <div class="px-6 py-4 rounded-xl bg-slate-800/50 border border-slate-700 peer-checked:bg-red-500/20 peer-checked:border-red-500 transition-all flex items-center gap-4">
-                                <div class="w-6 h-6 rounded-full border-2 border-slate-500 peer-checked:border-red-500 peer-checked:bg-red-500 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div></div>
-                                <span class="text-gray-300 peer-checked:text-white sheet-text">${opt}</span>
+                            <div class="px-6 py-4 rounded-xl bg-slate-800/50 border border-slate-700 peer-checked:bg-red-500/20 peer-checked:border-red-500 transition-all flex items-start gap-4">
+                                <div class="w-6 h-6 shrink-0 mt-1 rounded-full border-2 border-slate-500 peer-checked:border-red-500 peer-checked:bg-red-500 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div></div>
+                                <span class="text-gray-300 peer-checked:text-white sheet-text flex-1 text-base md:text-lg leading-relaxed text-justify-custom">${opt}</span>
                             </div>
                         </label>`;
                 });
