@@ -404,7 +404,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwF-UT9VN99n4d08ROsiyT8QG1w4IEzeM5hClNT1--naqxqJrOAPvluXagDLR8bWqA/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxyUIt3E9-S1LRSDool-84hfqP6rsNXZMqogDhUa5wTdWs7ickntzHS8xyRDPARy9S0/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -439,6 +439,41 @@
             } catch (error) {
                 ui.hideLoading(); ui.showModal("Kesalahan", "Koneksi ke server gagal.", "error"); throw error;
             }
+        };
+
+        // Fungsi Parser untuk merapikan teks ala MS Word
+        const formatText = (text) => {
+            if (!text) return "";
+            let lines = text.split('\n');
+            let html = '';
+            let inList = false;
+            let listType = '';
+
+            lines.forEach(line => {
+                let bulletMatch = line.match(/^(\-|\*)\s+(.*)/);
+                let numMatch = line.match(/^(\d+)\.\s+(.*)/);
+
+                if (bulletMatch) {
+                    if (listType !== 'ul') { if (inList) html += '</' + listType + '>'; html += '<ul class="list-disc list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; listType = 'ul'; }
+                    html += `<li><span class="ml-1">${bulletMatch[2]}</span></li>`;
+                } else if (numMatch) {
+                    if (listType !== 'ol') { if (inList) html += '</' + listType + '>'; html += '<ol class="list-decimal list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; listType = 'ol'; }
+                    html += `<li><span class="ml-1">${numMatch[2]}</span></li>`;
+                } else {
+                    if (inList) { html += '</' + listType + '>'; inList = false; listType = ''; }
+                    if (line.trim() === '') {
+                        html += '<div class="h-3"></div>';
+                    } else if (line.trim() === '[MEDIA]') {
+                        html += '[MEDIA]';
+                    } else {
+                        html += `<div class="mb-3 text-justify-custom leading-relaxed">${line}</div>`;
+                    }
+                }
+            });
+            if (inList) html += '</' + listType + '>';
+            // Fitur tambahan: Bisa menebalkan huruf dengan mengapit teks pakai tanda bintang **teks**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return html;
         };
 
         const app = {
@@ -511,38 +546,53 @@
                     if (data.materi.tujuan) document.getElementById('materiTujuan').innerText = data.materi.tujuan;
                     if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerText = data.materi.rangkuman;
                     
-                    // Render subbab array to HTML (menggunakan CSS whitespace-pre-wrap untuk membaca Enter otomatis)
                     const container = document.getElementById('materiIsiContainer');
-                    container.innerHTML = ""; // bersihkan
-                    
+                    container.innerHTML = ""; 
+
+                    // 1. Siapkan HTML untuk Media (Gambar/Video)
+                    let mediaHtml = "";
+                    if(data.materi.media && data.materi.media.trim() !== "") {
+                        if(data.materi.media.includes("youtube.com") || data.materi.media.includes("youtu.be")) {
+                            let embedUrl = data.materi.media;
+                            if(embedUrl.includes("watch?v=")) embedUrl = embedUrl.replace("watch?v=", "embed/");
+                            mediaHtml = `<div class="media-container my-6"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`;
+                        } else {
+                            mediaHtml = `<div class="media-container my-6"><img src="${data.materi.media}" alt="Media Pembelajaran"></div>`;
+                        }
+                    }
+
+                    // 2. Render subbab dan sisipkan media jika ada tag [MEDIA]
+                    let allHtml = "";
+                    let mediaInserted = false;
+
                     data.materi.subbab.forEach((teksSub, index) => {
                         if(teksSub && teksSub.trim() !== "") {
-                            container.innerHTML += `
+                            let formattedHtml = formatText(teksSub);
+                            
+                            // Deteksi kode rahasia [MEDIA] untuk disisipkan ke tengah teks
+                            if (formattedHtml.includes('[MEDIA]')) {
+                                formattedHtml = formattedHtml.replace(/\[MEDIA\]/g, mediaHtml);
+                                mediaInserted = true;
+                            }
+
+                            allHtml += `
                             <div class="bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md">
                                 <h3 class="text-xl md:text-2xl font-bold text-brand-orange mb-4 border-b border-slate-700/50 pb-3">Bagian ${index + 1}</h3>
-                                <div class="sheet-text text-gray-300 text-base md:text-lg leading-loose text-justify-custom">${teksSub}</div>
+                                <div class="text-gray-300 text-base md:text-lg">${formattedHtml}</div>
                             </div>`;
                         }
                     });
 
-                    // Render Media URL jika ada
-                    if(data.materi.media && data.materi.media.trim() !== "") {
-                        let mediaHtml = "";
-                        if(data.materi.media.includes("youtube.com") || data.materi.media.includes("youtu.be")) {
-                            // Coba konversi link youtube biasa ke format embed
-                            let embedUrl = data.materi.media;
-                            if(embedUrl.includes("watch?v=")) embedUrl = embedUrl.replace("watch?v=", "embed/");
-                            mediaHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-                        } else {
-                            // Anggap sebagai gambar
-                            mediaHtml = `<img src="${data.materi.media}" alt="Media Pembelajaran">`;
-                        }
-                        container.innerHTML += `
+                    // 3. Jika media ada tapi tidak pakai tag [MEDIA], taruh di paling bawah
+                    if (mediaHtml !== "" && !mediaInserted) {
+                        allHtml += `
                         <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-md media-container mt-8">
                             <h3 class="text-xl font-bold text-brand-orange mb-4"><i class="fa-solid fa-photo-film"></i> Media Pendukung</h3>
                             ${mediaHtml}
                         </div>`;
                     }
+                    
+                    container.innerHTML = allHtml;
                 }
                 document.getElementById('materiJudul').innerText = state.materialTitle;
                 
