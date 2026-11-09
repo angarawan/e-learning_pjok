@@ -51,9 +51,17 @@
         
         .sheet-text { white-space: pre-wrap; word-wrap: break-word; }
         .text-justify-custom { text-align: justify; text-justify: inter-word; }
+
+        /* MENCEGAH SELEKSI TEKS DARI APPS UNTUK MENCEGAH COPY PASTE */
+        body, input, textarea, select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
-<body class="bg-brand-navy text-white font-sans antialiased overflow-x-hidden min-h-screen">
+<body class="bg-brand-navy text-white font-sans antialiased overflow-x-hidden min-h-screen" oncontextmenu="return false;">
 
     <!-- GLOBAL MODAL -->
     <div id="globalModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -284,18 +292,18 @@
                     </div>
                     <div id="tugasDeskripsiContainer" class="hidden bg-slate-800 p-4 rounded-xl mb-4 text-gray-300 sheet-text text-justify-custom"></div>
                     <div class="bg-orange-900/20 border border-orange-500/30 p-5 rounded-xl mb-6">
-                        <h4 class="font-bold text-orange-400 mb-3 text-lg">Instruksi Tugas:</h4>
-                        <div id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">...</div>
+                        <h4 class="font-bold text-orange-400 mb-3 text-lg"><i class="fa-solid fa-circle-question mr-2"></i> Pertanyaan & Instruksi Tugas:</h4>
+                        <div id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">Memuat pertanyaan...</div>
                         <div id="tugasLampiranContainer" class="mt-4 hidden"></div>
                     </div>
                     <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Jawaban / Laporan</label>
-                            <textarea id="tugasJawaban" required rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange resize-none"></textarea>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Jawaban Tugas (Ketik Manual)</label>
+                            <textarea id="tugasJawaban" required rows="5" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange resize-none" placeholder="Tuliskan jawaban tugas Anda di sini..."></textarea>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Link Bukti (Foto/Video G-Drive) - Opsional</label>
-                            <input type="url" id="tugasLink" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange">
+                            <input type="url" id="tugasLink" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="https://drive.google.com/...">
                         </div>
                         <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl mt-4">KIRIM TUGAS</button>
                     </form>
@@ -312,10 +320,21 @@
                 <div id="formatifIntro" class="glass-card p-10 rounded-3xl shadow-xl text-center">
                     <div class="w-20 h-20 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"><i class="fa-solid fa-shield-halved"></i></div>
                     <h2 class="text-3xl font-bold text-white mb-4">Asesmen Formatif</h2>
-                    <p class="text-gray-300 mb-8 max-w-lg mx-auto">Kerjakan soal kuis dengan jujur dan teliti.</p>
-                    <button onclick="app.startFormatif()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg text-lg inline-flex items-center gap-3">
+                    <p id="formatifIntroDesc" class="text-gray-300 mb-8 max-w-lg mx-auto">Kerjakan soal kuis dengan jujur dan teliti.</p>
+                    <button id="btnStartFormatif" onclick="app.startFormatif()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg text-lg inline-flex items-center gap-3">
                         MULAI ASESMEN SEKARANG <i class="fa-solid fa-play"></i>
                     </button>
+                </div>
+
+                <!-- TAMPILAN JIKA FORMATIF BERUPA LINK EXTERNAL / GFORM -->
+                <div id="formatifLinkArea" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl text-center">
+                    <h3 class="text-2xl font-bold text-white mb-4"><i class="fa-solid fa-link text-red-400 mr-2"></i> Tautan Asesmen Formatif</h3>
+                    <p class="text-gray-300 mb-6">Klik tombol di bawah ini untuk membukanya di jendela baru, atau kerjakan melalui iframe yang tersedia.</p>
+                    <a id="btnExternalQuizLink" href="#" target="_blank" class="inline-flex items-center px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg text-lg mb-6"><i class="fa-solid fa-up-right-from-square mr-2"></i> BUKA LINK ASESMEN</a>
+                    <div id="quizIframeContainer" class="w-full mt-4 rounded-xl overflow-hidden hidden"></div>
+                    <div class="mt-8 border-t border-white/10 pt-4">
+                        <button onclick="app.markFormatifExternalDone()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold"><i class="fa-solid fa-check mr-2"></i> TANDAI SELESAI MENGERJAKAN</button>
+                    </div>
                 </div>
 
                 <div id="formatifQuizArea" class="hidden relative">
@@ -387,7 +406,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby6JN6SZumLSLnavzYMqB7_DjIaGtOf5xDSwYLwuA1ciCx5bgdOMWR1hZuVHuosTyUb/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz4PWthiPl_9NuZ4muvNgdjbSqCFG10gRDMYRu4fH4BgfUSo-gyOm_WKvcJ72XkBx4Q/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -871,6 +890,11 @@
 
         window.onload = () => {
             app.init();
+
+            // SCRIPT UNTUK MENCEGAH PASTE / COPY / CUT DI SELURUH INPUT DAN TEXTAREA
+            document.addEventListener('copy', (e) => e.preventDefault());
+            document.addEventListener('cut', (e) => e.preventDefault());
+            document.addEventListener('paste', (e) => e.preventDefault());
         };
     </script>
 </body>
