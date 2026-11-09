@@ -412,8 +412,8 @@
     </div>
 
     <script>
-        // Masukkan Link URL Web App (Google Apps Script) Anda di dalam tanda kutip di bawah ini:
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwbqOhN-0WBz8HWiAwVnRiLpweW9Ota3xUDw0lqXosqUr6XUIefSLg3LS5BsfkMprK2/exec"; 
+        // Link URL Web App (Google Apps Script) sudah otomatis diisi dengan milik Anda:
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxnJMX74_fF10baMg-PXKvRV6mWNm2YRFyqDkcZGdw6TVzKLX6NlrxS39lhcSJyiiU/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -475,6 +475,13 @@
                 if (!link.startsWith('http://') && !link.startsWith('https://')) {
                     link = 'https://' + link;
                 }
+                return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> ${text.trim()}</a>`;
+            });
+
+            // Format Tombol Baru (Mendukung format [Teks](Link) agar lebih mudah diketik di Spreadsheet)
+            processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+                let link = url.trim();
+                if (!link.startsWith('http://') && !link.startsWith('https://')) link = 'https://' + link;
                 return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> ${text.trim()}</a>`;
             });
             
