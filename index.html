@@ -385,7 +385,8 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzn5c3YRj1tJuhNXupxcGwGz5BscJlchnN-qUdDHurAlNj7HaJKkafTTqawwwv73NLR/exec"; 
+        // Masukkan URL Deployment Apps Script Anda yang sebenarnya di sini jika berbeda
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwQn_wSvIiYBxAZPDBxmOxJQXQskPC79r4SQqeAWONUhEG7EumiIcIyCd0FjIvBevLm/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -589,7 +590,7 @@
 
                     let lkmHtml = "";
                     
-                    const buildPhase = (letter, title, phaseData, colorPrefix, icon) => {
+                    const buildPhase = (letter, title, phaseData, colorStyle, icon) => {
                         if (!phaseData) return "";
                         const teks = phaseData.teks || "";
                         let questions = [];
@@ -602,24 +603,32 @@
                         
                         if (!teks && questions.length === 0) return "";
                         
+                        // Warna statis yang aman Tailwind
+                        const styles = {
+                            blue: { bg: 'bg-blue-900/20', border: 'border-blue-500/30', text: 'text-blue-400', focus: 'focus:border-blue-500' },
+                            green: { bg: 'bg-emerald-900/20', border: 'border-emerald-500/30', text: 'text-emerald-400', focus: 'focus:border-emerald-500' },
+                            orange: { bg: 'bg-orange-900/20', border: 'border-orange-500/30', text: 'text-orange-400', focus: 'focus:border-orange-500' },
+                            pink: { bg: 'bg-pink-900/20', border: 'border-pink-500/30', text: 'text-pink-400', focus: 'focus:border-pink-500' }
+                        }[colorStyle] || { bg: 'bg-slate-900/20', border: 'border-slate-500/30', text: 'text-slate-400', focus: 'focus:border-slate-500' };
+
                         let html = `
-                        <div class="bg-${colorPrefix}-900/20 border border-${colorPrefix}-500/30 p-5 md:p-6 rounded-2xl mb-6">
-                            <h3 class="text-xl font-bold text-${colorPrefix}-400 mb-4 flex items-center gap-2">
+                        <div class="${styles.bg} border ${styles.border} p-5 md:p-6 rounded-2xl mb-6 shadow-lg">
+                            <h3 class="text-xl font-bold ${styles.text} mb-4 flex items-center gap-2">
                                 <i class="${icon}"></i> ${letter}. ${title}
                             </h3>`;
                         
                         if (teks) {
-                            html += `<div class="text-gray-300 text-base md:text-lg mb-4 sheet-text text-justify-custom leading-relaxed">${formatText(teks)}</div>`;
+                            html += `<div class="text-gray-200 text-base md:text-lg mb-4 sheet-text text-justify-custom leading-relaxed">${formatText(teks)}</div>`;
                         }
                         
                         if (questions.length > 0) {
-                            html += `<div class="mt-4 pt-4 border-t border-${colorPrefix}-500/20 space-y-4">`;
+                            html += `<div class="mt-4 pt-4 border-t border-white/10 space-y-4">`;
                             questions.forEach((qText, qIdx) => {
                                 const qLabel = questions.length > 1 ? `Pertanyaan ${qIdx + 1}: ${formatText(qText, true)}` : formatText(qText, true);
                                 html += `
                                 <div>
-                                    <label class="block font-medium text-white mb-2 text-base md:text-lg">${qLabel}</label>
-                                    <textarea required rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-${colorPrefix}-500 transition-colors shadow-inner" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                                    <label class="block font-semibold text-white mb-2 text-base md:text-lg">${qLabel}</label>
+                                    <textarea required rows="4" class="w-full bg-slate-900/90 border border-slate-600 rounded-xl p-4 text-white ${styles.focus} transition-all shadow-inner focus:outline-none" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
                                 </div>`;
                             });
                             html += `</div>`;
