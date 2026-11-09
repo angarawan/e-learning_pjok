@@ -52,7 +52,7 @@
         .sheet-text { white-space: pre-wrap; word-wrap: break-word; }
         .text-justify-custom { text-align: justify; text-justify: inter-word; }
 
-        /* MENCEGAH SELEKSI TEKS DARI APPS UNTUK MENCEGAH COPY PASTE */
+        /* MENCEGAH SELEKSI TEKS UNTUK MENCEGAH COPY PASTE */
         body, input, textarea, select {
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -214,7 +214,6 @@
             <div id="content-materi" class="content-section hidden max-w-4xl mx-auto">
                 <div class="glass-card rounded-3xl overflow-hidden mb-8 shadow-2xl">
                     <div class="h-64 md:h-80 w-full relative bg-slate-900">
-                        <!-- Cover_URL dari Kolom D Sheet MATERI ditampilkan di sini -->
                         <img id="materiCover" src="https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" onerror="this.src='https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'" alt="Cover Materi" class="w-full h-full object-cover opacity-60">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 p-6 md:p-8">
@@ -224,13 +223,11 @@
                     </div>
                     
                     <div class="p-6 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-8">
-                        <!-- TUJUAN PEMBELAJARAN (POSISI UTAMA DI ATAS SUB TOPIK) -->
                         <div id="materiTujuanContainer" class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
                             <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
                             <div id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
 
-                        <!-- Dropdown Sub Topik Mode Fokus -->
                         <div id="materiTocContainer" class="hidden bg-slate-800/80 p-5 rounded-xl border border-slate-700 shadow-inner mt-6">
                             <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-ul text-brand-orange mr-2"></i> Pilih Sub Topik (Mode Fokus):</label>
                             <select id="materiTocSelect" onchange="app.scrollToSubbab()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
@@ -326,7 +323,6 @@
                     </button>
                 </div>
 
-                <!-- TAMPILAN JIKA FORMATIF BERUPA LINK EXTERNAL / GFORM -->
                 <div id="formatifLinkArea" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl text-center">
                     <h3 class="text-2xl font-bold text-white mb-4"><i class="fa-solid fa-link text-red-400 mr-2"></i> Tautan Asesmen Formatif</h3>
                     <p class="text-gray-300 mb-6">Klik tombol di bawah ini untuk membukanya di jendela baru, atau kerjakan melalui iframe yang tersedia.</p>
@@ -406,12 +402,13 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbz4PWthiPl_9NuZ4muvNgdjbSqCFG10gRDMYRu4fH4BgfUSo-gyOm_WKvcJ72XkBx4Q/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxeyxMmHjTdjgjlggCnA3i7PD8bfzCNqxFmIGH3PtpQPIdOZ_xyuSdLiBjqCWn1jj06/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
             progress: { materi: false, lkm: false, tugas: false, formatif: false, refleksi: false, formatifScore: 0 },
-            quiz: { questions: [], currentIdx: 0, answers: [] }
+            quiz: { questions: [], currentIdx: 0, answers: [], externalLink: "" },
+            refleksiList: []
         };
 
         const ui = {
@@ -566,10 +563,13 @@
                 document.getElementById('lblMaterialTitle').innerText = state.materialTitle;
                 document.getElementById('lblMotivation').innerText = `"${data.motivation || 'Tetap semangat!'}"`;
                 
+                document.getElementById('profName').innerText = state.studentName;
+                document.getElementById('profClass').innerText = state.studentClass;
+                document.getElementById('profilInisial').innerText = state.studentName ? state.studentName.charAt(0).toUpperCase() : 'U';
+
                 if (data.materi) {
                     if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
                     
-                    // Render Tujuan Pembelajaran tepat di bagian paling atas
                     const tujuanEl = document.getElementById('materiTujuan');
                     const tujuanContainer = document.getElementById('materiTujuanContainer');
                     if (data.materi.tujuan && String(data.materi.tujuan).trim() !== "") {
@@ -587,7 +587,6 @@
                     let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
                     let subbabCount = 0;
 
-                    // Mendukung Subbab_1 sampai Subbab_10 secara fleksibel dari Spreadsheet
                     if(Array.isArray(data.materi.subbab)) {
                         data.materi.subbab.forEach((teksSub, index) => {
                             if(teksSub && String(teksSub).trim() !== "" && String(teksSub).trim() !== "-") {
@@ -699,13 +698,6 @@
                                 <p class="text-gray-300 text-sm md:text-base leading-relaxed">
                                     Aplikasi mencari LKM dengan ID Materi: <span class="bg-slate-800 px-3 py-1 rounded text-brand-orange font-mono font-bold">${state.materialId}</span>
                                 </p>
-                                <div class="bg-slate-900/80 p-4 rounded-xl text-left text-xs md:text-sm text-gray-400 space-y-2 border border-slate-700">
-                                    <p class="font-bold text-white"><i class="fa-solid fa-wrench text-amber-400 mr-2"></i>Langkah Pengecekan:</p>
-                                    <p>1. Buka sheet <strong>LKM</strong> di Spreadsheet Anda.</p>
-                                    <p>2. Pastikan Kolom B (ID_Materi) terisi tulisan <code class="text-amber-300 font-bold">${state.materialId}</code> persis tanpa spasi ekstra.</p>
-                                    <p>3. Pastikan Kolom M (Status) terisi tulisan <code class="text-green-400 font-bold">Aktif</code>.</p>
-                                    <p>4. Di Apps Script, pastikan sudah klik <strong>Deploy > Kelola Deployment > Versi Baru</strong>.</p>
-                                </div>
                             </div>`;
                         document.getElementById('lkmSubmitArea').classList.add('hidden');
                     }
@@ -714,56 +706,77 @@
                 if(data.tugas) {
                     if(data.tugas.judul) document.getElementById('tugasJudulUtama').innerText = data.tugas.judul;
                     if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = `Batas waktu: ${data.tugas.deadline}`;
-                    if(data.tugas.instruksi) document.getElementById('tugasInstruksi').innerHTML = formatText(data.tugas.instruksi);
+                    
+                    const instruksiEl = document.getElementById('tugasInstruksi');
+                    if (Array.isArray(data.tugas.soalList) && data.tugas.soalList.length > 1) {
+                        let multiSoalHtml = "";
+                        data.tugas.soalList.forEach((sText, sIdx) => {
+                            multiSoalHtml += `
+                            <div class="mb-4 pb-3 border-b border-white/10 last:border-b-0">
+                                <span class="font-bold text-orange-300 block mb-1">Soal ${sIdx + 1}:</span>
+                                <div>${formatText(sText, true)}</div>
+                            </div>`;
+                        });
+                        instruksiEl.innerHTML = multiSoalHtml;
+                    } else {
+                        instruksiEl.innerHTML = formatText(data.tugas.instruksi);
+                    }
                 }
 
                 if(data.formatif) {
-                    state.quiz.questions = data.formatif;
+                    if (data.formatifLink) {
+                        state.quiz.externalLink = data.formatifLink;
+                    } else if (Array.isArray(data.formatif)) {
+                        state.quiz.questions = data.formatif;
+                        state.quiz.answers = new Array(data.formatif.length).fill(null);
+                    }
                 }
 
                 if(data.refleksi && Array.isArray(data.refleksi.questions)) {
+                    state.refleksiList = data.refleksi.questions;
                     const refContainer = document.getElementById('refleksiQuestionsContainer');
-                    refContainer.innerHTML = "";
-                    data.refleksi.questions.forEach((q, idx) => {
+                    refContainer.innerHTML = '';
+                    state.refleksiList.forEach((q, idx) => {
                         refContainer.innerHTML += `
-                        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-700">
-                            <label class="block text-white font-medium mb-3">${idx + 1}. ${q.text}</label>
-                            <textarea required rows="3" class="refleksi-answer-field w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-white focus:border-teal-500"></textarea>
+                        <div class="bg-slate-900/60 border border-slate-700/60 p-5 rounded-2xl">
+                            <label class="block font-semibold text-white mb-2 text-base md:text-lg">${idx + 1}. ${formatText(q.text, true)}</label>
+                            <textarea required rows="3" data-qid="${q.id}" class="refleksi-field w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-teal-500" placeholder="Tuliskan refleksi Anda..."></textarea>
                         </div>`;
                     });
                 }
             },
-
+            
             markMateriDone: () => {
                 state.progress.materi = true;
                 document.getElementById('status-materi-icon').innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
-                ui.showModal("Berhasil", "Materi telah ditandai selesai!", "success");
                 app.updateProgress();
+                ui.showModal("Sukses", "Materi telah selesai dibaca!", "success");
             },
 
             submitLKM: async (e) => {
                 e.preventDefault();
                 const fields = document.querySelectorAll('.lkm-answer-field');
-                const answers = Array.from(fields).map(f => f.value);
+                const answers = Array.from(fields).map(f => f.value.trim());
                 
                 await api('submitData', {
-                    type: 'lkm', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers
+                    type: 'lkm', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: answers
                 });
-                
+
                 state.progress.lkm = true;
                 document.getElementById('status-lkm-icon').innerHTML = '<i class="fa-solid fa-circle-check text-purple-500"></i>';
                 document.getElementById('lkmForm').classList.add('hidden');
                 document.getElementById('lkmDoneState').classList.remove('hidden');
                 app.updateProgress();
+                ui.showModal("Tersimpan", "Jawaban LKM berhasil dikirim!", "success");
             },
 
             submitTugas: async (e) => {
                 e.preventDefault();
-                const jawaban = document.getElementById('tugasJawaban').value;
-                const fileUrl = document.getElementById('tugasLink').value;
+                const jawaban = document.getElementById('tugasJawaban').value.trim();
+                const link = document.getElementById('tugasLink').value.trim();
 
                 await api('submitData', {
-                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban, fileUrl
+                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: jawaban, fileUrl: link
                 });
 
                 state.progress.tugas = true;
@@ -771,18 +784,21 @@
                 document.getElementById('tugasForm').classList.add('hidden');
                 document.getElementById('tugasDoneState').classList.remove('hidden');
                 app.updateProgress();
+                ui.showModal("Tersimpan", "Tugas berhasil dikirim!", "success");
             },
 
             startFormatif: () => {
-                if(!state.quiz.questions || state.quiz.questions.length === 0) {
-                    ui.showModal("Formatif Belum Ada", "Soal kuis untuk materi ini belum tersedia.", "info");
-                    return;
-                }
                 document.getElementById('formatifIntro').classList.add('hidden');
-                document.getElementById('formatifQuizArea').classList.remove('hidden');
-                state.quiz.currentIdx = 0;
-                state.quiz.answers = new Array(state.quiz.questions.length).fill(null);
-                app.renderQuizQuestion();
+                if (state.quiz.externalLink) {
+                    const linkArea = document.getElementById('formatifLinkArea');
+                    document.getElementById('btnExternalQuizLink').href = state.quiz.externalLink;
+                    linkArea.classList.remove('hidden');
+                } else if (state.quiz.questions.length > 0) {
+                    document.getElementById('formatifQuizArea').classList.remove('hidden');
+                    app.renderQuizQuestion();
+                } else {
+                    ui.showModal("Informasi", "Belum ada soal formatif untuk materi ini.", "info");
+                }
             },
 
             renderQuizQuestion: () => {
@@ -791,32 +807,31 @@
                 document.getElementById('quizTotalNum').innerText = state.quiz.questions.length;
                 document.getElementById('quizQuestion').innerHTML = formatText(q.text);
 
-                const optsDiv = document.getElementById('quizOptions');
-                optsDiv.innerHTML = "";
+                const percent = ((state.quiz.currentIdx + 1) / state.quiz.questions.length) * 100;
+                document.getElementById('quizProgressBar').style.width = `${percent}%`;
+
+                const optContainer = document.getElementById('quizOptions');
+                optContainer.innerHTML = '';
                 q.options.forEach((opt, idx) => {
                     const isSelected = state.quiz.answers[state.quiz.currentIdx] === idx;
-                    optsDiv.innerHTML += `
-                    <button type="button" onclick="app.selectQuizOption(${idx})" class="w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-red-600/30 border-red-500 text-white font-bold' : 'bg-slate-900 border-slate-700 text-gray-300 hover:bg-slate-800'}">
-                        <span class="inline-block w-8 h-8 rounded-full bg-slate-800 text-center leading-8 font-bold mr-3 border border-slate-600">${String.fromCharCode(65 + idx)}</span>
-                        ${opt}
+                    optContainer.innerHTML += `
+                    <button onclick="app.selectQuizOption(${idx})" class="w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-red-600/30 border-red-500 text-white font-bold' : 'bg-slate-800/80 border-slate-700 hover:bg-slate-700 text-gray-200'}">
+                        <span class="font-bold mr-2">${String.fromCharCode(65 + idx)}.</span> ${formatText(opt, true)}
                     </button>`;
                 });
 
                 document.getElementById('btnQuizPrev').disabled = state.quiz.currentIdx === 0;
-                if(state.quiz.currentIdx === state.quiz.questions.length - 1) {
+                if (state.quiz.currentIdx === state.quiz.questions.length - 1) {
                     document.getElementById('btnQuizNext').classList.add('hidden');
                     document.getElementById('btnQuizSubmit').classList.remove('hidden');
                 } else {
                     document.getElementById('btnQuizNext').classList.remove('hidden');
                     document.getElementById('btnQuizSubmit').classList.add('hidden');
                 }
-
-                const progressPct = ((state.quiz.currentIdx + 1) / state.quiz.questions.length) * 100;
-                document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
             },
 
-            selectQuizOption: (idx) => {
-                state.quiz.answers[state.quiz.currentIdx] = idx;
+            selectQuizOption: (optIdx) => {
+                state.quiz.answers[state.quiz.currentIdx] = optIdx;
                 app.renderQuizQuestion();
             },
 
@@ -827,29 +842,43 @@
 
             submitFormatif: async () => {
                 let correctCount = 0;
-                state.quiz.questions.forEach((q, idx) => {
-                    if(state.quiz.answers[idx] === q.answer) correctCount++;
+                state.quiz.questions.forEach((q, i) => {
+                    if (state.quiz.answers[i] === q.answer) correctCount++;
                 });
-
-                const score = Math.round((correctCount / state.quiz.questions.length) * 100);
-                state.progress.formatifScore = score;
+                const finalScore = Math.round((correctCount / state.quiz.questions.length) * 100);
+                state.progress.formatifScore = finalScore;
 
                 await api('submitData', {
-                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: state.quiz.answers, score
+                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: state.quiz.answers, score: finalScore
                 });
 
                 state.progress.formatif = true;
                 document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
                 document.getElementById('formatifQuizArea').classList.add('hidden');
+                document.getElementById('scoreText').innerText = finalScore;
                 document.getElementById('formatifResultArea').classList.remove('hidden');
-                document.getElementById('scoreText').innerText = score;
+                document.getElementById('profStatNilai').innerText = finalScore;
+                app.updateProgress();
+            },
+
+            markFormatifExternalDone: async () => {
+                await api('submitData', {
+                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: ["EXTERNAL_LINK"], score: 100
+                });
+
+                state.progress.formatif = true;
+                document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
+                document.getElementById('formatifLinkArea').classList.add('hidden');
+                document.getElementById('scoreText').innerText = '100';
+                document.getElementById('formatifResultArea').classList.remove('hidden');
+                document.getElementById('profStatNilai').innerText = '100';
                 app.updateProgress();
             },
 
             submitRefleksi: async (e) => {
                 e.preventDefault();
-                const fields = document.querySelectorAll('.refleksi-answer-field');
-                const answers = Array.from(fields).map(f => f.value);
+                const fields = document.querySelectorAll('.refleksi-field');
+                const answers = Array.from(fields).map(f => ({ qid: f.dataset.qid, answer: f.value.trim() }));
 
                 await api('submitData', {
                     type: 'refleksi', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, refleksi: answers
@@ -860,41 +889,32 @@
                 document.getElementById('refleksiForm').classList.add('hidden');
                 document.getElementById('refleksiDoneState').classList.remove('hidden');
                 app.updateProgress();
+                ui.showModal("Tersimpan", "Refleksi berhasil dikirim!", "success");
             },
 
             updateProgress: () => {
-                let count = 0;
-                if(state.progress.materi) count++;
-                if(state.progress.lkm) count++;
-                if(state.progress.tugas) count++;
-                if(state.progress.formatif) count++;
-                if(state.progress.refleksi) count++;
+                let doneCount = 0;
+                if(state.progress.materi) doneCount++;
+                if(state.progress.lkm) doneCount++;
+                if(state.progress.tugas) doneCount++;
+                if(state.progress.formatif) doneCount++;
+                if(state.progress.refleksi) doneCount++;
 
-                const totalPct = Math.round((count / 5) * 100);
-                document.getElementById('lblTotalProgress').innerText = `${totalPct}%`;
+                const percent = Math.round((doneCount / 5) * 100);
+                document.getElementById('lblTotalProgress').innerText = `${percent}%`;
 
-                // Update Profil Page
-                document.getElementById('profName').innerText = state.studentName;
-                document.getElementById('profClass').innerText = state.studentClass;
-                document.getElementById('profilInisial').innerText = state.studentName.charAt(0).toUpperCase();
                 document.getElementById('profStatMateri').innerText = state.progress.materi ? '1/1' : '0/1';
                 document.getElementById('profStatTugas').innerText = state.progress.tugas ? '1/1' : '0/1';
-                document.getElementById('profStatNilai').innerText = state.progress.formatif ? state.progress.formatifScore : '-';
                 document.getElementById('profStatRefleksi').innerText = state.progress.refleksi ? '1/1' : '0/1';
             },
 
             logout: () => {
-                location.reload();
+                window.location.reload();
             }
         };
 
         window.onload = () => {
             app.init();
-
-            // SCRIPT UNTUK MENCEGAH PASTE / COPY / CUT DI SELURUH INPUT DAN TEXTAREA
-            document.addEventListener('copy', (e) => e.preventDefault());
-            document.addEventListener('cut', (e) => e.preventDefault());
-            document.addEventListener('paste', (e) => e.preventDefault());
         };
     </script>
 </body>
