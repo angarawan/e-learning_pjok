@@ -89,6 +89,7 @@
     <!-- VIEW 1: WELCOME SCREEN -->
     <div id="view-welcome" class="min-h-screen flex flex-col items-center justify-center bg-cinematic p-6 relative">
         <div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-transparent"></div>
+        
         <div class="z-10 text-center max-w-3xl animate-slide-up">
             <div class="w-24 h-24 mx-auto bg-brand-orange/20 rounded-full flex items-center justify-center mb-6 glass">
                 <i class="fa-solid fa-running text-4xl text-brand-orange"></i>
@@ -96,7 +97,7 @@
             <h1 class="text-5xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">PJOK DIGITAL LEARNING</h1>
             <p class="text-lg md:text-xl text-gray-300 mb-2">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
             <p class="text-md md:text-lg text-brand-orange font-semibold italic mb-10">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
-            <button onclick="app.navigateTo('identity')" class="px-8 py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-lg font-bold rounded-full transition-all shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-1">
+            <button onclick="app.checkConnectionAndStart()" class="px-8 py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-lg font-bold rounded-full transition-all shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-1">
                 MULAI PEMBELAJARAN <i class="fa-solid fa-arrow-right ml-2"></i>
             </button>
         </div>
@@ -404,7 +405,8 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxyUIt3E9-S1LRSDool-84hfqP6rsNXZMqogDhUa5wTdWs7ickntzHS8xyRDPARy9S0/exec"; 
+        // Masukkan Link URL Web App (Google Apps Script) Anda di dalam tanda kutip di bawah ini:
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwbqOhN-0WBz8HWiAwVnRiLpweW9Ota3xUDw0lqXosqUr6XUIefSLg3LS5BsfkMprK2/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -428,6 +430,10 @@
         window.closeModal = ui.hideModal;
 
         const api = async (action, payload = {}) => {
+            if (!GAS_URL) {
+                ui.showModal("Sistem Belum Siap", "Link Web App (GAS_URL) belum dimasukkan ke dalam kode aplikasi. Silakan hubungi Guru.", "warning");
+                throw new Error("URL tidak ditemukan");
+            }
             ui.showLoading();
             try {
                 const response = await fetch(GAS_URL, {
@@ -447,43 +453,78 @@
             let lines = text.split('\n');
             let html = '';
             let inList = false;
-            let listType = '';
+            let currentListStyle = ''; // 'ul', 'ol-num', 'ol-alpha'
 
             lines.forEach(line => {
                 let bulletMatch = line.match(/^(\-|\*)\s+(.*)/);
                 let numMatch = line.match(/^(\d+)\.\s+(.*)/);
+                let alphaMatch = line.match(/^([a-zA-Z])\.\s+(.*)/); // Deteksi huruf a., b., c.
 
                 if (bulletMatch) {
-                    if (listType !== 'ul') { if (inList) html += '</' + listType + '>'; html += '<ul class="list-disc list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; listType = 'ul'; }
+                    if (currentListStyle !== 'ul') { 
+                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
+                        html += '<ul class="list-disc list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
+                        inList = true; currentListStyle = 'ul'; 
+                    }
                     html += `<li><span class="ml-1">${bulletMatch[2]}</span></li>`;
                 } else if (numMatch) {
-                    if (listType !== 'ol') { if (inList) html += '</' + listType + '>'; html += '<ol class="list-decimal list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; listType = 'ol'; }
+                    if (currentListStyle !== 'ol-num') { 
+                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
+                        html += '<ol class="list-decimal list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
+                        inList = true; currentListStyle = 'ol-num'; 
+                    }
                     html += `<li><span class="ml-1">${numMatch[2]}</span></li>`;
+                } else if (alphaMatch) {
+                    if (currentListStyle !== 'ol-alpha') { 
+                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
+                        html += '<ol class="list-[lower-alpha] list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
+                        inList = true; currentListStyle = 'ol-alpha';
+                    }
+                    html += `<li><span class="ml-1">${alphaMatch[2]}</span></li>`;
                 } else {
-                    if (inList) { html += '</' + listType + '>'; inList = false; listType = ''; }
-                    if (line.trim() === '') {
-                        html += '<div class="h-3"></div>';
-                    } else if (line.trim() === '[MEDIA]') {
-                        html += '[MEDIA]';
-                    } else {
-                        html += `<div class="mb-3 text-justify-custom leading-relaxed">${line}</div>`;
+                    // Jika bukan list, tutup list jika ada, lalu buat paragraf biasa
+                    if (inList) { 
+                        html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
+                        inList = false; 
+                        currentListStyle = ''; 
+                    }
+                    // Abaikan baris kosong
+                    if (line.trim() !== '') {
+                        html += `<p class="mb-4 text-justify-custom">${line}</p>`;
                     }
                 }
             });
-            if (inList) html += '</' + listType + '>';
-            // Fitur tambahan: Bisa menebalkan huruf dengan mengapit teks pakai tanda bintang **teks**
+            // Tutup list di akhir jika masih terbuka
+            if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>';
+            
+            // Format Bold (**teks**) dan Italic (_teks_)
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Fitur Baru: Tombol Tautan Eksternal [TOMBOL:Teks|URL]
+            html = html.replace(/\[TOMBOL:([^|]+)\|([^\]]+)\]/g, '<a href="$2" target="_blank" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> $1</a>');
+            
             return html;
         };
 
         const app = {
             init: async () => {
+                if (!GAS_URL) return; // Hentikan proses jika URL belum diisi
                 try {
                     const res = await api('getInitialData');
                     const selectClass = document.getElementById('selectClass');
                     res.data.classes.forEach(c => { selectClass.appendChild(new Option(c, c)); });
                 } catch(e) {}
             },
+            
+            checkConnectionAndStart: () => {
+                if (!GAS_URL) {
+                    ui.showModal("Sistem Belum Siap", "Link Web App (GAS_URL) belum dimasukkan ke dalam kode aplikasi. Silakan hubungi Guru.", "warning");
+                } else {
+                    app.navigateTo('identity');
+                }
+            },
+
             navigateTo: (viewId) => {
                 ['view-welcome', 'view-identity', 'view-main'].forEach(id => document.getElementById(id).classList.add('hidden'));
                 if (viewId === 'welcome' || viewId === 'identity') {
