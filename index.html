@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>PJOK Digital Learning</title>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -91,9 +94,7 @@
         <div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-transparent"></div>
         
         <div class="z-10 text-center max-w-3xl animate-slide-up">
-            <div class="w-24 h-24 mx-auto bg-brand-orange/20 rounded-full flex items-center justify-center mb-6 glass">
-                <i class="fa-solid fa-running text-4xl text-brand-orange"></i>
-            </div>
+            <img src="Lambang PJOK Sehat, Aktif, Berprestasi.png" alt="Logo PJOK" class="w-32 h-32 md:w-48 md:h-48 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             <h1 class="text-5xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">PJOK DIGITAL LEARNING</h1>
             <p class="text-lg md:text-xl text-gray-300 mb-2">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
             <p class="text-md md:text-lg text-brand-orange font-semibold italic mb-10">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
@@ -144,7 +145,7 @@
         <aside id="appSidebar" class="md:w-64 glass-card border-r border-white/10 md:h-full flex flex-col transition-all duration-300 z-50 shrink-0">
             <div class="flex items-center justify-between p-4 md:border-none md:p-6 md:pb-2">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-10 h-10 bg-brand-orange rounded-full flex shrink-0 items-center justify-center"><i class="fa-solid fa-running text-white"></i></div>
+                    <img src="Lambang PJOK Sehat, Aktif, Berprestasi.png" alt="Logo" class="w-10 h-10 object-contain shrink-0">
                     <span id="sidebarLogoText" class="font-bold text-lg hidden md:block">PJOK DIGITAL</span>
                     <span class="font-bold text-lg mobile-title md:hidden">PJOK</span>
                 </div>
@@ -268,7 +269,13 @@
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="text-center mb-8">
                         <div class="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-file-signature"></i></div>
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Lembar Kerja Murid (LKM)</h2>
+                        <h2 id="lkmJudulUtama" class="text-2xl md:text-3xl font-bold text-white mb-2">Lembar Kerja Murid (LKM)</h2>
+                    </div>
+                    <div id="lkmInfoContainer" class="hidden bg-purple-900/20 border border-purple-500/30 p-5 rounded-xl mb-6">
+                        <h4 class="font-bold text-purple-400 mb-2">Tujuan:</h4>
+                        <div id="lkmTujuan" class="text-gray-300 text-sm md:text-base mb-4 sheet-text text-justify-custom"></div>
+                        <h4 class="font-bold text-purple-400 mb-2">Petunjuk:</h4>
+                        <div id="lkmPetunjuk" class="text-gray-300 text-sm md:text-base sheet-text text-justify-custom"></div>
                     </div>
                     <form id="lkmForm" onsubmit="app.submitLKM(event)" class="space-y-6">
                         <div id="lkmQuestionsContainer" class="space-y-6"></div>
@@ -290,13 +297,15 @@
                     <div class="flex items-center gap-4 mb-6 border-b border-white/10 pb-6">
                         <div class="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-upload"></i></div>
                         <div>
-                            <h2 class="text-2xl font-bold text-white">Penugasan</h2>
+                            <h2 id="tugasJudulUtama" class="text-2xl font-bold text-white">Penugasan</h2>
                             <p class="text-gray-400 text-sm" id="tugasDeadline">Batas waktu: -</p>
                         </div>
                     </div>
+                    <div id="tugasDeskripsiContainer" class="hidden bg-slate-800 p-4 rounded-xl mb-4 text-gray-300 sheet-text text-justify-custom"></div>
                     <div class="bg-orange-900/20 border border-orange-500/30 p-5 md:p-6 rounded-xl mb-6">
                         <h4 class="font-bold text-orange-400 mb-3 text-lg">Instruksi Tugas:</h4>
                         <p id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">...</p>
+                        <div id="tugasLampiranContainer" class="mt-4 hidden"></div>
                     </div>
                     <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-5">
                         <div>
@@ -365,20 +374,10 @@
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl border-t-4 border-teal-500">
                     <div class="mb-8">
                         <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-comment-dots text-teal-400"></i> Refleksi</h2>
+                        <p class="text-gray-400 text-sm">Mari refleksikan pembelajaran hari ini.</p>
                     </div>
                     <form id="refleksiForm" onsubmit="app.submitRefleksi(event)" class="space-y-6">
-                        <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
-                            <label class="block font-medium text-white mb-3">1. Perasaan setelah belajar?</label>
-                            <div class="flex flex-wrap gap-4">
-                                <label class="cursor-pointer"><input type="radio" name="ref_perasaan" value="Senang" required class="peer sr-only"><div class="px-4 py-2 rounded-lg bg-slate-800 peer-checked:bg-teal-500/20 peer-checked:text-teal-400 transition-all">🤩 Senang</div></label>
-                                <label class="cursor-pointer"><input type="radio" name="ref_perasaan" value="Biasa" class="peer sr-only"><div class="px-4 py-2 rounded-lg bg-slate-800 peer-checked:bg-teal-500/20 peer-checked:text-teal-400 transition-all">🙂 Biasa</div></label>
-                                <label class="cursor-pointer"><input type="radio" name="ref_perasaan" value="Bingung" class="peer sr-only"><div class="px-4 py-2 rounded-lg bg-slate-800 peer-checked:bg-teal-500/20 peer-checked:text-teal-400 transition-all">🤔 Bingung</div></label>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">2. Apa hal baru yang dipelajari?</label>
-                            <textarea id="ref_hal_baru" required rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-teal-500"></textarea>
-                        </div>
+                        <div id="refleksiQuestionsContainer" class="space-y-6"></div>
                         <button type="submit" id="btnSubmitRefleksi" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-xl mt-4">KIRIM REFLEKSI</button>
                     </form>
                     <div id="refleksiDoneState" class="hidden text-center py-10">
@@ -413,7 +412,7 @@
 
     <script>
         // Link URL Web App (Google Apps Script) sudah otomatis diisi dengan milik Anda:
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxnJMX74_fF10baMg-PXKvRV6mWNm2YRFyqDkcZGdw6TVzKLX6NlrxS39lhcSJyiiU/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwzjivOd0WEq2_YXA3sh59PnfN5Mf06AXKQWuCAMLe0nQpTg6IXduqjcW-Hnx5Ksofq/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -683,11 +682,22 @@
                 }
                 document.getElementById('materiJudul').innerText = state.materialTitle;
                 
-                // LKM
+                // LKM Dinamis
                 const lkmContainer = document.getElementById('lkmQuestionsContainer');
                 lkmContainer.innerHTML = '';
-                if(data.lkm) {
-                    data.lkm.forEach((q, idx) => {
+                if(data.lkm && data.lkm.questions) {
+                    if (data.lkm.info.judul) document.getElementById('lkmJudulUtama').innerText = data.lkm.info.judul;
+                    
+                    const infoContainer = document.getElementById('lkmInfoContainer');
+                    if (data.lkm.info.tujuan || data.lkm.info.petunjuk) {
+                        infoContainer.classList.remove('hidden');
+                        document.getElementById('lkmTujuan').innerHTML = formatText(data.lkm.info.tujuan);
+                        document.getElementById('lkmPetunjuk').innerHTML = formatText(data.lkm.info.petunjuk);
+                    } else {
+                        infoContainer.classList.add('hidden');
+                    }
+
+                    data.lkm.questions.forEach((q, idx) => {
                         lkmContainer.innerHTML += `
                             <div class="bg-slate-900/50 p-5 md:p-6 rounded-xl border border-slate-700">
                                 <label class="block font-medium text-white mb-3 text-base md:text-lg text-justify-custom leading-relaxed">${idx+1}. ${formatText(q.text, true)}</label>
@@ -697,18 +707,42 @@
                     });
                 }
 
-                // Tugas & Formatif
+                // Tugas Dinamis
                 if(data.tugas) {
+                    if(data.tugas.judul) document.getElementById('tugasJudulUtama').innerText = data.tugas.judul;
+                    if(data.tugas.deskripsi) {
+                        document.getElementById('tugasDeskripsiContainer').classList.remove('hidden');
+                        document.getElementById('tugasDeskripsiContainer').innerHTML = formatText(data.tugas.deskripsi);
+                    } else {
+                         document.getElementById('tugasDeskripsiContainer').classList.add('hidden');
+                    }
                     if(data.tugas.instruksi) document.getElementById('tugasInstruksi').innerHTML = formatText(data.tugas.instruksi);
                     if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = "Batas waktu: " + data.tugas.deadline;
+                    
+                    const lampiranContainer = document.getElementById('tugasLampiranContainer');
+                    if(data.tugas.lampiran) {
+                        lampiranContainer.classList.remove('hidden');
+                        let lampiranLink = data.tugas.lampiran;
+                        if (!lampiranLink.startsWith('http')) lampiranLink = 'https://' + lampiranLink;
+                        lampiranContainer.innerHTML = `<a href="${lampiranLink}" target="_blank" rel="noopener" class="inline-flex items-center mt-2 px-5 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-sm transition-colors"><i class="fa-solid fa-paperclip mr-2"></i> Buka Lampiran Tugas</a>`;
+                    } else {
+                        lampiranContainer.classList.add('hidden');
+                    }
                 }
                 state.quizData = data.formatif || [];
 
-                // Refleksi Label
-                if (data.refleksi && data.refleksi.length > 0) {
-                    const refLabels = document.querySelectorAll('#refleksiForm label.block.font-medium, #refleksiForm label.block.text-sm');
-                    if (data.refleksi[0]) refLabels[0].innerText = "1. " + data.refleksi[0].text;
-                    if (data.refleksi[1]) refLabels[4].innerText = "2. " + data.refleksi[1].text;
+                // Refleksi Dinamis
+                const refContainer = document.getElementById('refleksiQuestionsContainer');
+                refContainer.innerHTML = '';
+                if (data.refleksi && data.refleksi.questions) {
+                    data.refleksi.questions.forEach((q, idx) => {
+                        refContainer.innerHTML += `
+                            <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
+                                <label class="block font-medium text-white mb-3 text-sm md:text-base">${idx+1}. ${formatText(q.text, true)}</label>
+                                <textarea id="ref_ans_${idx}" required rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-4 text-white focus:border-teal-500"></textarea>
+                            </div>
+                        `;
+                    });
                 }
 
                 document.getElementById('profName').innerText = state.studentName;
@@ -761,9 +795,27 @@
                 btn.innerHTML = '<i class="fa-solid fa-check-double"></i> SELESAI'; btn.classList.replace('bg-brand-blue', 'bg-green-600'); btn.disabled = true;
                 app.updateProgressUI();
             },
-            submitLKM: async (e) => { e.preventDefault(); await api('submitData', { type: 'lkm' }); state.progress.lkm = true; document.getElementById('lkmForm').classList.add('hidden'); document.getElementById('lkmDoneState').classList.remove('hidden'); app.updateProgressUI(); },
+            submitLKM: async (e) => { 
+                e.preventDefault(); 
+                const answers = [];
+                document.querySelectorAll('#lkmQuestionsContainer textarea').forEach(ta => answers.push(ta.value));
+                await api('submitData', { type: 'lkm', answers: answers }); 
+                state.progress.lkm = true; 
+                document.getElementById('lkmForm').classList.add('hidden'); 
+                document.getElementById('lkmDoneState').classList.remove('hidden'); 
+                app.updateProgressUI(); 
+            },
             submitTugas: async (e) => { e.preventDefault(); await api('submitData', { type: 'tugas' }); state.progress.tugas = true; document.getElementById('tugasForm').classList.add('hidden'); document.getElementById('tugasDoneState').classList.remove('hidden'); app.updateProgressUI(); },
-            submitRefleksi: async (e) => { e.preventDefault(); await api('submitData', { type: 'refleksi' }); state.progress.refleksi = true; document.getElementById('refleksiForm').classList.add('hidden'); document.getElementById('refleksiDoneState').classList.remove('hidden'); app.updateProgressUI(); },
+            submitRefleksi: async (e) => { 
+                e.preventDefault(); 
+                const answers = [];
+                document.querySelectorAll('#refleksiQuestionsContainer textarea').forEach(ta => answers.push(ta.value));
+                await api('submitData', { type: 'refleksi', refleksi: answers }); 
+                state.progress.refleksi = true; 
+                document.getElementById('refleksiForm').classList.add('hidden'); 
+                document.getElementById('refleksiDoneState').classList.remove('hidden'); 
+                app.updateProgressUI(); 
+            },
             
             startFormatif: () => {
                 if(state.progress.formatif) return;
@@ -804,7 +856,7 @@
                 let correct = 0; state.quiz.answers.forEach((ans, idx) => { if(ans === state.quiz.questions[idx].answer) correct++; });
                 const score = Math.round((correct / state.quiz.questions.length) * 100); state.progress.formatifScore = score;
                 
-                await api('submitData', { type: 'formatif', score: score }); state.progress.formatif = true;
+                await api('submitData', { type: 'formatif', score: score, answers: state.quiz.answers }); state.progress.formatif = true;
                 if (document.exitFullscreen) document.exitFullscreen().catch(e=>{});
                 
                 document.getElementById('formatifQuizArea').classList.add('hidden'); document.getElementById('formatifResultArea').classList.remove('hidden');
@@ -814,7 +866,45 @@
             logout: () => { location.reload(); }
         };
 
-        window.onload = app.init;
+        window.onload = () => {
+            app.init();
+            
+            // Script PWA (Progressive Web App) agar web bisa diinstal di HP
+            const manifest = {
+                "name": "PJOK Digital Learning",
+                "short_name": "PJOK",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#0f172a",
+                "theme_color": "#0f172a",
+                "icons": [{
+                    "src": "Lambang PJOK Sehat, Aktif, Berprestasi.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }, {
+                    "src": "Lambang PJOK Sehat, Aktif, Berprestasi.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = URL.createObjectURL(manifestBlob);
+            document.head.appendChild(manifestLink);
+
+            const swCode = `
+            self.addEventListener('install', (e) => { self.skipWaiting(); });
+            self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+            self.addEventListener('fetch', (e) => { 
+                e.respondWith(fetch(e.request).catch(() => new Response('Koneksi terputus. Pastikan Anda online.'))); 
+            });
+            `;
+            const swBlob = new Blob([swCode], {type: 'application/javascript'});
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(e => console.log('PWA Setup Error:', e));
+            }
+        };
     </script>
 </body>
 </html>
