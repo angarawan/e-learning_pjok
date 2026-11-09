@@ -34,7 +34,7 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         
         .glass-card {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -56,12 +56,13 @@
         .media-container img { border-radius: 12px; max-width: 100%; height: auto; margin: 1rem auto; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
         .media-container iframe, .media-container video { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
         
-        /* Auto Formatting untuk Spreadsheet */
+        /* Auto Formatting untuk Spreadsheet (Preserve whitespace & enters) */
         .sheet-text {
-            white-space: pre-wrap;
+            white-space: pre-wrap; /* Kunci ajaib agar Enter dan Spasi dari Spreadsheet terbaca langsung */
             word-wrap: break-word;
         }
         
+        /* Tambahan untuk kerapian teks paragraf */
         .text-justify-custom {
             text-align: justify;
             text-justify: inter-word;
@@ -94,7 +95,7 @@
         
         <div class="z-10 text-center max-w-3xl animate-slide-up">
             <img src="Logo PJOK Ceria dan Dinamis.png" alt="Logo PJOK" class="w-32 h-32 md:w-48 md:h-48 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">PJOK DIGITAL LEARNING</h1>
+            <h1 class="text-5xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">PJOK DIGITAL LEARNING</h1>
             <p class="text-lg md:text-xl text-gray-300 mb-2">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
             <p class="text-md md:text-lg text-brand-orange font-semibold italic mb-10">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
             <button onclick="app.checkConnectionAndStart()" class="px-8 py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-lg font-bold rounded-full transition-all shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-1">
@@ -115,19 +116,19 @@
                 <form id="identityForm" onsubmit="app.submitIdentity(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Kelas</label>
-                        <select id="selectClass" onchange="app.onClassChange()" required class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
+                        <select id="selectClass" onchange="app.onClassChange()" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
                             <option value="">-- Pilih Kelas --</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Nama Murid</label>
-                        <select id="selectStudent" required disabled class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange disabled:opacity-50">
+                        <select id="selectStudent" required disabled class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange disabled:opacity-50">
                             <option value="">-- Pilih Nama --</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Materi Pembelajaran</label>
-                        <select id="selectMaterial" required disabled class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange disabled:opacity-50">
+                        <select id="selectMaterial" required disabled class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange disabled:opacity-50">
                             <option value="">-- Pilih Materi --</option>
                         </select>
                     </div>
@@ -235,7 +236,7 @@
                     <div class="p-6 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-8">
                         <div class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
                             <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
-                            <div id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">Tujuan pembelajaran akan tampil di sini.</div>
+                            <p id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">Tujuan pembelajaran akan tampil di sini.</p>
                         </div>
 
                         <!-- Dropdown Daftar Sub Topik (TOC) -->
@@ -246,8 +247,8 @@
                             </select>
                         </div>
 
-                        <!-- Render Konten Subbab dari Spreadsheet -->
-                        <div class="font-light tracking-wide text-lg text-gray-200 space-y-6 mt-8" id="materiIsiContainer"></div>
+                        <!-- Render Konten Subbab dari Kolom Spreadsheet (Auto format Spasi/Enter) -->
+                        <div class="font-light tracking-wide text-lg text-gray-200 space-y-10 mt-8" id="materiIsiContainer"></div>
                         
                         <!-- Rangkuman Materi -->
                         <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-5 rounded-r-xl mt-8">
@@ -270,19 +271,18 @@
                         <div class="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-file-signature"></i></div>
                         <h2 id="lkmJudulUtama" class="text-2xl md:text-3xl font-bold text-white mb-2">Lembar Kerja Murid (LKM)</h2>
                     </div>
-                    
-                    <div id="lkmInfoContainer" class="hidden bg-purple-900/20 border border-purple-500/30 p-5 md:p-6 rounded-2xl mb-6">
-                        <h3 class="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> A. Tujuan Pembelajaran</h3>
-                        <div id="lkmTujuan" class="text-gray-300 text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
+                    <div id="lkmInfoContainer" class="hidden bg-purple-900/20 border border-purple-500/30 p-5 rounded-xl mb-6">
+                        <h4 class="font-bold text-purple-400 mb-2">Tujuan:</h4>
+                        <div id="lkmTujuan" class="text-gray-300 text-sm md:text-base mb-4 sheet-text text-justify-custom"></div>
+                        <h4 class="font-bold text-purple-400 mb-2">Petunjuk:</h4>
+                        <div id="lkmPetunjuk" class="text-gray-300 text-sm md:text-base sheet-text text-justify-custom"></div>
                     </div>
-
                     <form id="lkmForm" onsubmit="app.submitLKM(event)" class="space-y-6">
                         <div id="lkmQuestionsContainer" class="space-y-6"></div>
-                        <div id="lkmSubmitArea" class="pt-6 border-t border-white/10 mt-8">
-                            <button type="submit" id="btnSubmitLkm" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all">KIRIM JAWABAN LKM</button>
+                        <div class="pt-6 border-t border-white/10 mt-8">
+                            <button type="submit" id="btnSubmitLkm" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl">KIRIM JAWABAN LKM</button>
                         </div>
                     </form>
-                    
                     <div id="lkmDoneState" class="hidden text-center py-10">
                         <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">LKM Selesai!</h3>
@@ -304,13 +304,13 @@
                     <div id="tugasDeskripsiContainer" class="hidden bg-slate-800 p-4 rounded-xl mb-4 text-gray-300 sheet-text text-justify-custom"></div>
                     <div class="bg-orange-900/20 border border-orange-500/30 p-5 md:p-6 rounded-xl mb-6">
                         <h4 class="font-bold text-orange-400 mb-3 text-lg">Instruksi Tugas:</h4>
-                        <div id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">...</div>
+                        <p id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">...</p>
                         <div id="tugasLampiranContainer" class="mt-4 hidden"></div>
                     </div>
                     <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-5">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Jawaban / Laporan</label>
-                            <textarea id="tugasJawaban" required rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange resize-none"></textarea>
+                            <textarea id="tugasJawaban" required rows="4" onpaste="return false;" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange resize-none"></textarea>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Link Bukti (Foto/Video G-Drive) - Opsional</label>
@@ -411,8 +411,8 @@
     </div>
 
     <script>
-        // Link URL Web App Apps Script Anda
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwAejj2ZnC5saTY87GEMvGc1l28J7VRg5qJbjMT3Jggk1S6I290vesphSUNIDj_je7i/exec"; 
+        // Link URL Web App (Google Apps Script) sudah otomatis diisi dengan milik Anda:
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwQn_wSvIiYBxAZPDBxmOxJQXQskPC79r4SQqeAWONUhEG7EumiIcIyCd0FjIvBevLm/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -453,12 +453,12 @@
             }
         };
 
-        // Fungsi Parser Format Teks
+        // Fungsi Parser untuk merapikan teks ala MS Word
         const formatText = (text, isInline = false) => {
             if (!text) return "";
-            let processedText = String(text);
+            let processedText = text;
             
-            // 1. Media & Tombol
+            // 1. Ekstrak Gambar, Video, dan Tombol (Toleransi spasi, otomatis tambah HTTPS, & huruf kecil/besar)
             processedText = processedText.replace(/\[GAMBAR:\s*([^\]]+?)\s*\]/gi, (match, url) => `<div class="media-container my-6"><img src="${url.trim()}" alt="Media Gambar"></div>`);
             
             processedText = processedText.replace(/\[VIDEO:\s*([^\]]+?)\s*\]/gi, (match, url) => {
@@ -467,24 +467,34 @@
                 else if(embedUrl.includes("youtu.be/")) embedUrl = embedUrl.replace("youtu.be/", "youtube.com/embed/");
                 return `<div class="media-container my-6"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`;
             });
+            
+            processedText = processedText.replace(/\[TOMBOL:\s*([^|]+?)\s*\|\s*([^\]]+?)\s*\]/gi, (match, text, url) => {
+                let link = url.trim();
+                // Otomatis tambahkan https:// jika guru lupa mengetiknya
+                if (!link.startsWith('http://') && !link.startsWith('https://')) {
+                    link = 'https://' + link;
+                }
+                return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> ${text.trim()}</a>`;
+            });
 
+            // Format Tombol Baru (Mendukung format [Teks](Link) agar lebih mudah diketik di Spreadsheet)
             processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
                 let link = url.trim();
                 if (!link.startsWith('http://') && !link.startsWith('https://')) link = 'https://' + link;
                 return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> ${text.trim()}</a>`;
             });
             
-            // 2. Bold & Italic
+            // 2. Format Bold (**teks**) dan Italic (_teks_)
             processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             processedText = processedText.replace(/_(.*?)_/g, '<em>$1</em>');
             
-            if (isInline) return processedText;
+            if (isInline) return processedText; // Cegah penambahan <p> jika hanya teks sebaris
 
-            // 3. Paragraf & List
+            // 3. Format Paragraf dan List (Penomoran otomatis)
             let lines = processedText.split('\n');
             let html = '';
             let inList = false;
-            let currentListStyle = '';
+            let currentListStyle = ''; // 'ul', 'ol-num', 'ol-alpha'
 
             lines.forEach(line => {
                 let trimLine = line.trim();
@@ -504,6 +514,7 @@
                 } else {
                     if (inList) { html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; inList = false; currentListStyle = ''; }
                     if (trimLine !== '') {
+                        // Jangan bungkus elemen media/tombol ke dalam tag <p>
                         if (trimLine.startsWith('<div class="media-container') || trimLine.startsWith('<a href=')) {
                             html += trimLine;
                         } else {
@@ -519,7 +530,7 @@
 
         const app = {
             init: async () => {
-                if (!GAS_URL) return;
+                if (!GAS_URL) return; // Hentikan proses jika URL belum diisi
                 try {
                     const res = await api('getInitialData');
                     const selectClass = document.getElementById('selectClass');
@@ -591,7 +602,7 @@
                 document.getElementById('lblMaterialTitle').innerText = state.materialTitle;
                 document.getElementById('lblMotivation').innerText = `"${data.motivation}"`;
                 
-                // 1. Render Materi
+                // Render Materi (Auto Format & Subbab terpisah)
                 if (data.materi) {
                     if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
                     if (data.materi.tujuan) document.getElementById('materiTujuan').innerHTML = formatText(data.materi.tujuan);
@@ -600,6 +611,7 @@
                     const container = document.getElementById('materiIsiContainer');
                     container.innerHTML = ""; 
 
+                    // 1. Siapkan HTML untuk Media (Gambar/Video)
                     let mediaHtml = "";
                     if(data.materi.media && data.materi.media.trim() !== "") {
                         if(data.materi.media.includes("youtube.com") || data.materi.media.includes("youtu.be")) {
@@ -611,37 +623,43 @@
                         }
                     }
 
+                    // 2. Render subbab dan sisipkan media jika ada tag [MEDIA]
                     let allHtml = "";
                     let mediaInserted = false;
                     let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
                     let subbabCount = 0;
 
-                    if(Array.isArray(data.materi.subbab)) {
-                        data.materi.subbab.forEach((teksSub, index) => {
-                            if(teksSub && teksSub.trim() !== "") {
-                                subbabCount++;
-                                let lines = teksSub.split('\n').map(l => l.trim()).filter(l => l !== '');
-                                let rawTitle = lines.length > 0 ? lines[0] : `Sub Topik ${index + 1}`;
-                                let cleanTitle = rawTitle.replace(/<\/?[^>]+(>|$)/g, "").replace(/[*_]/g, "").substring(0, 50);
-                                if(cleanTitle.length === 50) cleanTitle += "...";
+                    data.materi.subbab.forEach((teksSub, index) => {
+                        if(teksSub && teksSub.trim() !== "") {
+                            subbabCount++;
+                            
+                            // Ekstrak baris pertama untuk dijadikan nama menu Dropdown
+                            let lines = teksSub.split('\n').map(l => l.trim()).filter(l => l !== '');
+                            let rawTitle = lines.length > 0 ? lines[0] : `Sub Topik ${index + 1}`;
+                            
+                            // Bersihkan dari tag HTML dan bintang (bold/italic) agar rapi di dalam Dropdown
+                            let cleanTitle = rawTitle.replace(/<\/?[^>]+(>|$)/g, "").replace(/[*_]/g, "").substring(0, 50);
+                            if(cleanTitle.length === 50) cleanTitle += "...";
 
-                                let formattedHtml = formatText(teksSub);
-                                if (formattedHtml.includes('[MEDIA]')) {
-                                    formattedHtml = formattedHtml.replace(/\[MEDIA\]/g, mediaHtml);
-                                    mediaInserted = true;
-                                }
-
-                                let subbabId = `subbab-${index}`;
-                                tocOptions += `<option value="${subbabId}">${cleanTitle}</option>`;
-
-                                allHtml += `
-                                <div id="${subbabId}" class="subbab-section bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md mb-6 transition-all duration-500">
-                                    <div class="text-gray-300 text-base md:text-lg">${formattedHtml}</div>
-                                </div>`;
+                            let formattedHtml = formatText(teksSub);
+                            
+                            // Deteksi kode rahasia [MEDIA] untuk disisipkan ke tengah teks
+                            if (formattedHtml.includes('[MEDIA]')) {
+                                formattedHtml = formattedHtml.replace(/\[MEDIA\]/g, mediaHtml);
+                                mediaInserted = true;
                             }
-                        });
-                    }
 
+                            let subbabId = `subbab-${index}`;
+                            tocOptions += `<option value="${subbabId}">${cleanTitle}</option>`;
+
+                            allHtml += `
+                            <div id="${subbabId}" class="subbab-section bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md mb-6 transition-all duration-500">
+                                <div class="text-gray-300 text-base md:text-lg">${formattedHtml}</div>
+                            </div>`;
+                        }
+                    });
+
+                    // Setup Dropdown Daftar Isi
                     const tocContainer = document.getElementById('materiTocContainer');
                     const tocSelect = document.getElementById('materiTocSelect');
                     if (subbabCount > 1) {
@@ -651,6 +669,7 @@
                         tocContainer.classList.add('hidden');
                     }
 
+                    // 3. Jika media ada tapi tidak pakai tag [MEDIA], taruh di paling bawah
                     if (mediaHtml !== "" && !mediaInserted) {
                         allHtml += `
                         <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-md media-container mt-8">
@@ -663,90 +682,39 @@
                 }
                 document.getElementById('materiJudul').innerText = state.materialTitle;
                 
-                // 2. Render LKM Dinamis (Fase A, B, C, D, E & Support Banyak Soal)
+                // LKM Dinamis
                 const lkmContainer = document.getElementById('lkmQuestionsContainer');
                 lkmContainer.innerHTML = '';
-                
-                if(data.lkm) {
-                    if (data.lkm.judul) document.getElementById('lkmJudulUtama').innerText = data.lkm.judul;
+                if(data.lkm && data.lkm.questions) {
+                    if (data.lkm.info.judul) document.getElementById('lkmJudulUtama').innerText = data.lkm.info.judul;
                     
                     const infoContainer = document.getElementById('lkmInfoContainer');
-                    if (data.lkm.tujuan) {
+                    if (data.lkm.info.tujuan || data.lkm.info.petunjuk) {
                         infoContainer.classList.remove('hidden');
-                        document.getElementById('lkmTujuan').innerHTML = formatText(data.lkm.tujuan);
+                        document.getElementById('lkmTujuan').innerHTML = formatText(data.lkm.info.tujuan);
+                        document.getElementById('lkmPetunjuk').innerHTML = formatText(data.lkm.info.petunjuk);
                     } else {
                         infoContainer.classList.add('hidden');
                     }
 
-                    let lkmHtml = "";
-                    
-                    const buildPhase = (letter, title, phaseData, colorPrefix, icon) => {
-                        if (!phaseData) return "";
-                        const teks = phaseData.teks || "";
-                        let questions = [];
-                        
-                        if (Array.isArray(phaseData.soalList) && phaseData.soalList.length > 0) {
-                            questions = phaseData.soalList.filter(s => s && s.trim() !== "");
-                        } else if (phaseData.soal && phaseData.soal.trim() !== "") {
-                            questions = [phaseData.soal.trim()];
-                        }
-                        
-                        if (!teks && questions.length === 0) return "";
-                        
-                        let html = `
-                        <div class="bg-${colorPrefix}-900/20 border border-${colorPrefix}-500/30 p-5 md:p-6 rounded-2xl mb-6">
-                            <h3 class="text-xl font-bold text-${colorPrefix}-400 mb-4 flex items-center gap-2">
-                                <i class="${icon}"></i> ${letter}. ${title}
-                            </h3>`;
-                        
-                        if (teks) {
-                            html += `<div class="text-gray-300 text-base md:text-lg mb-4 sheet-text text-justify-custom leading-relaxed">${formatText(teks)}</div>`;
-                        }
-                        
-                        if (questions.length > 0) {
-                            html += `<div class="mt-4 pt-4 border-t border-${colorPrefix}-500/20 space-y-4">`;
-                            questions.forEach((qText, qIdx) => {
-                                const qLabel = questions.length > 1 ? `Pertanyaan ${qIdx + 1}: ${formatText(qText, true)}` : formatText(qText, true);
-                                html += `
-                                <div>
-                                    <label class="block font-medium text-white mb-2 text-base md:text-lg">${qLabel}</label>
-                                    <textarea required rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-${colorPrefix}-500 transition-colors shadow-inner" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
-                                </div>`;
-                            });
-                            html += `</div>`;
-                        }
-                        
-                        html += `</div>`;
-                        return html;
-                    };
-
-                    lkmHtml += buildPhase('B', 'Kegiatan 1 – Memahami', data.lkm.kegiatan1, 'blue', 'fa-solid fa-book-open-reader');
-                    lkmHtml += buildPhase('C', 'Kegiatan 2 – Menerapkan', data.lkm.kegiatan2, 'green', 'fa-solid fa-person-running');
-                    lkmHtml += buildPhase('D', 'Kegiatan 3 – Menganalisis', data.lkm.kegiatan3, 'orange', 'fa-solid fa-magnifying-glass-chart');
-                    lkmHtml += buildPhase('E', 'Refleksi Pembelajaran', data.lkm.refleksi, 'pink', 'fa-solid fa-heart');
-
-                    if (lkmHtml.trim() !== "") {
-                        lkmContainer.innerHTML = lkmHtml;
-                        document.getElementById('lkmSubmitArea').classList.remove('hidden');
-                    } else {
-                        lkmContainer.innerHTML = `
-                            <div class="bg-amber-900/20 border border-amber-500/30 p-6 rounded-2xl text-center">
-                                <i class="fa-solid fa-triangle-exclamation text-amber-400 text-3xl mb-2"></i>
-                                <h3 class="text-amber-400 font-bold text-lg mb-1">Isian LKM Belum Tersedia</h3>
-                                <p class="text-gray-300 text-sm">Belum ada kolom pertanyaan LKM yang diisi di Spreadsheet untuk materi ini.</p>
-                            </div>`;
-                        document.getElementById('lkmSubmitArea').classList.add('hidden');
-                    }
+                    data.lkm.questions.forEach((q, idx) => {
+                        lkmContainer.innerHTML += `
+                            <div class="bg-slate-900/50 p-5 md:p-6 rounded-xl border border-slate-700">
+                                <label class="block font-medium text-white mb-3 text-base md:text-lg text-justify-custom leading-relaxed">${idx+1}. ${formatText(q.text, true)}</label>
+                                <textarea id="lkm_ans_${idx}" required rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-4 text-white focus:border-purple-500"></textarea>
+                            </div>
+                        `;
+                    });
                 }
 
-                // 3. Render Tugas
+                // Tugas Dinamis
                 if(data.tugas) {
                     if(data.tugas.judul) document.getElementById('tugasJudulUtama').innerText = data.tugas.judul;
                     if(data.tugas.deskripsi) {
                         document.getElementById('tugasDeskripsiContainer').classList.remove('hidden');
                         document.getElementById('tugasDeskripsiContainer').innerHTML = formatText(data.tugas.deskripsi);
                     } else {
-                        document.getElementById('tugasDeskripsiContainer').classList.add('hidden');
+                         document.getElementById('tugasDeskripsiContainer').classList.add('hidden');
                     }
                     if(data.tugas.instruksi) document.getElementById('tugasInstruksi').innerHTML = formatText(data.tugas.instruksi);
                     if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = "Batas waktu: " + data.tugas.deadline;
@@ -761,10 +729,9 @@
                         lampiranContainer.classList.add('hidden');
                     }
                 }
-                
                 state.quizData = data.formatif || [];
 
-                // 4. Render Refleksi
+                // Refleksi Dinamis
                 const refContainer = document.getElementById('refleksiQuestionsContainer');
                 refContainer.innerHTML = '';
                 if (data.refleksi && data.refleksi.questions) {
@@ -779,7 +746,6 @@
                 }
 
                 document.getElementById('profName').innerText = state.studentName;
-                document.getElementById('profClass').innerText = state.studentClass;
                 document.getElementById('profilInisial').innerText = state.studentName.charAt(0).toUpperCase();
                 app.updateProgressUI();
             },
@@ -788,18 +754,20 @@
                 const sections = document.querySelectorAll('.subbab-section');
                 
                 if (val === "") {
+                    // Jika memilih "Tampilkan Semua", kembalikan semua subbab
                     sections.forEach(el => {
                         el.style.display = 'block';
                         setTimeout(() => el.style.opacity = '1', 20);
                     });
                 } else {
+                    // Mode Fokus: Sembunyikan yang lain, tampilkan HANYA yang dipilih
                     sections.forEach(el => {
                         if (el.id === val) {
                             el.style.display = 'block';
                             setTimeout(() => el.style.opacity = '1', 20);
                         } else {
                             el.style.opacity = '0';
-                            setTimeout(() => el.style.display = 'none', 300);
+                            setTimeout(() => el.style.display = 'none', 300); // Tunggu animasi pudar selesai
                         }
                     });
                 }
@@ -822,37 +790,27 @@
             
             markMateriDone: async () => {
                 if(state.progress.materi) return;
-                await api('submitData', { type: 'materi', studentName: state.studentName, className: state.studentClass, materialId: state.materialId }); 
-                state.progress.materi = true;
+                await api('submitData', { type: 'materi' }); state.progress.materi = true;
                 const btn = document.getElementById('btnSelesaiMateri');
-                btn.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> SELESAI'; btn.classList.replace('bg-brand-blue', 'bg-green-600'); btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-check-double"></i> SELESAI'; btn.classList.replace('bg-brand-blue', 'bg-green-600'); btn.disabled = true;
                 app.updateProgressUI();
             },
             submitLKM: async (e) => { 
                 e.preventDefault(); 
                 const answers = [];
                 document.querySelectorAll('#lkmQuestionsContainer textarea').forEach(ta => answers.push(ta.value));
-                await api('submitData', { type: 'lkm', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: answers }); 
+                await api('submitData', { type: 'lkm', answers: answers }); 
                 state.progress.lkm = true; 
                 document.getElementById('lkmForm').classList.add('hidden'); 
                 document.getElementById('lkmDoneState').classList.remove('hidden'); 
                 app.updateProgressUI(); 
             },
-            submitTugas: async (e) => { 
-                e.preventDefault(); 
-                const ans = document.getElementById('tugasJawaban').value;
-                const link = document.getElementById('tugasLink').value;
-                await api('submitData', { type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: ans, fileUrl: link }); 
-                state.progress.tugas = true; 
-                document.getElementById('tugasForm').classList.add('hidden'); 
-                document.getElementById('tugasDoneState').classList.remove('hidden'); 
-                app.updateProgressUI(); 
-            },
+            submitTugas: async (e) => { e.preventDefault(); await api('submitData', { type: 'tugas' }); state.progress.tugas = true; document.getElementById('tugasForm').classList.add('hidden'); document.getElementById('tugasDoneState').classList.remove('hidden'); app.updateProgressUI(); },
             submitRefleksi: async (e) => { 
                 e.preventDefault(); 
                 const answers = [];
                 document.querySelectorAll('#refleksiQuestionsContainer textarea').forEach(ta => answers.push(ta.value));
-                await api('submitData', { type: 'refleksi', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, refleksi: answers }); 
+                await api('submitData', { type: 'refleksi', refleksi: answers }); 
                 state.progress.refleksi = true; 
                 document.getElementById('refleksiForm').classList.add('hidden'); 
                 document.getElementById('refleksiDoneState').classList.remove('hidden'); 
@@ -898,8 +856,7 @@
                 let correct = 0; state.quiz.answers.forEach((ans, idx) => { if(ans === state.quiz.questions[idx].answer) correct++; });
                 const score = Math.round((correct / state.quiz.questions.length) * 100); state.progress.formatifScore = score;
                 
-                await api('submitData', { type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, score: score, answers: state.quiz.answers }); 
-                state.progress.formatif = true;
+                await api('submitData', { type: 'formatif', score: score, answers: state.quiz.answers }); state.progress.formatif = true;
                 if (document.exitFullscreen) document.exitFullscreen().catch(e=>{});
                 
                 document.getElementById('formatifQuizArea').classList.add('hidden'); document.getElementById('formatifResultArea').classList.remove('hidden');
@@ -912,7 +869,7 @@
         window.onload = () => {
             app.init();
             
-            // PWA Setup
+            // Script PWA (Progressive Web App) agar web bisa diinstal di HP
             const manifest = {
                 "name": "PJOK Digital Learning",
                 "short_name": "PJOK",
