@@ -238,14 +238,21 @@
                             <p id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">Tujuan pembelajaran akan tampil di sini.</p>
                         </div>
 
-                        <!-- Render Konten Subbab dari Kolom Spreadsheet (Auto format Spasi/Enter) -->
-                        <div class="font-light tracking-wide text-lg text-gray-200 space-y-10" id="materiIsiContainer">
-                            <!-- Injected by JS -->
+                        <!-- Dropdown Daftar Sub Topik (TOC) -->
+                        <div id="materiTocContainer" class="hidden bg-slate-800/80 p-5 rounded-xl border border-slate-700 shadow-inner mt-6">
+                            <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-ul text-brand-orange mr-2"></i> Pilih Sub Topik (Mode Fokus):</label>
+                            <select id="materiTocSelect" onchange="app.scrollToSubbab()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange transition-colors cursor-pointer font-medium">
+                                <option value="">-- Tampilkan Semua Bagian --</option>
+                            </select>
                         </div>
 
-                        <div class="bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 mt-10">
-                            <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-list-check"></i> Rangkuman</h4>
-                            <p id="materiRangkuman" class="text-base md:text-lg text-gray-300 sheet-text text-justify-custom leading-relaxed">Inti sari dari pembelajaran ini.</p>
+                        <!-- Render Konten Subbab dari Kolom Spreadsheet (Auto format Spasi/Enter) -->
+                        <div class="font-light tracking-wide text-lg text-gray-200 space-y-10 mt-8" id="materiIsiContainer"></div>
+                        
+                        <!-- Rangkuman Materi -->
+                        <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-5 rounded-r-xl mt-8">
+                            <h4 class="text-brand-orange font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-clipboard-list"></i> Rangkuman</h4>
+                            <div id="materiRangkuman" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">Rangkuman akan tampil di sini.</div>
                         </div>
                     </div>
                     
@@ -406,7 +413,7 @@
 
     <script>
         // Masukkan Link URL Web App (Google Apps Script) Anda di dalam tanda kutip di bawah ini:
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwbqOhN-0WBz8HWiAwVnRiLpweW9Ota3xUDw0lqXosqUr6XUIefSLg3LS5BsfkMprK2/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzl4MBjshnaWDqNbiNWzFB5Z0PjmVz3MrafpvD-l_w--sAaRrSIt71W4nsMQT8oYM8/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -604,9 +611,21 @@
                     // 2. Render subbab dan sisipkan media jika ada tag [MEDIA]
                     let allHtml = "";
                     let mediaInserted = false;
+                    let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
+                    let subbabCount = 0;
 
                     data.materi.subbab.forEach((teksSub, index) => {
                         if(teksSub && teksSub.trim() !== "") {
+                            subbabCount++;
+                            
+                            // Ekstrak baris pertama untuk dijadikan nama menu Dropdown
+                            let lines = teksSub.split('\n').map(l => l.trim()).filter(l => l !== '');
+                            let rawTitle = lines.length > 0 ? lines[0] : `Sub Topik ${index + 1}`;
+                            
+                            // Bersihkan dari tag HTML dan bintang (bold/italic) agar rapi di dalam Dropdown
+                            let cleanTitle = rawTitle.replace(/<\/?[^>]+(>|$)/g, "").replace(/[*_]/g, "").substring(0, 50);
+                            if(cleanTitle.length === 50) cleanTitle += "...";
+
                             let formattedHtml = formatText(teksSub);
                             
                             // Deteksi kode rahasia [MEDIA] untuk disisipkan ke tengah teks
@@ -615,13 +634,25 @@
                                 mediaInserted = true;
                             }
 
+                            let subbabId = `subbab-${index}`;
+                            tocOptions += `<option value="${subbabId}">${cleanTitle}</option>`;
+
                             allHtml += `
-                            <div class="bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md">
-                                <h3 class="text-xl md:text-2xl font-bold text-brand-orange mb-4 border-b border-slate-700/50 pb-3">Bagian ${index + 1}</h3>
+                            <div id="${subbabId}" class="subbab-section bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-md mb-6 transition-all duration-500">
                                 <div class="text-gray-300 text-base md:text-lg">${formattedHtml}</div>
                             </div>`;
                         }
                     });
+
+                    // Setup Dropdown Daftar Isi
+                    const tocContainer = document.getElementById('materiTocContainer');
+                    const tocSelect = document.getElementById('materiTocSelect');
+                    if (subbabCount > 1) {
+                        tocSelect.innerHTML = tocOptions;
+                        tocContainer.classList.remove('hidden');
+                    } else {
+                        tocContainer.classList.add('hidden');
+                    }
 
                     // 3. Jika media ada tapi tidak pakai tag [MEDIA], taruh di paling bawah
                     if (mediaHtml !== "" && !mediaInserted) {
@@ -667,6 +698,29 @@
                 document.getElementById('profName').innerText = state.studentName;
                 document.getElementById('profilInisial').innerText = state.studentName.charAt(0).toUpperCase();
                 app.updateProgressUI();
+            },
+            scrollToSubbab: () => {
+                const val = document.getElementById('materiTocSelect').value;
+                const sections = document.querySelectorAll('.subbab-section');
+                
+                if (val === "") {
+                    // Jika memilih "Tampilkan Semua", kembalikan semua subbab
+                    sections.forEach(el => {
+                        el.style.display = 'block';
+                        setTimeout(() => el.style.opacity = '1', 20);
+                    });
+                } else {
+                    // Mode Fokus: Sembunyikan yang lain, tampilkan HANYA yang dipilih
+                    sections.forEach(el => {
+                        if (el.id === val) {
+                            el.style.display = 'block';
+                            setTimeout(() => el.style.opacity = '1', 20);
+                        } else {
+                            el.style.opacity = '0';
+                            setTimeout(() => el.style.display = 'none', 300); // Tunggu animasi pudar selesai
+                        }
+                    });
+                }
             },
             updateProgressUI: () => {
                 let completed = 0; const total = 5;
