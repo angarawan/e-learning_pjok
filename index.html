@@ -448,61 +448,60 @@
         };
 
         // Fungsi Parser untuk merapikan teks ala MS Word
-        const formatText = (text) => {
+        const formatText = (text, isInline = false) => {
             if (!text) return "";
-            let lines = text.split('\n');
+            let processedText = text;
+            
+            // 1. Ekstrak Gambar, Video, dan Tombol (Toleransi spasi & huruf kecil/besar)
+            processedText = processedText.replace(/\[GAMBAR:\s*([^\]]+?)\]/gi, '<div class="media-container my-6"><img src="$1" alt="Media Gambar"></div>');
+            processedText = processedText.replace(/\[VIDEO:\s*([^\]]+?)\]/gi, (match, url) => {
+                let embedUrl = url.trim();
+                if(embedUrl.includes("watch?v=")) embedUrl = embedUrl.replace("watch?v=", "embed/");
+                else if(embedUrl.includes("youtu.be/")) embedUrl = embedUrl.replace("youtu.be/", "youtube.com/embed/");
+                return `<div class="media-container my-6"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`;
+            });
+            processedText = processedText.replace(/\[TOMBOL:\s*([^|]+?)\s*\|\s*([^\]]+?)\]/gi, '<a href="$2" target="_blank" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> $1</a>');
+            
+            // 2. Format Bold (**teks**) dan Italic (_teks_)
+            processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            processedText = processedText.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            if (isInline) return processedText; // Cegah penambahan <p> jika hanya teks sebaris
+
+            // 3. Format Paragraf dan List (Penomoran otomatis)
+            let lines = processedText.split('\n');
             let html = '';
             let inList = false;
             let currentListStyle = ''; // 'ul', 'ol-num', 'ol-alpha'
 
             lines.forEach(line => {
+                let trimLine = line.trim();
                 let bulletMatch = line.match(/^(\-|\*)\s+(.*)/);
                 let numMatch = line.match(/^(\d+)\.\s+(.*)/);
-                let alphaMatch = line.match(/^([a-zA-Z])\.\s+(.*)/); // Deteksi huruf a., b., c.
+                let alphaMatch = line.match(/^([a-zA-Z])\.\s+(.*)/);
 
                 if (bulletMatch) {
-                    if (currentListStyle !== 'ul') { 
-                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
-                        html += '<ul class="list-disc list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
-                        inList = true; currentListStyle = 'ul'; 
-                    }
+                    if (currentListStyle !== 'ul') { if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; html += '<ul class="list-disc list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; currentListStyle = 'ul'; }
                     html += `<li><span class="ml-1">${bulletMatch[2]}</span></li>`;
                 } else if (numMatch) {
-                    if (currentListStyle !== 'ol-num') { 
-                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
-                        html += '<ol class="list-decimal list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
-                        inList = true; currentListStyle = 'ol-num'; 
-                    }
+                    if (currentListStyle !== 'ol-num') { if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; html += '<ol class="list-decimal list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; currentListStyle = 'ol-num'; }
                     html += `<li><span class="ml-1">${numMatch[2]}</span></li>`;
                 } else if (alphaMatch) {
-                    if (currentListStyle !== 'ol-alpha') { 
-                        if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
-                        html += '<ol class="list-[lower-alpha] list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; 
-                        inList = true; currentListStyle = 'ol-alpha';
-                    }
+                    if (currentListStyle !== 'ol-alpha') { if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; html += '<ol class="list-[lower-alpha] list-outside ml-6 space-y-2 mb-4 text-justify-custom">'; inList = true; currentListStyle = 'ol-alpha'; }
                     html += `<li><span class="ml-1">${alphaMatch[2]}</span></li>`;
                 } else {
-                    // Jika bukan list, tutup list jika ada, lalu buat paragraf biasa
-                    if (inList) { 
-                        html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; 
-                        inList = false; 
-                        currentListStyle = ''; 
-                    }
-                    // Abaikan baris kosong
-                    if (line.trim() !== '') {
-                        html += `<p class="mb-4 text-justify-custom">${line}</p>`;
+                    if (inList) { html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>'; inList = false; currentListStyle = ''; }
+                    if (trimLine !== '') {
+                        // Jangan bungkus elemen media/tombol ke dalam tag <p>
+                        if (trimLine.startsWith('<div class="media-container') || trimLine.startsWith('<a href=')) {
+                            html += trimLine;
+                        } else {
+                            html += `<p class="mb-4 text-justify-custom">${line}</p>`;
+                        }
                     }
                 }
             });
-            // Tutup list di akhir jika masih terbuka
             if (inList) html += currentListStyle.startsWith('ol') ? '</ol>' : '</ul>';
-            
-            // Format Bold (**teks**) dan Italic (_teks_)
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/_(.*?)_/g, '<em>$1</em>');
-            
-            // Fitur Baru: Tombol Tautan Eksternal [TOMBOL:Teks|URL]
-            html = html.replace(/\[TOMBOL:([^|]+)\|([^\]]+)\]/g, '<a href="$2" target="_blank" class="inline-flex items-center justify-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-[0_4px_15px_rgba(249,115,22,0.4)] transition-all my-4 hover:-translate-y-1 w-full md:w-auto text-center"><i class="fa-solid fa-up-right-from-square mr-3"></i> $1</a>');
             
             return html;
         };
@@ -584,8 +583,8 @@
                 // Render Materi (Auto Format & Subbab terpisah)
                 if (data.materi) {
                     if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
-                    if (data.materi.tujuan) document.getElementById('materiTujuan').innerText = data.materi.tujuan;
-                    if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerText = data.materi.rangkuman;
+                    if (data.materi.tujuan) document.getElementById('materiTujuan').innerHTML = formatText(data.materi.tujuan);
+                    if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerHTML = formatText(data.materi.rangkuman);
                     
                     const container = document.getElementById('materiIsiContainer');
                     container.innerHTML = ""; 
@@ -644,7 +643,7 @@
                     data.lkm.forEach((q, idx) => {
                         lkmContainer.innerHTML += `
                             <div class="bg-slate-900/50 p-5 md:p-6 rounded-xl border border-slate-700">
-                                <label class="block font-medium text-white mb-3 sheet-text text-base md:text-lg text-justify-custom leading-relaxed">${idx+1}. ${q.text}</label>
+                                <label class="block font-medium text-white mb-3 text-base md:text-lg text-justify-custom leading-relaxed">${idx+1}. ${formatText(q.text, true)}</label>
                                 <textarea id="lkm_ans_${idx}" required rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-4 text-white focus:border-purple-500"></textarea>
                             </div>
                         `;
@@ -653,7 +652,7 @@
 
                 // Tugas & Formatif
                 if(data.tugas) {
-                    if(data.tugas.instruksi) document.getElementById('tugasInstruksi').innerText = data.tugas.instruksi;
+                    if(data.tugas.instruksi) document.getElementById('tugasInstruksi').innerHTML = formatText(data.tugas.instruksi);
                     if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = "Batas waktu: " + data.tugas.deadline;
                 }
                 state.quizData = data.formatif || [];
@@ -708,7 +707,7 @@
             renderQuiz: () => {
                 const q = state.quiz.questions[state.quiz.currentIdx];
                 document.getElementById('quizCurrentNum').innerText = state.quiz.currentIdx + 1;
-                document.getElementById('quizQuestion').innerText = q.text;
+                document.getElementById('quizQuestion').innerHTML = formatText(q.text);
                 document.getElementById('quizProgressBar').style.width = `${(state.quiz.currentIdx / state.quiz.questions.length) * 100}%`;
                 
                 const optsContainer = document.getElementById('quizOptions'); optsContainer.innerHTML = '';
@@ -719,7 +718,7 @@
                             <input type="radio" name="quizOpt" value="${idx}" onchange="app.selectQuizAns(${idx})" class="peer sr-only" ${isChecked}>
                             <div class="px-6 py-4 rounded-xl bg-slate-800/50 border border-slate-700 peer-checked:bg-red-500/20 peer-checked:border-red-500 transition-all flex items-start gap-4">
                                 <div class="w-6 h-6 shrink-0 mt-1 rounded-full border-2 border-slate-500 peer-checked:border-red-500 peer-checked:bg-red-500 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div></div>
-                                <span class="text-gray-300 peer-checked:text-white sheet-text flex-1 text-base md:text-lg leading-relaxed text-justify-custom">${opt}</span>
+                                <span class="text-gray-300 peer-checked:text-white flex-1 text-base md:text-lg leading-relaxed text-justify-custom">${formatText(opt, true)}</span>
                             </div>
                         </label>`;
                 });
