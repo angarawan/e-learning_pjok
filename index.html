@@ -385,7 +385,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxZxNvxkhApTu6GGAsOECuZsy_x25PgKQ9fHJ1FLVtw9_8_rMx8xyLwWsVzfVFJGlZ_/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz2GB4MAysTUD7pFaIZFYlfUOhC1DUsaRnY7NM7kPQ49zebUbw8padaHhsVE30jm9w/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -556,9 +556,10 @@
                     let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
                     let subbabCount = 0;
 
+                    // Mengolah Sub Topik murni (tanpa memasukkan Tujuan Pembelajaran)
                     if(Array.isArray(data.materi.subbab)) {
                         data.materi.subbab.forEach((teksSub, index) => {
-                            if(teksSub && String(teksSub).trim() !== "") {
+                            if(teksSub && String(teksSub).trim() !== "" && String(teksSub).trim() !== "-") {
                                 subbabCount++;
                                 let lines = String(teksSub).split('\n').map(l => l.trim()).filter(l => l !== '');
                                 let rawTitle = lines.length > 0 ? lines[0] : `Sub Topik ${index + 1}`;
