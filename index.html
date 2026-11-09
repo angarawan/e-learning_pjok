@@ -215,7 +215,8 @@
                     </div>
                     
                     <div class="p-6 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-8">
-                        <div class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
+                        <!-- TUJUAN PEMBELAJARAN (POSISI UTAMA DI ATAS SUB TOPIK) -->
+                        <div id="materiTujuanContainer" class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
                             <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
                             <div id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
@@ -385,7 +386,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwQn_wSvIiYBxAZPDBxmOxJQXQskPC79r4SQqeAWONUhEG7EumiIcIyCd0FjIvBevLm/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyoHoAVVl9q0QEHhnDqRJsQzpNugXtbYZ9sbGd1NIksXYVQYOiIo36pteIc3wZc2tBF/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -547,7 +548,17 @@
                 
                 if (data.materi) {
                     if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
-                    if (data.materi.tujuan) document.getElementById('materiTujuan').innerHTML = formatText(data.materi.tujuan);
+                    
+                    // Render Tujuan Pembelajaran tepat di bagian paling atas
+                    const tujuanEl = document.getElementById('materiTujuan');
+                    const tujuanContainer = document.getElementById('materiTujuanContainer');
+                    if (data.materi.tujuan && String(data.materi.tujuan).trim() !== "") {
+                        tujuanContainer.classList.remove('hidden');
+                        tujuanEl.innerHTML = formatText(data.materi.tujuan);
+                    } else {
+                        tujuanContainer.classList.add('hidden');
+                    }
+
                     if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerHTML = formatText(data.materi.rangkuman);
                     
                     const container = document.getElementById('materiIsiContainer');
@@ -556,7 +567,7 @@
                     let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
                     let subbabCount = 0;
 
-                    // Mengolah Sub Topik murni (tanpa memasukkan Tujuan Pembelajaran)
+                    // Mendukung Subbab_1 sampai Subbab_10 secara fleksibel dari Spreadsheet
                     if(Array.isArray(data.materi.subbab)) {
                         data.materi.subbab.forEach((teksSub, index) => {
                             if(teksSub && String(teksSub).trim() !== "" && String(teksSub).trim() !== "-") {
