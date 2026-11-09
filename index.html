@@ -288,22 +288,18 @@
                         </div>
                     </div>
                     <div id="tugasDeskripsiContainer" class="hidden bg-slate-800 p-4 rounded-xl mb-4 text-gray-300 sheet-text text-justify-custom"></div>
-                    <div class="bg-orange-900/20 border border-orange-500/30 p-5 rounded-xl mb-6">
-                        <h4 class="font-bold text-orange-400 mb-3 text-lg"><i class="fa-solid fa-circle-question mr-2"></i> Pertanyaan & Instruksi Tugas:</h4>
-                        <div id="tugasInstruksi" class="text-gray-300 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">Memuat pertanyaan...</div>
-                        <div id="tugasLampiranContainer" class="mt-4 hidden"></div>
-                    </div>
-                    <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Jawaban Tugas (Ketik Manual)</label>
-                            <textarea id="tugasJawaban" required rows="5" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange resize-none" placeholder="Tuliskan jawaban tugas Anda di sini..."></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Link Bukti (Foto/Video G-Drive) - Opsional</label>
+                    
+                    <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-6">
+                        <!-- CONTAINER SOAL & JAWABAN TUGAS PER-NOMOR -->
+                        <div id="tugasQuestionsContainer" class="space-y-6"></div>
+
+                        <div id="tugasLinkArea" class="pt-4 border-t border-white/10">
+                            <label class="block text-sm font-medium text-gray-300 mb-2"><i class="fa-solid fa-link text-orange-400 mr-2"></i> Link Bukti (Foto/Video G-Drive) - Opsional</label>
                             <input type="url" id="tugasLink" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="https://drive.google.com/...">
                         </div>
                         <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl mt-4">KIRIM TUGAS</button>
                     </form>
+                    
                     <div id="tugasDoneState" class="hidden text-center py-10">
                         <i class="fa-solid fa-cloud-check text-6xl text-brand-orange mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">Tugas Terkirim!</h3>
@@ -402,7 +398,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxeyxMmHjTdjgjlggCnA3i7PD8bfzCNqxFmIGH3PtpQPIdOZ_xyuSdLiBjqCWn1jj06/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxnuGgAS_CqcfFIYzMLhaTe--1vBgYdW6s4GgVTpDZ6Ufb4vksSMQgZfVwhcclIr1td/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -707,19 +703,44 @@
                     if(data.tugas.judul) document.getElementById('tugasJudulUtama').innerText = data.tugas.judul;
                     if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = `Batas waktu: ${data.tugas.deadline}`;
                     
-                    const instruksiEl = document.getElementById('tugasInstruksi');
-                    if (Array.isArray(data.tugas.soalList) && data.tugas.soalList.length > 1) {
-                        let multiSoalHtml = "";
-                        data.tugas.soalList.forEach((sText, sIdx) => {
-                            multiSoalHtml += `
-                            <div class="mb-4 pb-3 border-b border-white/10 last:border-b-0">
-                                <span class="font-bold text-orange-300 block mb-1">Soal ${sIdx + 1}:</span>
-                                <div>${formatText(sText, true)}</div>
+                    const qContainer = document.getElementById('tugasQuestionsContainer');
+                    qContainer.innerHTML = "";
+
+                    let questions = [];
+                    if (Array.isArray(data.tugas.soalList) && data.tugas.soalList.length > 0) {
+                        questions = data.tugas.soalList.filter(s => s && String(s).trim() !== "");
+                    } else if (data.tugas.instruksi && String(data.tugas.instruksi).trim() !== "") {
+                        // Jika dalam 1 sel ada baris berurutan (misal: 1. Soal A \n 2. Soal B)
+                        const rawText = String(data.tugas.instruksi).trim();
+                        if (rawText.includes('\n')) {
+                            questions = rawText.split('\n').map(l => l.trim()).filter(l => l !== "");
+                        } else {
+                            questions = [rawText];
+                        }
+                    }
+
+                    if (questions.length > 0) {
+                        let html = "";
+                        questions.forEach((qText, idx) => {
+                            const labelText = questions.length > 1 ? `Soal ${idx + 1}` : `Pertanyaan / Instruksi Tugas`;
+                            html += `
+                            <div class="bg-orange-900/20 border border-orange-500/30 p-5 md:p-6 rounded-2xl shadow-lg space-y-3">
+                                <h4 class="font-bold text-orange-400 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-question"></i> ${labelText}
+                                </h4>
+                                <div class="text-gray-200 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">${formatText(qText, true)}</div>
+                                <div class="pt-2">
+                                    <label class="block text-sm font-semibold text-gray-300 mb-2">Jawaban Anda (Ketik Manual):</label>
+                                    <textarea required rows="4" class="tugas-answer-field w-full bg-slate-900/90 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange focus:outline-none transition-all shadow-inner resize-none" placeholder="Tuliskan jawaban untuk nomor ini..."></textarea>
+                                </div>
                             </div>`;
                         });
-                        instruksiEl.innerHTML = multiSoalHtml;
+                        qContainer.innerHTML = html;
                     } else {
-                        instruksiEl.innerHTML = formatText(data.tugas.instruksi);
+                        qContainer.innerHTML = `
+                        <div class="bg-slate-800 p-5 rounded-2xl text-center text-gray-400">
+                            Belum ada soal tugas yang diisi untuk materi ini.
+                        </div>`;
                     }
                 }
 
@@ -772,11 +793,12 @@
 
             submitTugas: async (e) => {
                 e.preventDefault();
-                const jawaban = document.getElementById('tugasJawaban').value.trim();
+                const fields = document.querySelectorAll('.tugas-answer-field');
+                const answers = Array.from(fields).map(f => f.value.trim());
                 const link = document.getElementById('tugasLink').value.trim();
 
                 await api('submitData', {
-                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: jawaban, fileUrl: link
+                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: answers, fileUrl: link
                 });
 
                 state.progress.tugas = true;
