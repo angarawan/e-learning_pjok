@@ -108,7 +108,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Kelas</label>
                         <select id="selectClass" onchange="app.onClassChange()" required class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
-                            <option value="">-- Memuat Kelas... --</option>
+                            <option value="">-- Pilih Kelas --</option>
                         </select>
                     </div>
                     <div>
@@ -283,11 +283,11 @@
                         <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">LKM Berhasil Terkirim!</h3>
                         
-                        <!-- KARTU UMPAN BALIK UNTUK LKM -->
+                        <!-- KARTU UMPAN BALIK AI UNTUK LKM -->
                         <div id="lkmAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
                                 <span class="text-purple-400 font-bold text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-comments text-purple-400 text-xl"></i> Umpan Balik Evaluasi
+                                    <i class="fa-solid fa-robot text-purple-400 text-xl"></i> Umpan Balik AI Otomatis
                                 </span>
                                 <span id="lkmAiScore" class="bg-purple-500/20 text-purple-300 font-extrabold px-3 py-1 rounded-full text-sm border border-purple-400/30">Pemahaman: -%</span>
                             </div>
@@ -328,11 +328,11 @@
                         <i class="fa-solid fa-cloud-check text-6xl text-brand-orange mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">Tugas Berhasil Terkirim!</h3>
                         
-                        <!-- KARTU UMPAN BALIK UNTUK TUGAS -->
+                        <!-- KARTU UMPAN BALIK AI UNTUK TUGAS -->
                         <div id="tugasAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-orange-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
                                 <span class="text-orange-400 font-bold text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-clipboard-check text-orange-400 text-xl"></i> Umpan Balik Tugas
+                                    <i class="fa-solid fa-brain text-orange-400 text-xl"></i> Umpan Balik AI Otomatis
                                 </span>
                                 <span id="tugasAiScore" class="bg-orange-500/20 text-orange-300 font-extrabold px-3 py-1 rounded-full text-sm border border-orange-400/30">Nilai: -</span>
                             </div>
@@ -465,7 +465,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwabdJXdQo9jE0hZ20AAORJy-C41D4lICbdz759M7zWMALZi1d2MOKew4dfwxTo_j-z/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxnuGgAS_CqcfFIYzMLhaTe--1vBgYdW6s4GgVTpDZ6Ufb4vksSMQgZfVwhcclIr1td/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -547,28 +547,18 @@
         const app = {
             init: async () => {
                 if (!GAS_URL) return;
-                const selectClass = document.getElementById('selectClass');
-                selectClass.innerHTML = '<option value="">-- Memuat Kelas... --</option>';
                 try {
                     const res = await api('getInitialData');
-                    selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-                    if(res && res.data && Array.isArray(res.data.classes) && res.data.classes.length > 0) {
+                    const selectClass = document.getElementById('selectClass');
+                    if(res && res.data && res.data.classes) {
                         res.data.classes.forEach(c => { selectClass.appendChild(new Option(c, c)); });
-                    } else {
-                        selectClass.innerHTML = '<option value="">-- Kelas Tidak Ditemukan --</option>';
                     }
-                } catch(e) {
-                    selectClass.innerHTML = '<option value="">-- Gagal Memuat Kelas (Cek URL/Network) --</option>';
-                }
+                } catch(e) {}
             },
             
             checkConnectionAndStart: () => {
-                if (!GAS_URL) {
-                    ui.showModal("Sistem Belum Siap", "Link Web App belum dimasukkan ke dalam kode.", "warning");
-                } else {
-                    app.navigateTo('identity');
-                    app.init(); // Memastikan pengambilan daftar kelas langsung dipanggil saat tombol MULAI diklik
-                }
+                if (!GAS_URL) ui.showModal("Sistem Belum Siap", "Link Web App belum dimasukkan ke dalam kode.", "warning");
+                else app.navigateTo('identity');
             },
 
             navigateTo: (viewId) => {
@@ -889,7 +879,7 @@
                 document.getElementById('status-lkm-icon').innerHTML = '<i class="fa-solid fa-circle-check text-purple-500"></i>';
                 document.getElementById('lkmForm').classList.add('hidden');
                 
-                // TAMPILKAN UMPAN BALIK
+                // TAMPILKAN UMPAN BALIK AI
                 const feedbackCard = document.getElementById('lkmAiFeedbackCard');
                 if (res.data && res.data.feedback) {
                     document.getElementById('lkmAiScore').innerText = `Tingkat Pemahaman: ${res.data.score || 85}%`;
@@ -901,7 +891,7 @@
 
                 document.getElementById('lkmDoneState').classList.remove('hidden');
                 app.updateProgress();
-                ui.showModal("Tersimpan", "Jawaban LKM berhasil dikirim & dievaluasi!", "success");
+                ui.showModal("Tersimpan", "Jawaban LKM berhasil dikirim & dievaluasi oleh AI!", "success");
             },
 
             submitTugas: async (e) => {
@@ -918,7 +908,7 @@
                 document.getElementById('status-tugas-icon').innerHTML = '<i class="fa-solid fa-circle-check text-orange-500"></i>';
                 document.getElementById('tugasForm').classList.add('hidden');
                 
-                // TAMPILKAN UMPAN BALIK
+                // TAMPILKAN UMPAN BALIK AI
                 const feedbackCard = document.getElementById('tugasAiFeedbackCard');
                 if (res.data && res.data.feedback) {
                     document.getElementById('tugasAiScore').innerText = `Estimasi Nilai: ${res.data.score || 88}`;
@@ -930,62 +920,58 @@
 
                 document.getElementById('tugasDoneState').classList.remove('hidden');
                 app.updateProgress();
-                ui.showModal("Tersimpan", "Tugas berhasil dikirim & dievaluasi!", "success");
+                ui.showModal("Tersimpan", "Tugas berhasil dikirim & dievaluasi oleh AI!", "success");
+            },
+
+            submitTugas: async (e) => {
+                e.preventDefault();
+                const fields = document.querySelectorAll('.tugas-answer-field');
+                const answers = Array.from(fields).map(f => f.value.trim());
+                const link = document.getElementById('tugasLink').value.trim();
+
+                await api('submitData', {
+                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: answers, fileUrl: link
+                });
+
+                state.progress.tugas = true;
+                document.getElementById('status-tugas-icon').innerHTML = '<i class="fa-solid fa-circle-check text-orange-500"></i>';
+                document.getElementById('tugasForm').classList.add('hidden');
+                document.getElementById('tugasDoneState').classList.remove('hidden');
+                app.updateProgress();
+                ui.showModal("Tersimpan", "Tugas berhasil dikirim!", "success");
             },
 
             startFormatif: () => {
                 document.getElementById('formatifIntro').classList.add('hidden');
                 if (state.quiz.externalLink) {
-                    document.getElementById('formatifLinkArea').classList.remove('hidden');
+                    const linkArea = document.getElementById('formatifLinkArea');
                     document.getElementById('btnExternalQuizLink').href = state.quiz.externalLink;
-                    const iframeContainer = document.getElementById('quizIframeContainer');
-                    iframeContainer.innerHTML = `<iframe src="${state.quiz.externalLink}" class="w-full h-[600px] border-0 rounded-xl"></iframe>`;
-                    iframeContainer.classList.remove('hidden');
+                    linkArea.classList.remove('hidden');
                 } else if (state.quiz.questions.length > 0) {
                     document.getElementById('formatifQuizArea').classList.remove('hidden');
-                    state.quiz.currentIdx = 0;
                     app.renderQuizQuestion();
                 } else {
-                    ui.showModal("Info", "Belum ada soal formatif untuk materi ini.", "info");
-                    document.getElementById('formatifIntro').classList.remove('hidden');
+                    ui.showModal("Informasi", "Belum ada soal formatif untuk materi ini.", "info");
                 }
-            },
-
-            markFormatifExternalDone: async () => {
-                await api('submitData', {
-                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: ["EXTERNAL_LINK_DONE"], score: 100
-                });
-                state.progress.formatif = true;
-                state.progress.formatifScore = 100;
-                document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
-                document.getElementById('formatifLinkArea').classList.add('hidden');
-                document.getElementById('scoreText').innerText = "100";
-                document.getElementById('formatifResultArea').classList.remove('hidden');
-                app.updateProgress();
-                ui.showModal("Selesai", "Asesmen formatif berhasil ditandai selesai!", "success");
             },
 
             renderQuizQuestion: () => {
                 const q = state.quiz.questions[state.quiz.currentIdx];
                 document.getElementById('quizCurrentNum').innerText = state.quiz.currentIdx + 1;
                 document.getElementById('quizTotalNum').innerText = state.quiz.questions.length;
-                document.getElementById('quizQuestion').innerHTML = formatText(q.text, true);
+                document.getElementById('quizQuestion').innerHTML = formatText(q.text);
 
                 const percent = ((state.quiz.currentIdx + 1) / state.quiz.questions.length) * 100;
                 document.getElementById('quizProgressBar').style.width = `${percent}%`;
 
                 const optContainer = document.getElementById('quizOptions');
                 optContainer.innerHTML = '';
-                q.options.forEach((optText, idx) => {
+                q.options.forEach((opt, idx) => {
                     const isSelected = state.quiz.answers[state.quiz.currentIdx] === idx;
-                    const activeStyle = isSelected ? 'bg-red-900/50 border-red-500 text-white shadow-lg' : 'bg-slate-900/60 border-slate-700 text-gray-300 hover:bg-slate-800';
                     optContainer.innerHTML += `
-                    <div onclick="app.selectQuizOption(${idx})" class="p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${activeStyle}">
-                        <div class="w-7 h-7 rounded-full border border-gray-500 flex items-center justify-center text-sm font-bold ${isSelected ? 'bg-red-500 border-red-500 text-white' : ''}">
-                            ${String.fromCharCode(65 + idx)}
-                        </div>
-                        <div class="flex-1 text-base">${formatText(optText, true)}</div>
-                    </div>`;
+                    <button onclick="app.selectQuizOption(${idx})" class="w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-red-600/30 border-red-500 text-white font-bold' : 'bg-slate-800/80 border-slate-700 hover:bg-slate-700 text-gray-200'}">
+                        <span class="font-bold mr-2">${String.fromCharCode(65 + idx)}.</span> ${formatText(opt, true)}
+                    </button>`;
                 });
 
                 document.getElementById('btnQuizPrev').disabled = state.quiz.currentIdx === 0;
@@ -998,8 +984,8 @@
                 }
             },
 
-            selectQuizOption: (idx) => {
-                state.quiz.answers[state.quiz.currentIdx] = idx;
+            selectQuizOption: (optIdx) => {
+                state.quiz.answers[state.quiz.currentIdx] = optIdx;
                 app.renderQuizQuestion();
             },
 
@@ -1010,32 +996,43 @@
 
             submitFormatif: async () => {
                 let correctCount = 0;
-                state.quiz.questions.forEach((q, idx) => {
-                    if (state.quiz.answers[idx] === q.answer) correctCount++;
+                state.quiz.questions.forEach((q, i) => {
+                    if (state.quiz.answers[i] === q.answer) correctCount++;
                 });
                 const finalScore = Math.round((correctCount / state.quiz.questions.length) * 100);
+                state.progress.formatifScore = finalScore;
 
                 await api('submitData', {
                     type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: state.quiz.answers, score: finalScore
                 });
 
                 state.progress.formatif = true;
-                state.progress.formatifScore = finalScore;
                 document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
-                document.getElementById('scoreText').innerText = finalScore;
                 document.getElementById('formatifQuizArea').classList.add('hidden');
+                document.getElementById('scoreText').innerText = finalScore;
                 document.getElementById('formatifResultArea').classList.remove('hidden');
+                document.getElementById('profStatNilai').innerText = finalScore;
                 app.updateProgress();
-                ui.showModal("Selesai", `Nilai Asesmen Anda: ${finalScore}`, "success");
+            },
+
+            markFormatifExternalDone: async () => {
+                await api('submitData', {
+                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: ["EXTERNAL_LINK"], score: 100
+                });
+
+                state.progress.formatif = true;
+                document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
+                document.getElementById('formatifLinkArea').classList.add('hidden');
+                document.getElementById('scoreText').innerText = '100';
+                document.getElementById('formatifResultArea').classList.remove('hidden');
+                document.getElementById('profStatNilai').innerText = '100';
+                app.updateProgress();
             },
 
             submitRefleksi: async (e) => {
                 e.preventDefault();
                 const fields = document.querySelectorAll('.refleksi-field');
-                let answers = [];
-                fields.forEach(f => {
-                    answers.push({ qid: f.dataset.qid, answer: f.value.trim() });
-                });
+                const answers = Array.from(fields).map(f => ({ qid: f.dataset.qid, answer: f.value.trim() }));
 
                 await api('submitData', {
                     type: 'refleksi', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, refleksi: answers
@@ -1046,28 +1043,27 @@
                 document.getElementById('refleksiForm').classList.add('hidden');
                 document.getElementById('refleksiDoneState').classList.remove('hidden');
                 app.updateProgress();
-                ui.showModal("Tersimpan", "Refleksi Anda telah berhasil dikirim!", "success");
+                ui.showModal("Tersimpan", "Refleksi berhasil dikirim!", "success");
             },
 
             updateProgress: () => {
                 let doneCount = 0;
-                if (state.progress.materi) doneCount++;
-                if (state.progress.lkm) doneCount++;
-                if (state.progress.tugas) doneCount++;
-                if (state.progress.formatif) doneCount++;
-                if (state.progress.refleksi) doneCount++;
+                if(state.progress.materi) doneCount++;
+                if(state.progress.lkm) doneCount++;
+                if(state.progress.tugas) doneCount++;
+                if(state.progress.formatif) doneCount++;
+                if(state.progress.refleksi) doneCount++;
 
-                const totalPercent = Math.round((doneCount / 5) * 100);
-                document.getElementById('lblTotalProgress').innerText = `${totalPercent}%`;
+                const percent = Math.round((doneCount / 5) * 100);
+                document.getElementById('lblTotalProgress').innerText = `${percent}%`;
 
                 document.getElementById('profStatMateri').innerText = state.progress.materi ? '1/1' : '0/1';
                 document.getElementById('profStatTugas').innerText = state.progress.tugas ? '1/1' : '0/1';
-                document.getElementById('profStatNilai').innerText = state.progress.formatif ? state.progress.formatifScore : '-';
                 document.getElementById('profStatRefleksi').innerText = state.progress.refleksi ? '1/1' : '0/1';
             },
 
             logout: () => {
-                location.reload();
+                window.location.reload();
             }
         };
 
