@@ -46,6 +46,28 @@
         .sidebar-collapsed .nav-text, .sidebar-collapsed #sidebarLogoText, .sidebar-collapsed #sidebarMenuLabel, .sidebar-collapsed .mobile-title { display: none !important; }
         .sidebar-collapsed .nav-link, .sidebar-collapsed .logout-link { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
 
+        /* REVISI UNTUK SIDEBAR DRAWER MOBILE */
+        @media (max-width: 767px) {
+            #appSidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100%;
+                z-index: 90;
+                transition: left 0.3s ease-in-out;
+            }
+            #appSidebar.mobile-open {
+                left: 0;
+            }
+            #sidebarOverlay {
+                display: none;
+            }
+            #sidebarOverlay.active {
+                display: block;
+            }
+        }
+
         .media-container img { border-radius: 12px; max-width: 100%; height: auto; margin: 1rem auto; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
         .media-container iframe, .media-container video { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
         
@@ -146,18 +168,22 @@
     <!-- MAIN APP WRAPPER -->
     <div id="view-main" class="hidden h-screen w-full bg-dashboard flex flex-col md:flex-row overflow-hidden">
         
+        <!-- BACKDROP OVERLAY LAYAR HP SAAT MENU DIBUKA -->
+        <div id="sidebarOverlay" onclick="app.toggleSidebar()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"></div>
+
         <!-- SIDEBAR -->
         <aside id="appSidebar" class="md:w-64 glass-card border-r border-white/10 md:h-full flex flex-col transition-all duration-300 z-50 shrink-0">
             <div class="flex items-center justify-between p-4 md:p-6">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div class="w-10 h-10 rounded-full bg-brand-orange flex items-center justify-center text-white font-black shrink-0">P</div>
                     <span id="sidebarLogoText" class="font-bold text-lg hidden md:block">PJOK DIGITAL</span>
-                    <span class="font-bold text-lg mobile-title md:hidden">PJOK</span>
+                    <span class="font-bold text-lg mobile-title md:hidden">PJOK DIGITAL</span>
                 </div>
-                <button onclick="app.toggleSidebar()" class="text-2xl text-gray-300 hover:text-white p-1"><i class="fa-solid fa-bars"></i></button>
+                <button onclick="app.toggleSidebar()" class="text-2xl text-gray-300 hover:text-white p-1"><i class="fa-solid fa-xmark md:fa-bars"></i></button>
             </div>
 
-            <nav id="sidebarNav" class="hidden md:flex flex-col flex-1 p-4 gap-2">
+            <!-- DITAMBAHKAN CLASS MOBILE SUDAH TIDAK DIBATASI HIDDEN -->
+            <nav id="sidebarNav" class="flex flex-col flex-1 p-4 gap-2 overflow-y-auto">
                 <a href="#" onclick="app.navigateTo('dashboard')" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/10" data-target="dashboard"><i class="fa-solid fa-house w-5"></i> <span class="nav-text">Dashboard</span></a>
                 <a href="#" onclick="app.navigateTo('materi')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/10" data-target="materi"><i class="fa-solid fa-book-open w-5"></i> <span class="nav-text">Materi</span></a>
                 <a href="#" onclick="app.navigateTo('lkm')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/10" data-target="lkm"><i class="fa-solid fa-file-signature w-5"></i> <span class="nav-text">LKM</span></a>
@@ -171,6 +197,19 @@
                 </div>
             </nav>
         </aside>
+
+        <!-- HEADER BAR UTAMA KHUSUS LAYAR HP (MOBILE TOP BAR) -->
+        <div class="md:hidden flex items-center justify-between p-4 glass-card border-b border-white/10 sticky top-0 z-30 shrink-0">
+            <div class="flex items-center gap-3">
+                <button id="btnMobileBack" onclick="app.goBack()" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white hover:bg-slate-700">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <span id="lblMobileHeaderTitle" class="font-bold text-white text-base capitalize">Dashboard</span>
+            </div>
+            <button onclick="app.toggleSidebar()" class="w-10 h-10 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
 
         <!-- MAIN CONTENT AREA -->
         <main class="flex-1 p-4 md:p-8 h-full overflow-y-auto relative">
@@ -447,7 +486,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyaXh856ReVtMEPXuRSK3ALsBJYp7EDQEnatx1kDe0wJl5wO26Si29cA28YGeOztV66/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzI9XJMVWfV8WhNq_wMZCeAdHEq7hF4jGMkO4Tyu3njkxKckW6yt979hD4HoxVjSXEt/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -1104,6 +1143,26 @@
                 state.currentView = viewId;
                 saveSession();
 
+                // UPDATE JUDUL HEADER MOBILE
+                const headerTitleEl = document.getElementById('lblMobileHeaderTitle');
+                if (headerTitleEl) headerTitleEl.innerText = viewId;
+
+                // TAMPILKAN TOMBOL BACK HANYA JIKA TIDAK DI DASHBOARD
+                const btnBack = document.getElementById('btnMobileBack');
+                if (btnBack) {
+                    if (viewId === 'dashboard') {
+                        btnBack.innerHTML = '<i class="fa-solid fa-house"></i>';
+                    } else {
+                        btnBack.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+                    }
+                }
+
+                // TUTUP SIDEBAR PADA HP JIKA NAVIGASI DIKLIK
+                const sidebar = document.getElementById('appSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar) sidebar.classList.remove('mobile-open');
+                if (overlay) overlay.classList.remove('active');
+
                 ['view-welcome', 'view-identity', 'view-main'].forEach(id => document.getElementById(id).classList.add('hidden'));
                 if (viewId === 'welcome' || viewId === 'identity') {
                     document.getElementById(`view-${viewId}`).classList.remove('hidden'); 
@@ -1119,6 +1178,23 @@
                             if(el.dataset.target === viewId) el.classList.add('active', 'bg-white/10', 'text-white');
                         });
                     }
+                }
+            },
+
+            goBack: () => {
+                if (state.currentView !== 'dashboard') {
+                    app.navigateTo('dashboard');
+                }
+            },
+
+            toggleSidebar: () => {
+                const sidebar = document.getElementById('appSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (window.innerWidth < 768) {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('sidebar-collapsed');
                 }
             },
 
