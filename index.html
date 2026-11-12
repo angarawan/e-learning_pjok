@@ -122,7 +122,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Kelas</label>
                         <select id="selectClass" onchange="app.onClassChange()" required class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
-                            <option value="">-- Memuat Kelas... --</option>
+                            <option value="">-- Pilih Kelas --</option>
                         </select>
                     </div>
                     <div>
@@ -137,7 +137,7 @@
                             <option value="">-- Pilih Materi --</option>
                         </select>
                     </div>
-                    <button type="submit" id="btnContinue" disabled class="w-full mt-6 bg-brand-blue hover:bg-blue-700 text-white font-bold py-4 rounded-xl disabled:opacity-50 shadow-lg">LANJUTKAN</button>
+                    <button type="submit" id="btnContinue" disabled class="w-full mt-6 bg-brand-blue hover:bg-blue-700 text-white font-bold py-4 rounded-xl disabled:opacity-50 shadow-lg cursor-pointer">LANJUTKAN</button>
                 </form>
             </div>
         </div>
@@ -447,7 +447,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw9nde-7CYTzB2q2mllvpzC7vfCL1toNQHJ9m4bLJaIAMm9li7Zo47PaQQC9MezIsEV/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzVd4NJmJF4v-3mafXkJEE-PuO3ekBDONkna8M276uv-lYhK5U8ztr9TFagX4sY5Pyo/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -1139,9 +1139,3 @@
     </script>
 </body>
 </html>
-```
-
-### Summary of Changes:
-1. **Added `app.setupDashboard`:** Maps fetched spreadsheet data directly into student profile details, motivation quotes, and calls individual section sub-renderers.
-2. **Added Missing Render Functions:** Restored `renderMateri`, `renderLKM`, `renderTugas`, `renderFormatif`, `renderRefleksi`, `scrollToSubbab`, `scrollToLkmPhase`, `startFormatif`, `quizNav`, and `updateProgress`.
-3. The `TypeError: app.setupDashboard is not a function` error is now completely resolved when submitting identity or launching the main view.
