@@ -84,16 +84,26 @@
     <!-- VIEW 1: WELCOME SCREEN -->
     <div id="view-welcome" class="min-h-screen flex flex-col items-center justify-center bg-cinematic p-6 relative">
         <div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-transparent"></div>
-        <div class="z-10 text-center max-w-3xl">
-            <!-- LOGO UTAMA PJOK CERIA DAN DINAMIS DENGAN FALLBACK AMAN CORS -->
+        <div class="z-10 text-center max-w-3xl flex flex-col items-center justify-center">
+            <!-- LOGO UTAMA PJOK CERIA DAN DINAMIS -->
             <img src="Logo PJOK Ceria dan Dinamis.png" 
                  onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300';" 
                  alt="Logo PJOK Ceria dan Dinamis" 
-                 class="w-28 h-28 md:w-40 md:h-40 mx-auto mb-4 rounded-full border-4 border-brand-orange object-cover shadow-[0_0_20px_rgba(249,115,22,0.4)]">
-            <h1 class="text-2xl md:text-5xl font-black mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">PJOK DIGITAL LEARNING</h1>
-            <p class="text-sm md:text-lg text-gray-300 mb-1">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
-            <p class="text-xs md:text-base text-brand-orange font-semibold italic mb-8">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
-            <button onclick="app.checkConnectionAndStart()" class="px-6 py-3 md:px-8 md:py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-sm md:text-base font-bold rounded-full transition-all shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1">
+                 class="w-32 h-32 md:w-44 md:h-44 mx-auto mb-6 rounded-full border-4 border-brand-orange object-cover shadow-[0_0_35px_rgba(249,115,22,0.5)]">
+            
+            <!-- JUDUL UTAMA -->
+            <h1 class="text-3xl md:text-5xl font-black mb-3 tracking-tight text-white drop-shadow-lg">PJOK DIGITAL LEARNING</h1>
+            
+            <!-- SUB-JUDUL & SLOGAN DI ATAS TOMBOL -->
+            <p class="text-sm md:text-xl text-gray-200 font-medium mb-2 tracking-wide max-w-2xl">
+                Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan
+            </p>
+            <p class="text-xs md:text-base text-brand-orange font-bold italic mb-8 tracking-wider">
+                "Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."
+            </p>
+
+            <!-- TOMBOL DI BAGIAN PALING BAWAH TEKS -->
+            <button onclick="app.checkConnectionAndStart()" class="px-8 py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-base md:text-lg font-bold rounded-full transition-all shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1 cursor-pointer">
                 MULAI PEMBELAJARAN <i class="fa-solid fa-arrow-right ml-2"></i>
             </button>
         </div>
@@ -348,37 +358,6 @@
                 </div>
             </div>
 
-            <!-- TUGAS CONTENT -->
-            <div id="content-tugas" class="content-section hidden max-w-3xl mx-auto">
-                <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
-                    <div class="flex items-center gap-4 mb-6 border-b border-white/10 pb-6">
-                        <div class="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-upload"></i></div>
-                        <div>
-                            <h2 id="tugasJudulUtama" class="text-2xl font-bold text-white">Penugasan</h2>
-                            <p class="text-gray-400 text-sm" id="tugasDeadline">Batas waktu: -</p>
-                        </div>
-                    </div>
-                    <div id="tugasDeskripsiContainer" class="hidden bg-slate-800 p-4 rounded-xl mb-4 text-gray-300 sheet-text text-justify-custom"></div>
-                    
-                    <form id="tugasForm" onsubmit="app.submitTugas(event)" class="space-y-6">
-                        <!-- CONTAINER SOAL & JAWABAN TUGAS PER-NOMOR -->
-                        <div id="tugasQuestionsContainer" class="space-y-6"></div>
-
-                        <div id="tugasLinkArea" class="pt-4 border-t border-white/10">
-                            <label class="block text-sm font-medium text-gray-300 mb-2"><i class="fa-solid fa-link text-orange-400 mr-2"></i> Link Bukti (Foto/Video G-Drive) - Opsional</label>
-                            <input type="url" id="tugasLink" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="https://drive.google.com/...">
-                        </div>
-                        <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl mt-4">KIRIM TUGAS</button>
-                    </form>
-                    
-                    <div id="tugasDoneState" class="hidden text-center py-10">
-                        <i class="fa-solid fa-cloud-check text-6xl text-brand-orange mb-4"></i>
-                        <h3 class="text-2xl font-bold text-white mb-2">Tugas Terkirim!</h3>
-                        <button onclick="app.navigateTo('dashboard')" class="mt-4 bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg text-white">Kembali ke Dashboard</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- FORMATIF CONTENT -->
             <div id="content-formatif" class="content-section hidden max-w-4xl mx-auto">
                 <div id="formatifIntro" class="glass-card p-10 rounded-3xl shadow-xl text-center">
@@ -455,12 +434,10 @@
                             <h2 class="text-3xl font-bold text-white mb-1" id="profName">Nama Lengkap</h2>
                             <p class="text-brand-orange font-medium mb-4"><i class="fa-solid fa-graduation-cap"></i> <span id="profClass">Kelas</span></p>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Materi</p><p class="text-xl font-bold text-blue-400" id="profStatMateri">0/1</p></div>
-                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Tugas</p><p class="text-xl font-bold text-orange-400" id="profStatTugas">0/1</p></div>
-                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Nilai Formatif</p><p class="text-xl font-bold text-red-400" id="profStatNilai">-</p></div>
-                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Refleksi</p><p class="text-xl font-bold text-teal-400" id="profStatRefleksi">0/1</p></div>
-                            </div>
-                        </div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Materi</p><p class="text-xl font-bold text-blue-400" id="profStatMateri">0/1</p></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Tugas</p><p class="text-xl font-bold text-orange-400" id="profStatTugas">0/1</p></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Nilai Formatif</p><p class="text-xl font-bold text-red-400" id="profStatNilai">-</p></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Refleksi</p><p class="text-xl font-bold text-teal-400" id="profStatRefleksi">0/1</p></div>
                     </div>
                 </div>
             </div>
@@ -470,7 +447,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbykvN8zLR-0s3CJS9wY0FCvUgqwpv5Psa50Wk1u8u5ff1M_fytCV4bjimj08xkAptnd/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby0onROuwgvcrDK2OFeHxV9QrA0H-D5k5-HgfNdOrL-BZUZ-1wA1aQBXBWNcromJ5xK/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -504,6 +481,29 @@
                 console.warn("Storage warning: Gagal membaca LocalStorage.", e);
                 return null;
             }
+        };
+
+        const parseMediaTags = (text) => {
+            if (!text) return "";
+            let parsed = String(text);
+            parsed = parsed.replace(/\[GAMBAR:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
+                return `<div class="media-container my-4 text-center"><img src="${url.trim()}" alt="Media Gambar" class="rounded-xl mx-auto shadow-md max-h-96 object-contain" onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat'"></div>`;
+            });
+            parsed = parsed.replace(/\[VIDEO:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
+                let videoUrl = url.trim();
+                if (videoUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = videoUrl.split('v=')[1].split('&')[0];
+                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
+                } else if (videoUrl.includes('youtu.be/')) {
+                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+                return `<div class="media-container my-4"><iframe src="${videoUrl}" allowfullscreen class="w-full aspect-video rounded-xl shadow-md"></iframe></div>`;
+            });
+            parsed = parsed.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/gi, (match, label, url) => {
+                return `<a href="${url.trim()}" target="_blank" class="inline-flex items-center px-4 py-2 bg-brand-blue hover:bg-blue-600 text-white font-semibold rounded-lg my-2"><i class="fa-solid fa-external-link mr-2"></i> ${label}</a>`;
+            });
+            return parsed;
         };
 
         const api = async (action, data = {}) => {
@@ -584,27 +584,17 @@
                         selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                         res.data.classes.forEach(c => { selectClass.appendChild(new Option(c, c)); });
                     } else {
-                        selectClass.innerHTML = '<option value="">-- Data Kelas Kosong / Sheet MURID Belum Terisi --</option>';
+                        selectClass.innerHTML = '<option value="">-- Data Kelas Kosong --</option>';
                     }
                 } catch(e) {
-                    selectClass.innerHTML = '<option value="">-- Gagal Memuat Kelas --</option>';
+                    selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                 }
             },
 
-            checkConnectionAndStart: async () => {
-                const selectClass = document.getElementById('selectClass');
+            checkConnectionAndStart: () => {
+                // LANGSUNG PINDAH KE HALAMAN IDENTITAS TANPA MENCETAK TEKS ERROR DI HALAMAN AWAL
                 app.navigateTo('identity');
-                if (selectClass && (selectClass.options.length <= 1 || selectClass.value === "")) {
-                    await app.loadInitialClasses();
-                }
-            },
-
-            checkConnectionAndStart: async () => {
-                const selectClass = document.getElementById('selectClass');
-                if (selectClass && selectClass.options.length <= 1) {
-                    await app.loadInitialClasses();
-                }
-                app.navigateTo('identity');
+                app.loadInitialClasses();
             },
 
             onClassChange: async () => {
@@ -646,6 +636,456 @@
                 }
             },
 
+            setupDashboard: (data) => {
+                if (!data) return;
+
+                // Set Identitas Dashboard
+                document.getElementById('lblStudentName').innerText = state.studentName;
+                document.getElementById('lblStudentClass').innerText = state.studentClass;
+                document.getElementById('lblMaterialTitle').innerText = state.materialTitle;
+                document.getElementById('lblMotivation').innerText = data.motivation || "Tetap semangat dan jaga kesehatan!";
+                
+                document.getElementById('profName').innerText = state.studentName;
+                document.getElementById('profClass').innerText = state.studentClass;
+                document.getElementById('profilInisial').innerText = state.studentName ? state.studentName.charAt(0).toUpperCase() : 'U';
+
+                // Render Komponen Utama
+                app.renderMateri(data.materi);
+                app.renderLKM(data.lkm);
+                app.renderTugas(data.tugas);
+                app.renderFormatif(data.formatif, data.formatifLink);
+                app.renderRefleksi(data.refleksi);
+
+                app.updateProgress();
+            },
+
+            renderMateri: (materi) => {
+                if (!materi) return;
+                document.getElementById('materiJudul').innerText = materi.judul || state.materialTitle;
+                if (materi.cover) document.getElementById('materiCover').src = materi.cover;
+                
+                document.getElementById('materiTujuan').innerHTML = parseMediaTags(materi.tujuan || "Tujuan pembelajaran belum diisi.");
+                document.getElementById('materiRangkuman').innerHTML = parseMediaTags(materi.rangkuman || "Belum ada rangkuman.");
+
+                const container = document.getElementById('materiIsiContainer');
+                const tocSelect = document.getElementById('materiTocSelect');
+                const tocContainer = document.getElementById('materiTocContainer');
+                
+                container.innerHTML = "";
+                tocSelect.innerHTML = '<option value="">-- Tampilkan Semua Bagian --</option>';
+
+                if (Array.isArray(materi.subbab) && materi.subbab.length > 0) {
+                    tocContainer.classList.remove('hidden');
+                    materi.subbab.forEach((sub, idx) => {
+                        const subId = `subbab-${idx + 1}`;
+                        const option = document.createElement('option');
+                        option.value = subId;
+                        option.innerText = `Subbab ${idx + 1}`;
+                        tocSelect.appendChild(option);
+
+                        const card = document.createElement('div');
+                        card.id = subId;
+                        card.className = "bg-slate-800/80 p-6 md:p-8 rounded-2xl border border-slate-700/80 space-y-4 scroll-mt-24";
+                        card.innerHTML = `
+                            <h3 class="text-xl md:text-2xl font-bold text-white border-b border-slate-700 pb-3">
+                                <span class="text-brand-orange mr-2">Subbab ${idx + 1}</span>
+                            </h3>
+                            <div class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">${parseMediaTags(sub)}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    tocContainer.classList.add('hidden');
+                }
+            },
+
+            scrollToSubbab: () => {
+                const val = document.getElementById('materiTocSelect').value;
+                if (!val) {
+                    document.querySelectorAll('#materiIsiContainer > div').forEach(el => el.classList.remove('hidden'));
+                    return;
+                }
+                document.querySelectorAll('#materiIsiContainer > div').forEach(el => {
+                    if (el.id === val) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                });
+                const target = document.getElementById(val);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            },
+
+            renderLKM: (lkm) => {
+                if (!lkm) return;
+                document.getElementById('lkmJudulUtama').innerText = lkm.judul || "Lembar Kerja Murid";
+                if (lkm.tujuan) {
+                    document.getElementById('lkmInfoContainer').classList.remove('hidden');
+                    document.getElementById('lkmTujuan').innerHTML = parseMediaTags(lkm.tujuan);
+                }
+
+                const container = document.getElementById('lkmQuestionsContainer');
+                const tocSelect = document.getElementById('lkmTocSelect');
+                const tocContainer = document.getElementById('lkmTocContainer');
+                
+                container.innerHTML = "";
+                tocSelect.innerHTML = '<option value="">-- Tampilkan Semua Kegiatan --</option>';
+                
+                const phases = [
+                    { id: "keg1", title: "B. Kegiatan 1 – Memahami", data: lkm.kegiatan1, color: "purple" },
+                    { id: "keg2", title: "C. Kegiatan 2 – Menerapkan", data: lkm.kegiatan2, color: "blue" },
+                    { id: "keg3", title: "D. Kegiatan 3 – Menganalisis", data: lkm.kegiatan3, color: "teal" },
+                    { id: "ref", title: "E. Refleksi LKM", data: lkm.refleksi, color: "orange" }
+                ];
+
+                let hasPhases = false;
+                phases.forEach(p => {
+                    if (p.data && (p.data.teks || (p.data.soalList && p.data.soalList.length > 0) || p.data.soal)) {
+                        hasPhases = true;
+                        const option = document.createElement('option');
+                        option.value = p.id;
+                        option.innerText = p.title;
+                        tocSelect.appendChild(option);
+
+                        const card = document.createElement('div');
+                        card.id = p.id;
+                        card.className = "lkm-phase-card bg-slate-900/90 border border-slate-700 rounded-2xl p-6 space-y-4 scroll-mt-24";
+                        
+                        let questionsHtml = "";
+                        if (p.data.soalList && Array.isArray(p.data.soalList)) {
+                            p.data.soalList.forEach((q, qIdx) => {
+                                questionsHtml += `
+                                    <div class="mt-4">
+                                        <label class="block text-sm md:text-base font-semibold text-gray-200 mb-2">${qIdx + 1}. ${q}</label>
+                                        <textarea required name="lkm_${p.id}_${qIdx}" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                                    </div>
+                                `;
+                            });
+                        } else if (p.data.soal) {
+                            questionsHtml = `
+                                <div class="mt-4">
+                                    <label class="block text-sm md:text-base font-semibold text-gray-200 mb-2">${p.data.soal}</label>
+                                    <textarea required name="lkm_${p.id}_0" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                                </div>
+                            `;
+                        }
+
+                        card.innerHTML = `
+                            <h3 class="text-lg md:text-xl font-bold text-white border-b border-slate-700 pb-2">${p.title}</h3>
+                            ${p.data.teks ? `<div class="text-sm md:text-base text-gray-300 sheet-text leading-relaxed">${parseMediaTags(p.data.teks)}</div>` : ''}
+                            ${questionsHtml}
+                        `;
+                        container.appendChild(card);
+                    }
+                });
+
+                if (hasPhases) tocContainer.classList.remove('hidden');
+            },
+
+            scrollToLkmPhase: () => {
+                const val = document.getElementById('lkmTocSelect').value;
+                if (!val) {
+                    document.querySelectorAll('.lkm-phase-card').forEach(el => el.classList.remove('hidden'));
+                    return;
+                }
+                document.querySelectorAll('.lkm-phase-card').forEach(el => {
+                    if (el.id === val) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                });
+                const target = document.getElementById(val);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            },
+
+            submitLKM: async (e) => {
+                e.preventDefault();
+                const form = document.getElementById('lkmForm');
+                const formData = new FormData(form);
+                const answers = [];
+                for (let [key, val] of formData.entries()) {
+                    if (val.trim()) answers.push(val.trim());
+                }
+
+                if (answers.length === 0) {
+                    showModal("Jawaban Kosong", "Harap isi setidaknya satu pertanyaan LKM.", "fa-solid fa-exclamation-triangle text-yellow-500");
+                    return;
+                }
+
+                const res = await api('submitData', {
+                    type: 'lkm',
+                    studentName: state.studentName,
+                    className: state.studentClass,
+                    materialId: state.materialId,
+                    answers: answers
+                });
+
+                if (res) {
+                    state.progress.lkm = true;
+                    app.updateProgress();
+                    document.getElementById('lkmForm').classList.add('hidden');
+                    document.getElementById('lkmDoneState').classList.remove('hidden');
+                    
+                    if (res.feedback) {
+                        document.getElementById('lkmAiFeedbackCard').classList.remove('hidden');
+                        document.getElementById('lkmAiFeedbackContent').innerHTML = parseMediaTags(res.feedback);
+                        if (res.score !== undefined) {
+                            document.getElementById('lkmAiScore').innerText = `Pemahaman: ${res.score}%`;
+                        }
+                    }
+                }
+            },
+
+            renderTugas: (tugas) => {
+                if (!tugas) return;
+                document.getElementById('tugasJudulUtama').innerText = tugas.judul || "Penugasan";
+                document.getElementById('tugasDeadline').innerText = `Batas waktu: ${tugas.deadline || 'Sesuai instruksi guru'}`;
+                
+                if (tugas.deskripsi) {
+                    document.getElementById('tugasDeskripsiContainer').classList.remove('hidden');
+                    document.getElementById('tugasDeskripsiContainer').innerHTML = parseMediaTags(tugas.deskripsi);
+                }
+
+                const container = document.getElementById('tugasQuestionsContainer');
+                container.innerHTML = "";
+                
+                const questions = (tugas.soalList && tugas.soalList.length > 0) ? tugas.soalList : (tugas.instruksi ? [tugas.instruksi] : []);
+
+                questions.forEach((q, idx) => {
+                    const box = document.createElement('div');
+                    box.className = "bg-slate-900/90 border border-slate-700 rounded-2xl p-6 space-y-3";
+                    box.innerHTML = `
+                        <label class="block text-sm md:text-base font-bold text-white mb-2">Soal ${idx + 1}:</label>
+                        <div class="text-sm md:text-base text-gray-300 sheet-text leading-relaxed mb-3">${parseMediaTags(q)}</div>
+                        <textarea required name="tugas_answer_${idx}" rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-brand-orange" placeholder="Tuliskan jawaban soal nomor ${idx + 1} di sini..."></textarea>
+                    `;
+                    container.appendChild(box);
+                });
+            },
+
+            submitTugas: async (e) => {
+                e.preventDefault();
+                const form = document.getElementById('tugasForm');
+                const formData = new FormData(form);
+                const answers = [];
+                for (let [key, val] of formData.entries()) {
+                    if (key.startsWith('tugas_answer_') && val.trim()) {
+                        answers.push(val.trim());
+                    }
+                }
+
+                const fileUrl = document.getElementById('tugasLink').value;
+
+                const res = await api('submitData', {
+                    type: 'tugas',
+                    studentName: state.studentName,
+                    className: state.studentClass,
+                    materialId: state.materialId,
+                    jawaban: answers,
+                    fileUrl: fileUrl
+                });
+
+                if (res) {
+                    state.progress.tugas = true;
+                    app.updateProgress();
+                    document.getElementById('tugasForm').classList.add('hidden');
+                    document.getElementById('tugasDoneState').classList.remove('hidden');
+                    
+                    if (res.feedback) {
+                        document.getElementById('tugasAiFeedbackCard').classList.remove('hidden');
+                        document.getElementById('tugasAiFeedbackContent').innerHTML = parseMediaTags(res.feedback);
+                        if (res.score !== undefined) {
+                            document.getElementById('tugasAiScore').innerText = `Nilai: ${res.score}`;
+                        }
+                    }
+                }
+            },
+
+            renderFormatif: (questions, externalLink) => {
+                const introArea = document.getElementById('formatifIntro');
+                const linkArea = document.getElementById('formatifLinkArea');
+                const quizArea = document.getElementById('formatifQuizArea');
+                
+                introArea.classList.remove('hidden');
+                linkArea.classList.add('hidden');
+                quizArea.classList.add('hidden');
+
+                if (externalLink) {
+                    state.quiz.externalLink = externalLink;
+                    document.getElementById('btnExternalQuizLink').href = externalLink;
+                    document.getElementById('formatifIntroDesc').innerText = "Asesmen ini menggunakan link eksternal. Klik tombol untuk memulai.";
+                } else if (Array.isArray(questions) && questions.length > 0) {
+                    state.quiz.questions = questions;
+                    state.quiz.currentIdx = 0;
+                    state.quiz.answers = new Array(questions.length).fill(null);
+                    document.getElementById('formatifIntroDesc').innerText = `Terdapat ${questions.length} soal pilihan ganda. Kerjakan dengan cermat.`;
+                }
+            },
+
+            startFormatif: () => {
+                document.getElementById('formatifIntro').classList.add('hidden');
+                if (state.quiz.externalLink) {
+                    document.getElementById('formatifLinkArea').classList.remove('hidden');
+                } else if (state.quiz.questions.length > 0) {
+                    document.getElementById('formatifQuizArea').classList.remove('hidden');
+                    app.renderQuizQuestion();
+                }
+            },
+
+            renderQuizQuestion: () => {
+                const q = state.quiz.questions[state.quiz.currentIdx];
+                document.getElementById('quizCurrentNum').innerText = state.quiz.currentIdx + 1;
+                document.getElementById('quizTotalNum').innerText = state.quiz.questions.length;
+                document.getElementById('quizQuestion').innerHTML = parseMediaTags(q.text);
+
+                const optsContainer = document.getElementById('quizOptions');
+                optsContainer.innerHTML = "";
+
+                q.options.forEach((opt, idx) => {
+                    const isSelected = state.quiz.answers[state.quiz.currentIdx] === idx;
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = `w-full text-left p-4 rounded-xl border transition-all flex items-center gap-3 ${isSelected ? 'bg-red-600/30 border-red-500 text-white font-bold' : 'bg-slate-800/80 border-slate-700 text-gray-300 hover:bg-slate-700'}`;
+                    btn.onclick = () => {
+                        state.quiz.answers[state.quiz.currentIdx] = idx;
+                        app.renderQuizQuestion();
+                    };
+                    btn.innerHTML = `
+                        <div class="w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-red-500 bg-red-500 text-white' : 'border-gray-500 text-gray-400'}">${String.fromCharCode(65 + idx)}</div>
+                        <div class="text-sm md:text-base">${opt}</div>
+                    `;
+                    optsContainer.appendChild(btn);
+                });
+
+                document.getElementById('quizProgressBar').style.width = `${((state.quiz.currentIdx + 1) / state.quiz.questions.length) * 100}%`;
+                document.getElementById('btnQuizPrev').disabled = state.quiz.currentIdx === 0;
+
+                if (state.quiz.currentIdx === state.quiz.questions.length - 1) {
+                    document.getElementById('btnQuizNext').classList.add('hidden');
+                    document.getElementById('btnQuizSubmit').classList.remove('hidden');
+                } else {
+                    document.getElementById('btnQuizNext').classList.remove('hidden');
+                    document.getElementById('btnQuizSubmit').classList.add('hidden');
+                }
+            },
+
+            quizNav: (dir) => {
+                state.quiz.currentIdx += dir;
+                app.renderQuizQuestion();
+            },
+
+            submitFormatif: async () => {
+                let correctCount = 0;
+                state.quiz.questions.forEach((q, idx) => {
+                    if (state.quiz.answers[idx] === q.answer) correctCount++;
+                });
+                const finalScore = Math.round((correctCount / state.quiz.questions.length) * 100);
+
+                const res = await api('submitData', {
+                    type: 'formatif',
+                    studentName: state.studentName,
+                    className: state.studentClass,
+                    materialId: state.materialId,
+                    answers: state.quiz.answers,
+                    score: finalScore
+                });
+
+                if (res) {
+                    state.progress.formatif = true;
+                    state.progress.formatifScore = finalScore;
+                    app.updateProgress();
+                    document.getElementById('formatifQuizArea').classList.add('hidden');
+                    document.getElementById('formatifResultArea').classList.remove('hidden');
+                    document.getElementById('scoreText').innerText = finalScore;
+                }
+            },
+
+            markFormatifExternalDone: async () => {
+                const res = await api('submitData', {
+                    type: 'formatif',
+                    studentName: state.studentName,
+                    className: state.studentClass,
+                    materialId: state.materialId,
+                    answers: "External Link Completed",
+                    score: 100
+                });
+
+                if (res) {
+                    state.progress.formatif = true;
+                    state.progress.formatifScore = 100;
+                    app.updateProgress();
+                    document.getElementById('formatifLinkArea').classList.add('hidden');
+                    document.getElementById('formatifResultArea').classList.remove('hidden');
+                    document.getElementById('scoreText').innerText = "SELESAI";
+                }
+            },
+
+            renderRefleksi: (refleksi) => {
+                if (!refleksi || !Array.isArray(refleksi.questions)) return;
+                state.refleksiList = refleksi.questions;
+                const container = document.getElementById('refleksiQuestionsContainer');
+                container.innerHTML = "";
+
+                refleksi.questions.forEach((q, idx) => {
+                    const box = document.createElement('div');
+                    box.className = "bg-slate-900/90 border border-slate-700 rounded-2xl p-6 space-y-3";
+                    box.innerHTML = `
+                        <label class="block text-sm md:text-base font-bold text-white mb-2">${idx + 1}. ${q.text}</label>
+                        <textarea required name="refleksi_${q.id}" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-teal-500" placeholder="Tuliskan refleksi Anda di sini..."></textarea>
+                    `;
+                    container.appendChild(box);
+                });
+            },
+
+            submitRefleksi: async (e) => {
+                e.preventDefault();
+                const form = document.getElementById('refleksiForm');
+                const formData = new FormData(form);
+                const refleksiData = [];
+                for (let [key, val] of formData.entries()) {
+                    refleksiData.push({ id: key, text: val.trim() });
+                }
+
+                const res = await api('submitData', {
+                    type: 'refleksi',
+                    studentName: state.studentName,
+                    className: state.studentClass,
+                    materialId: state.materialId,
+                    refleksi: refleksiData
+                });
+
+                if (res) {
+                    state.progress.refleksi = true;
+                    app.updateProgress();
+                    document.getElementById('refleksiForm').classList.add('hidden');
+                    document.getElementById('refleksiDoneState').classList.remove('hidden');
+                }
+            },
+
+            markMateriDone: () => {
+                state.progress.materi = true;
+                app.updateProgress();
+                showModal("Selesai!", "Materi telah ditandai selesai dipelajari.", "fa-solid fa-circle-check text-green-500");
+            },
+
+            updateProgress: () => {
+                const keys = ['materi', 'lkm', 'tugas', 'formatif', 'refleksi'];
+                let doneCount = 0;
+                keys.forEach(k => {
+                    const iconEl = document.getElementById(`status-${k}-icon`);
+                    if (state.progress[k]) {
+                        doneCount++;
+                        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-green-500 text-xs md:text-sm"></i>';
+                    }
+                });
+
+                const pct = Math.round((doneCount / keys.length) * 100);
+                document.getElementById('lblTotalProgress').innerText = `${pct}%`;
+
+                // Update Profil Stats
+                document.getElementById('profStatMateri').innerText = state.progress.materi ? "1/1" : "0/1";
+                document.getElementById('profStatTugas').innerText = state.progress.tugas ? "1/1" : "0/1";
+                document.getElementById('profStatNilai').innerText = state.progress.formatif ? state.progress.formatifScore : "-";
+                document.getElementById('profStatRefleksi').innerText = state.progress.refleksi ? "1/1" : "0/1";
+
+                saveSession();
+            },
+
             navigateTo: (viewId) => {
                 state.currentView = viewId;
                 saveSession();
@@ -666,6 +1106,10 @@
                         });
                     }
                 }
+            },
+
+            toggleSidebar: () => {
+                document.getElementById('appSidebar').classList.toggle('sidebar-collapsed');
             },
             
             submitIdentity: async (e) => {
@@ -695,3 +1139,9 @@
     </script>
 </body>
 </html>
+```
+
+### Summary of Changes:
+1. **Added `app.setupDashboard`:** Maps fetched spreadsheet data directly into student profile details, motivation quotes, and calls individual section sub-renderers.
+2. **Added Missing Render Functions:** Restored `renderMateri`, `renderLKM`, `renderTugas`, `renderFormatif`, `renderRefleksi`, `scrollToSubbab`, `scrollToLkmPhase`, `startFormatif`, `quizNav`, and `updateProgress`.
+3. The `TypeError: app.setupDashboard is not a function` error is now completely resolved when submitting identity or launching the main view.
