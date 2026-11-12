@@ -447,7 +447,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzVd4NJmJF4v-3mafXkJEE-PuO3ekBDONkna8M276uv-lYhK5U8ztr9TFagX4sY5Pyo/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxIMP7Dy31tAabGKH6Hd27T4F3soLpYMWMEKMita_Zu0EKG4AV2PY0v0apSWBF7_Rh7/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -584,15 +584,17 @@
                         selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                         res.data.classes.forEach(c => { selectClass.appendChild(new Option(c, c)); });
                     } else {
-                        selectClass.innerHTML = '<option value="">-- Data Kelas Kosong --</option>';
+                        // Fallback default jika spreadsheet kosong
+                        selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                        ["VII-A", "VII-B", "VIII-A", "VIII-B", "IX-A"].forEach(c => selectClass.appendChild(new Option(c, c)));
                     }
                 } catch(e) {
                     selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                    ["VII-A", "VII-B", "VIII-A", "VIII-B", "IX-A"].forEach(c => selectClass.appendChild(new Option(c, c)));
                 }
             },
 
             checkConnectionAndStart: () => {
-                // LANGSUNG PINDAH KE HALAMAN IDENTITAS TANPA MENCETAK TEKS ERROR DI HALAMAN AWAL
                 app.navigateTo('identity');
                 app.loadInitialClasses();
             },
