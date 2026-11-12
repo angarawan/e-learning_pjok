@@ -85,11 +85,15 @@
     <div id="view-welcome" class="min-h-screen flex flex-col items-center justify-center bg-cinematic p-6 relative">
         <div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-transparent"></div>
         <div class="z-10 text-center max-w-3xl">
-            <img src="Logo PJOK Ceria dan Dinamis.png" onerror="this.src='https://placehold.co/150x150/f97316/ffffff?text=PJOK'" alt="Logo PJOK" class="w-36 h-36 md:w-48 md:h-48 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">PJOK DIGITAL LEARNING</h1>
-            <p class="text-lg md:text-xl text-gray-300 mb-2">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
-            <p class="text-md md:text-lg text-brand-orange font-semibold italic mb-10">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
-            <button onclick="app.checkConnectionAndStart()" class="px-8 py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-lg font-bold rounded-full transition-all shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1">
+            <!-- LOGO UTAMA PJOK CERIA DAN DINAMIS DENGAN FALLBACK AMAN CORS -->
+            <img src="Logo PJOK Ceria dan Dinamis.png" 
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300';" 
+                 alt="Logo PJOK Ceria dan Dinamis" 
+                 class="w-28 h-28 md:w-40 md:h-40 mx-auto mb-4 rounded-full border-4 border-brand-orange object-cover shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+            <h1 class="text-2xl md:text-5xl font-black mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">PJOK DIGITAL LEARNING</h1>
+            <p class="text-sm md:text-lg text-gray-300 mb-1">Aplikasi Pembelajaran Digital Pendidikan Jasmani, Olahraga, dan Kesehatan</p>
+            <p class="text-xs md:text-base text-brand-orange font-semibold italic mb-8">"Belajar Aktif, Bergerak Sehat, Berprestasi Hebat."</p>
+            <button onclick="app.checkConnectionAndStart()" class="px-6 py-3 md:px-8 md:py-4 bg-brand-orange hover:bg-brand-orangeHover text-white text-sm md:text-base font-bold rounded-full transition-all shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1">
                 MULAI PEMBELAJARAN <i class="fa-solid fa-arrow-right ml-2"></i>
             </button>
         </div>
@@ -108,7 +112,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Kelas</label>
                         <select id="selectClass" onchange="app.onClassChange()" required class="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
-                            <option value="">-- Pilih Kelas --</option>
+                            <option value="">-- Memuat Kelas... --</option>
                         </select>
                     </div>
                     <div>
@@ -136,7 +140,7 @@
         <aside id="appSidebar" class="md:w-64 glass-card border-r border-white/10 md:h-full flex flex-col transition-all duration-300 z-50 shrink-0">
             <div class="flex items-center justify-between p-4 md:p-6">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <img src="Logo PJOK Ceria dan Dinamis.png" onerror="this.src='https://placehold.co/40x40/f97316/ffffff?text=P'" alt="Logo" class="w-10 h-10 object-contain shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-brand-orange flex items-center justify-center text-white font-black shrink-0">P</div>
                     <span id="sidebarLogoText" class="font-bold text-lg hidden md:block">PJOK DIGITAL</span>
                     <span class="font-bold text-lg mobile-title md:hidden">PJOK</span>
                 </div>
@@ -163,49 +167,49 @@
             
             <!-- DASHBOARD CONTENT -->
             <div id="content-dashboard" class="content-section">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
                     <div>
-                        <h2 class="text-3xl font-bold text-white mb-1">Selamat Datang, <span id="lblStudentName" class="text-brand-orange">Murid</span>!</h2>
-                        <p class="text-gray-400 flex items-center gap-2">
+                        <h2 class="text-xl md:text-3xl font-bold text-white mb-1">Selamat Datang, <span id="lblStudentName" class="text-brand-orange">Murid</span>!</h2>
+                        <p class="text-xs md:text-sm text-gray-400 flex items-center gap-2">
                             <i class="fa-solid fa-users"></i> <span id="lblStudentClass">Kelas</span> | 
                             <i class="fa-solid fa-book"></i> <span id="lblMaterialTitle" class="text-blue-300 font-medium">Materi</span>
                         </p>
                     </div>
-                    <div class="glass-card px-6 py-3 rounded-2xl flex items-center gap-4">
+                    <div class="glass-card px-4 py-2 md:px-6 md:py-3 rounded-2xl flex items-center gap-3">
                         <div>
-                            <p class="text-xs text-gray-400">Progres Sesi Ini</p>
-                            <p class="text-2xl font-bold text-white" id="lblTotalProgress">0%</p>
+                            <p class="text-[10px] md:text-xs text-gray-400">Progres Sesi Ini</p>
+                            <p class="text-lg md:text-2xl font-bold text-white" id="lblTotalProgress">0%</p>
                         </div>
-                        <div class="w-12 h-12 rounded-full border-4 border-brand-orange flex items-center justify-center text-brand-orange"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="w-9 h-9 md:w-12 md:h-12 rounded-full border-2 md:border-4 border-brand-orange flex items-center justify-center text-brand-orange text-sm md:text-base"><i class="fa-solid fa-trophy"></i></div>
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl p-6 mb-8 border-l-4 border-brand-orange shadow-lg relative overflow-hidden">
-                    <p class="text-xs text-brand-orange font-bold uppercase tracking-widest mb-2">Motivasi Hari Ini</p>
-                    <p id="lblMotivation" class="text-xl md:text-2xl font-light italic text-white leading-relaxed">"Memuat motivasi..."</p>
+                <div class="glass-card rounded-2xl p-4 md:p-6 mb-6 border-l-4 border-brand-orange shadow-lg relative overflow-hidden">
+                    <p class="text-[10px] md:text-xs text-brand-orange font-bold uppercase tracking-widest mb-1">Motivasi Hari Ini</p>
+                    <p id="lblMotivation" class="text-sm md:text-xl font-light italic text-white leading-relaxed">"Memuat motivasi..."</p>
                 </div>
 
-                <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-2">Status Pembelajaran</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <div class="glass-card p-5 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('materi')">
-                        <div class="flex justify-between items-center mb-3"><div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><i class="fa-solid fa-book-open"></i></div><span id="status-materi-icon"><i class="fa-regular fa-circle text-gray-500"></i></span></div>
-                        <h4 class="font-bold text-lg">Materi</h4>
+                <h3 class="text-base md:text-xl font-bold mb-3 border-b border-white/10 pb-2">Status Pembelajaran</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div class="glass-card p-4 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('materi')">
+                        <div class="flex justify-between items-center mb-2"><div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-xs md:text-base"><i class="fa-solid fa-book-open"></i></div><span id="status-materi-icon"><i class="fa-regular fa-circle text-gray-500 text-xs"></i></span></div>
+                        <h4 class="font-bold text-sm md:text-base">Materi</h4>
                     </div>
-                    <div class="glass-card p-5 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('lkm')">
-                        <div class="flex justify-between items-center mb-3"><div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400"><i class="fa-solid fa-file-signature"></i></div><span id="status-lkm-icon"><i class="fa-regular fa-circle text-gray-500"></i></span></div>
-                        <h4 class="font-bold text-lg">LKM</h4>
+                    <div class="glass-card p-4 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('lkm')">
+                        <div class="flex justify-between items-center mb-2"><div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs md:text-base"><i class="fa-solid fa-file-signature"></i></div><span id="status-lkm-icon"><i class="fa-regular fa-circle text-gray-500 text-xs"></i></span></div>
+                        <h4 class="font-bold text-sm md:text-base">LKM</h4>
                     </div>
-                    <div class="glass-card p-5 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('tugas')">
-                        <div class="flex justify-between items-center mb-3"><div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400"><i class="fa-solid fa-upload"></i></div><span id="status-tugas-icon"><i class="fa-regular fa-circle text-gray-500"></i></span></div>
-                        <h4 class="font-bold text-lg">Tugas</h4>
+                    <div class="glass-card p-4 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('tugas')">
+                        <div class="flex justify-between items-center mb-2"><div class="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-xs md:text-base"><i class="fa-solid fa-upload"></i></div><span id="status-tugas-icon"><i class="fa-regular fa-circle text-gray-500 text-xs"></i></span></div>
+                        <h4 class="font-bold text-sm md:text-base">Tugas</h4>
                     </div>
-                    <div class="glass-card p-5 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('formatif')">
-                        <div class="flex justify-between items-center mb-3"><div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400"><i class="fa-solid fa-stopwatch"></i></div><span id="status-formatif-icon"><i class="fa-regular fa-circle text-gray-500"></i></span></div>
-                        <h4 class="font-bold text-lg">Formatif</h4>
+                    <div class="glass-card p-4 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('formatif')">
+                        <div class="flex justify-between items-center mb-2"><div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 text-xs md:text-base"><i class="fa-solid fa-stopwatch"></i></div><span id="status-formatif-icon"><i class="fa-regular fa-circle text-gray-500 text-xs"></i></span></div>
+                        <h4 class="font-bold text-sm md:text-base">Formatif</h4>
                     </div>
-                    <div class="glass-card p-5 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('refleksi')">
-                        <div class="flex justify-between items-center mb-3"><div class="w-10 h-10 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-400"><i class="fa-solid fa-comment-dots"></i></div><span id="status-refleksi-icon"><i class="fa-regular fa-circle text-gray-500"></i></span></div>
-                        <h4 class="font-bold text-lg">Refleksi</h4>
+                    <div class="glass-card p-4 rounded-2xl cursor-pointer hover:bg-white/10" onclick="app.navigateTo('refleksi')">
+                        <div class="flex justify-between items-center mb-2"><div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-400 text-xs md:text-base"><i class="fa-solid fa-comment-dots"></i></div><span id="status-refleksi-icon"><i class="fa-regular fa-circle text-gray-500 text-xs"></i></span></div>
+                        <h4 class="font-bold text-sm md:text-base">Refleksi</h4>
                     </div>
                 </div>
             </div>
@@ -283,11 +287,11 @@
                         <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">LKM Berhasil Terkirim!</h3>
                         
-                        <!-- KARTU UMPAN BALIK AI UNTUK LKM -->
+                        <!-- KARTU UMPAN BALIK UNTUK LKM -->
                         <div id="lkmAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
                                 <span class="text-purple-400 font-bold text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-robot text-purple-400 text-xl"></i> Umpan Balik AI Otomatis
+                                    <i class="fa-solid fa-comments text-purple-400 text-xl"></i> Umpan Balik Evaluasi
                                 </span>
                                 <span id="lkmAiScore" class="bg-purple-500/20 text-purple-300 font-extrabold px-3 py-1 rounded-full text-sm border border-purple-400/30">Pemahaman: -%</span>
                             </div>
@@ -328,11 +332,11 @@
                         <i class="fa-solid fa-cloud-check text-6xl text-brand-orange mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">Tugas Berhasil Terkirim!</h3>
                         
-                        <!-- KARTU UMPAN BALIK AI UNTUK TUGAS -->
+                        <!-- KARTU UMPAN BALIK UNTUK TUGAS -->
                         <div id="tugasAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-orange-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
                                 <span class="text-orange-400 font-bold text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-brain text-orange-400 text-xl"></i> Umpan Balik AI Otomatis
+                                    <i class="fa-solid fa-clipboard-check text-orange-400 text-xl"></i> Umpan Balik Tugas
                                 </span>
                                 <span id="tugasAiScore" class="bg-orange-500/20 text-orange-300 font-extrabold px-3 py-1 rounded-full text-sm border border-orange-400/30">Nilai: -</span>
                             </div>
@@ -465,103 +469,187 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxmCGF4PH0iz77qJ-gkENrBoeCTaMG47HI94Hd9wHOIhFo92R252nSAyKN4mwZ1HUOD/exec"; 
+        // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbykvN8zLR-0s3CJS9wY0FCvUgqwpv5Psa50Wk1u8u5ff1M_fytCV4bjimj08xkAptnd/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
+            currentView: "dashboard",
             progress: { materi: false, lkm: false, tugas: false, formatif: false, refleksi: false, formatifScore: 0 },
             quiz: { questions: [], currentIdx: 0, answers: [], externalLink: "" },
             refleksiList: []
         };
 
-        const ui = {
-            showLoading: () => document.getElementById('loadingScreen').classList.remove('hidden'),
-            hideLoading: () => document.getElementById('loadingScreen').classList.add('hidden'),
-            showModal: (title, message, type = 'info') => {
-                const modal = document.getElementById('globalModal');
-                document.getElementById('modalTitle').innerText = title;
-                document.getElementById('modalMessage').innerText = message;
-                document.getElementById('modalIcon').innerHTML = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-500"></i>' : '<i class="fa-solid fa-circle-info text-blue-500"></i>';
-                modal.classList.remove('hidden'); modal.classList.add('flex');
-            },
-            hideModal: () => { document.getElementById('globalModal').classList.add('hidden'); document.getElementById('globalModal').classList.remove('flex'); }
-        };
-        window.closeModal = ui.hideModal;
-
-        const api = async (action, payload = {}) => {
-            if (!GAS_URL) {
-                ui.showModal("Sistem Belum Siap", "Link Web App (GAS_URL) belum dimasukkan ke dalam kode.", "warning");
-                throw new Error("URL tidak ditemukan");
+        // HELPER SAFE LOCALSTORAGE (ANTI ERROR DOMEXCEPTION)
+        const saveSession = () => {
+            try {
+                localStorage.setItem('pjok_session', JSON.stringify({
+                    studentName: state.studentName,
+                    studentClass: state.studentClass,
+                    materialId: state.materialId,
+                    materialTitle: state.materialTitle,
+                    currentView: state.currentView,
+                    progress: state.progress
+                }));
+            } catch (e) {
+                console.warn("Storage warning: LocalStorage tidak tersedia.", e);
             }
-            ui.showLoading();
+        };
+
+        const restoreSession = () => {
+            try {
+                const data = localStorage.getItem('pjok_session');
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.warn("Storage warning: Gagal membaca LocalStorage.", e);
+                return null;
+            }
+        };
+
+        const api = async (action, data = {}) => {
+            showLoading(true);
             try {
                 const response = await fetch(GAS_URL, {
-                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action, ...payload })
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action, ...data })
                 });
                 const result = await response.json();
-                ui.hideLoading(); return result;
-            } catch (error) {
-                ui.hideLoading(); ui.showModal("Kesalahan", "Koneksi ke server gagal.", "error"); throw error;
+                showLoading(false);
+                if (result.status === "error") {
+                    showModal("Terjadi Kesalahan", result.message || "Gagal mengambil data dari Google Sheet.", "fa-solid fa-triangle-exclamation text-red-500");
+                    return null;
+                }
+                return result;
+            } catch (err) {
+                showLoading(false);
+                showModal("Koneksi Terputus", "Gagal terhubung ke server backend Apps Script. Pastikan URL Web App sudah benar dan sudah di-Deploy sebagai 'Versi Baru'.", "fa-solid fa-wifi text-yellow-500");
+                return null;
             }
         };
 
-        const formatText = (text, isInline = false) => {
-            if (!text) return "";
-            let processedText = String(text);
-            
-            processedText = processedText.replace(/\[GAMBAR:\s*([^\]]+?)\s*\]/gi, (m, url) => `<div class="media-container my-6"><img src="${url.trim()}" alt="Media Gambar"></div>`);
-            processedText = processedText.replace(/\[VIDEO:\s*([^\]]+?)\s*\]/gi, (m, url) => {
-                let embedUrl = url.trim();
-                if(embedUrl.includes("watch?v=")) embedUrl = embedUrl.replace("watch?v=", "embed/");
-                else if(embedUrl.includes("youtu.be/")) embedUrl = embedUrl.replace("youtu.be/", "youtube.com/embed/");
-                return `<div class="media-container my-6"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`;
-            });
+        const showLoading = (show) => {
+            const el = document.getElementById('loadingScreen');
+            if (el) {
+                if (show) el.classList.remove('hidden'), el.classList.add('flex');
+                else el.classList.add('hidden'), el.classList.remove('flex');
+            }
+        };
 
-            processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, txt, url) => {
-                let link = url.trim();
-                if (!link.startsWith('http')) link = 'https://' + link;
-                return `<a href="${link}" target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 bg-brand-orange hover:bg-brand-orangeHover text-white font-bold rounded-xl shadow-md my-4"><i class="fa-solid fa-up-right-from-square mr-2"></i> ${txt.trim()}</a>`;
-            });
-            
-            processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            processedText = processedText.replace(/_(.*?)_/g, '<em>$1</em>');
-            
-            if (isInline) return processedText;
+        const showModal = (title, message, iconClass = "fa-solid fa-circle-info text-blue-500") => {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('modalIcon').className = `text-4xl mb-4 ${iconClass}`;
+            const modal = document.getElementById('globalModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
 
-            let lines = processedText.split('\n');
-            let html = '';
-            lines.forEach(line => {
-                let trimLine = line.trim();
-                if (trimLine !== '') {
-                    if (trimLine.startsWith('<div class="media-container') || trimLine.startsWith('<a href=')) {
-                        html += trimLine;
-                    } else {
-                        html += `<p class="mb-4 text-justify-custom">${line}</p>`;
-                    }
-                }
-            });
-            return html;
+        const closeModal = () => {
+            const modal = document.getElementById('globalModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         };
 
         const app = {
             init: async () => {
                 if (!GAS_URL) return;
+
+                const savedSession = restoreSession();
+                if (savedSession && savedSession.studentName && savedSession.materialId) {
+                    state.studentName = savedSession.studentName;
+                    state.studentClass = savedSession.studentClass;
+                    state.materialId = savedSession.materialId;
+                    state.materialTitle = savedSession.materialTitle;
+                    if(savedSession.progress) state.progress = savedSession.progress;
+
+                    const res = await api('getDashboardData', { studentName: state.studentName, className: state.studentClass, materialId: state.materialId });
+                    if (res && res.data) {
+                        app.setupDashboard(res.data);
+                        app.navigateTo(savedSession.currentView || 'dashboard');
+                        return;
+                    }
+                }
+
+                app.loadInitialClasses();
+            },
+
+            loadInitialClasses: async () => {
+                const selectClass = document.getElementById('selectClass');
+                if(!selectClass) return;
+                selectClass.innerHTML = '<option value="">-- Memuat Kelas... --</option>';
                 try {
                     const res = await api('getInitialData');
-                    const selectClass = document.getElementById('selectClass');
-                    if(res && res.data && res.data.classes) {
+                    if(res && res.data && Array.isArray(res.data.classes) && res.data.classes.length > 0) {
+                        selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                         res.data.classes.forEach(c => { selectClass.appendChild(new Option(c, c)); });
+                    } else {
+                        selectClass.innerHTML = '<option value="">-- Data Kelas Kosong / Sheet MURID Belum Terisi --</option>';
                     }
-                } catch(e) {}
+                } catch(e) {
+                    selectClass.innerHTML = '<option value="">-- Gagal Memuat Kelas --</option>';
+                }
             },
-            
-            checkConnectionAndStart: () => {
-                if (!GAS_URL) ui.showModal("Sistem Belum Siap", "Link Web App belum dimasukkan ke dalam kode.", "warning");
-                else app.navigateTo('identity');
+
+            checkConnectionAndStart: async () => {
+                const selectClass = document.getElementById('selectClass');
+                app.navigateTo('identity');
+                if (selectClass && (selectClass.options.length <= 1 || selectClass.value === "")) {
+                    await app.loadInitialClasses();
+                }
+            },
+
+            checkConnectionAndStart: async () => {
+                const selectClass = document.getElementById('selectClass');
+                if (selectClass && selectClass.options.length <= 1) {
+                    await app.loadInitialClasses();
+                }
+                app.navigateTo('identity');
+            },
+
+            onClassChange: async () => {
+                const className = document.getElementById('selectClass').value;
+                const selectStudent = document.getElementById('selectStudent');
+                const selectMaterial = document.getElementById('selectMaterial');
+                const btnContinue = document.getElementById('btnContinue');
+
+                if (!className) {
+                    selectStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                    selectMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
+                    selectStudent.disabled = true;
+                    selectMaterial.disabled = true;
+                    if(btnContinue) btnContinue.disabled = true;
+                    return;
+                }
+
+                selectStudent.innerHTML = '<option value="">-- Memuat Siswa... --</option>';
+                selectMaterial.innerHTML = '<option value="">-- Memuat Materi... --</option>';
+                selectStudent.disabled = true;
+                selectMaterial.disabled = true;
+
+                try {
+                    const res = await api('getStudentsAndMaterials', { className: className });
+                    if (res && res.data) {
+                        selectStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                        (res.data.students || []).forEach(s => selectStudent.appendChild(new Option(s, s)));
+                        selectStudent.disabled = false;
+
+                        selectMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
+                        (res.data.materials || []).forEach(m => selectMaterial.appendChild(new Option(m.title, m.id)));
+                        selectMaterial.disabled = false;
+
+                        if (btnContinue) btnContinue.disabled = false;
+                    }
+                } catch(e) {
+                    selectStudent.innerHTML = '<option value="">-- Gagal Memuat --</option>';
+                    selectMaterial.innerHTML = '<option value="">-- Gagal Memuat --</option>';
+                }
             },
 
             navigateTo: (viewId) => {
+                state.currentView = viewId;
+                saveSession();
+
                 ['view-welcome', 'view-identity', 'view-main'].forEach(id => document.getElementById(id).classList.add('hidden'));
                 if (viewId === 'welcome' || viewId === 'identity') {
                     document.getElementById(`view-${viewId}`).classList.remove('hidden'); 
@@ -579,25 +667,7 @@
                     }
                 }
             },
-            toggleSidebar: () => {
-                const sb = document.getElementById('appSidebar');
-                sb.classList.toggle('sidebar-collapsed');
-            },
-            onClassChange: async () => {
-                const className = document.getElementById('selectClass').value;
-                const selStudent = document.getElementById('selectStudent');
-                const selMaterial = document.getElementById('selectMaterial');
-                if(!className) return;
-                
-                const res = await api('getStudentsAndMaterials', { className });
-                selStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
-                if(res.data.students) res.data.students.forEach(s => selStudent.appendChild(new Option(s, s)));
-                
-                selMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
-                if(res.data.materials) res.data.materials.forEach(m => selMaterial.appendChild(new Option(m.title, m.id)));
-                
-                selStudent.disabled = false; selMaterial.disabled = false; document.getElementById('btnContinue').disabled = false;
-            },
+            
             submitIdentity: async (e) => {
                 e.preventDefault();
                 state.studentClass = document.getElementById('selectClass').value;
@@ -605,465 +675,17 @@
                 state.materialId = document.getElementById('selectMaterial').value;
                 state.materialTitle = document.getElementById('selectMaterial').options[document.getElementById('selectMaterial').selectedIndex].text;
                 
+                saveSession();
                 const res = await api('getDashboardData', { studentName: state.studentName, className: state.studentClass, materialId: state.materialId });
                 app.setupDashboard(res.data); 
                 app.navigateTo('dashboard');
             },
-            scrollToSubbab: () => {
-                const sel = document.getElementById('materiTocSelect').value;
-                if(!sel) {
-                    document.querySelectorAll('.subbab-section').forEach(el => el.classList.remove('hidden'));
-                } else {
-                    document.querySelectorAll('.subbab-section').forEach(el => {
-                        if(el.id === sel) el.classList.remove('hidden');
-                        else el.classList.add('hidden');
-                    });
-                }
-            },
-            scrollToLkmPhase: () => {
-                const sel = document.getElementById('lkmTocSelect').value;
-                if(!sel) {
-                    document.querySelectorAll('.lkm-phase-section').forEach(el => el.classList.remove('hidden'));
-                } else {
-                    document.querySelectorAll('.lkm-phase-section').forEach(el => {
-                        if(el.id === sel) el.classList.remove('hidden');
-                        else el.classList.add('hidden');
-                    });
-                }
-            },
-            setupDashboard: (data) => {
-                document.getElementById('lblStudentName').innerText = state.studentName;
-                document.getElementById('lblStudentClass').innerText = state.studentClass;
-                document.getElementById('lblMaterialTitle').innerText = state.materialTitle;
-                document.getElementById('lblMotivation').innerText = `"${data.motivation || 'Tetap semangat!'}"`;
-                
-                document.getElementById('profName').innerText = state.studentName;
-                document.getElementById('profClass').innerText = state.studentClass;
-                document.getElementById('profilInisial').innerText = state.studentName ? state.studentName.charAt(0).toUpperCase() : 'U';
-
-                if (data.materi) {
-                    if (data.materi.cover) document.getElementById('materiCover').src = data.materi.cover;
-                    
-                    const tujuanEl = document.getElementById('materiTujuan');
-                    const tujuanContainer = document.getElementById('materiTujuanContainer');
-                    if (data.materi.tujuan && String(data.materi.tujuan).trim() !== "") {
-                        tujuanContainer.classList.remove('hidden');
-                        tujuanEl.innerHTML = formatText(data.materi.tujuan);
-                    } else {
-                        tujuanContainer.classList.add('hidden');
-                    }
-
-                    if (data.materi.rangkuman) document.getElementById('materiRangkuman').innerHTML = formatText(data.materi.rangkuman);
-                    
-                    const container = document.getElementById('materiIsiContainer');
-                    container.innerHTML = ""; 
-                    let allHtml = "";
-                    let tocOptions = '<option value="">-- Tampilkan Semua Bagian --</option>';
-                    let subbabCount = 0;
-
-                    if(Array.isArray(data.materi.subbab)) {
-                        data.materi.subbab.forEach((teksSub, index) => {
-                            if(teksSub && String(teksSub).trim() !== "" && String(teksSub).trim() !== "-") {
-                                subbabCount++;
-                                let lines = String(teksSub).split('\n').map(l => l.trim()).filter(l => l !== '');
-                                let rawTitle = lines.length > 0 ? lines[0] : `Sub Topik ${index + 1}`;
-                                let cleanTitle = rawTitle.replace(/<\/?[^>]+(>|$)/g, "").replace(/[*_]/g, "").substring(0, 50);
-
-                                let subbabId = `subbab-${index}`;
-                                tocOptions += `<option value="${subbabId}">${cleanTitle}</option>`;
-
-                                allHtml += `
-                                <div id="${subbabId}" class="subbab-section bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-slate-700/50 mb-6 transition-all">
-                                    <div class="text-gray-300 text-base md:text-lg">${formatText(teksSub)}</div>
-                                </div>`;
-                            }
-                        });
-                    }
-
-                    const tocContainer = document.getElementById('materiTocContainer');
-                    const tocSelect = document.getElementById('materiTocSelect');
-                    if (subbabCount > 1) {
-                        tocSelect.innerHTML = tocOptions;
-                        tocContainer.classList.remove('hidden');
-                    } else {
-                        tocContainer.classList.add('hidden');
-                    }
-                    
-                    container.innerHTML = allHtml;
-                }
-                document.getElementById('materiJudul').innerText = state.materialTitle;
-                
-                const lkmContainer = document.getElementById('lkmQuestionsContainer');
-                lkmContainer.innerHTML = '';
-                
-                if(data.lkm) {
-                    if (data.lkm.judul) document.getElementById('lkmJudulUtama').innerText = data.lkm.judul;
-                    
-                    const infoContainer = document.getElementById('lkmInfoContainer');
-                    if (data.lkm.tujuan) {
-                        infoContainer.classList.remove('hidden');
-                        document.getElementById('lkmTujuan').innerHTML = formatText(data.lkm.tujuan);
-                    } else {
-                        infoContainer.classList.add('hidden');
-                    }
-
-                    let lkmHtml = "";
-                    let lkmTocOptions = '<option value="">-- Tampilkan Semua Kegiatan --</option>';
-                    let lkmPhaseCount = 0;
-                    
-                    const buildPhase = (letter, title, phaseData, colorStyle, icon, phaseId) => {
-                        if (!phaseData) return "";
-                        const teks = phaseData.teks || "";
-                        let questions = [];
-                        
-                        if (Array.isArray(phaseData.soalList) && phaseData.soalList.length > 0) {
-                            questions = phaseData.soalList.filter(s => s && String(s).trim() !== "");
-                        } else if (phaseData.soal && String(phaseData.soal).trim() !== "") {
-                            questions = [String(phaseData.soal).trim()];
-                        }
-                        
-                        if (!teks && questions.length === 0) return "";
-                        
-                        lkmPhaseCount++;
-                        lkmTocOptions += `<option value="${phaseId}">${letter}. ${title}</option>`;
-
-                        const styles = {
-                            blue: { bg: 'bg-blue-900/20', border: 'border-blue-500/30', text: 'text-blue-400', focus: 'focus:border-blue-500' },
-                            green: { bg: 'bg-emerald-900/20', border: 'border-emerald-500/30', text: 'text-emerald-400', focus: 'focus:border-emerald-500' },
-                            orange: { bg: 'bg-orange-900/20', border: 'border-orange-500/30', text: 'text-orange-400', focus: 'focus:border-orange-500' },
-                            pink: { bg: 'bg-pink-900/20', border: 'border-pink-500/30', text: 'text-pink-400', focus: 'focus:border-pink-500' }
-                        }[colorStyle] || { bg: 'bg-slate-900/20', border: 'border-slate-500/30', text: 'text-slate-400', focus: 'focus:border-slate-500' };
-
-                        let html = `
-                        <div id="${phaseId}" class="lkm-phase-section ${styles.bg} border ${styles.border} p-5 md:p-6 rounded-2xl mb-6 shadow-lg transition-all">
-                            <h3 class="text-xl font-bold ${styles.text} mb-4 flex items-center gap-2">
-                                <i class="${icon}"></i> ${letter}. ${title}
-                            </h3>`;
-                        
-                        if (teks) {
-                            html += `<div class="text-gray-200 text-base md:text-lg mb-4 sheet-text text-justify-custom leading-relaxed">${formatText(teks)}</div>`;
-                        }
-                        
-                        if (questions.length > 0) {
-                            html += `<div class="mt-4 pt-4 border-t border-white/10 space-y-4">`;
-                            questions.forEach((qText, qIdx) => {
-                                const qLabel = questions.length > 1 ? `Pertanyaan ${qIdx + 1}: ${formatText(qText, true)}` : formatText(qText, true);
-                                html += `
-                                <div>
-                                    <label class="block font-semibold text-white mb-2 text-base md:text-lg">${qLabel}</label>
-                                    <textarea required rows="4" class="lkm-answer-field w-full bg-slate-900/90 border border-slate-600 rounded-xl p-4 text-white ${styles.focus} transition-all shadow-inner focus:outline-none" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
-                                </div>`;
-                            });
-                            html += `</div>`;
-                        }
-                        
-                        html += `</div>`;
-                        return html;
-                    };
-
-                    lkmHtml += buildPhase('B', 'Kegiatan 1 – Memahami', data.lkm.kegiatan1, 'blue', 'fa-solid fa-book-open-reader', 'lkm-phase-keg1');
-                    lkmHtml += buildPhase('C', 'Kegiatan 2 – Menerapkan', data.lkm.kegiatan2, 'green', 'fa-solid fa-person-running', 'lkm-phase-keg2');
-                    lkmHtml += buildPhase('D', 'Kegiatan 3 – Menganalisis', data.lkm.kegiatan3, 'orange', 'fa-solid fa-magnifying-glass-chart', 'lkm-phase-keg3');
-                    lkmHtml += buildPhase('E', 'Refleksi Pembelajaran', data.lkm.refleksi, 'pink', 'fa-solid fa-heart', 'lkm-phase-refleksi');
-
-                    const lkmTocContainer = document.getElementById('lkmTocContainer');
-                    const lkmTocSelect = document.getElementById('lkmTocSelect');
-                    if (lkmPhaseCount > 1) {
-                        lkmTocSelect.innerHTML = lkmTocOptions;
-                        lkmTocContainer.classList.remove('hidden');
-                    } else {
-                        lkmTocContainer.classList.add('hidden');
-                    }
-
-                    if (lkmHtml.trim() !== "") {
-                        lkmContainer.innerHTML = lkmHtml;
-                        document.getElementById('lkmSubmitArea').classList.remove('hidden');
-                    } else {
-                        lkmContainer.innerHTML = `
-                            <div class="bg-amber-900/20 border border-amber-500/30 p-6 rounded-2xl text-center space-y-3">
-                                <i class="fa-solid fa-triangle-exclamation text-amber-400 text-4xl animate-bounce"></i>
-                                <h3 class="text-amber-400 font-bold text-xl">Isian LKM Belum Terbaca</h3>
-                                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
-                                    Aplikasi mencari LKM dengan ID Materi: <span class="bg-slate-800 px-3 py-1 rounded text-brand-orange font-mono font-bold">${state.materialId}</span>
-                                </p>
-                            </div>`;
-                        document.getElementById('lkmSubmitArea').classList.add('hidden');
-                    }
-                }
-
-                if(data.tugas) {
-                    if(data.tugas.judul) document.getElementById('tugasJudulUtama').innerText = data.tugas.judul;
-                    if(data.tugas.deadline) document.getElementById('tugasDeadline').innerText = `Batas waktu: ${data.tugas.deadline}`;
-                    
-                    const qContainer = document.getElementById('tugasQuestionsContainer');
-                    qContainer.innerHTML = "";
-
-                    let questions = [];
-                    if (Array.isArray(data.tugas.soalList) && data.tugas.soalList.length > 0) {
-                        questions = data.tugas.soalList.filter(s => s && String(s).trim() !== "");
-                    } else if (data.tugas.instruksi && String(data.tugas.instruksi).trim() !== "") {
-                        // Jika dalam 1 sel ada baris berurutan (misal: 1. Soal A \n 2. Soal B)
-                        const rawText = String(data.tugas.instruksi).trim();
-                        if (rawText.includes('\n')) {
-                            questions = rawText.split('\n').map(l => l.trim()).filter(l => l !== "");
-                        } else {
-                            questions = [rawText];
-                        }
-                    }
-
-                    if (questions.length > 0) {
-                        let html = "";
-                        questions.forEach((qText, idx) => {
-                            const labelText = questions.length > 1 ? `Soal ${idx + 1}` : `Pertanyaan / Instruksi Tugas`;
-                            html += `
-                            <div class="bg-orange-900/20 border border-orange-500/30 p-5 md:p-6 rounded-2xl shadow-lg space-y-3">
-                                <h4 class="font-bold text-orange-400 text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-circle-question"></i> ${labelText}
-                                </h4>
-                                <div class="text-gray-200 text-base md:text-lg leading-relaxed sheet-text text-justify-custom">${formatText(qText, true)}</div>
-                                <div class="pt-2">
-                                    <label class="block text-sm font-semibold text-gray-300 mb-2">Jawaban Anda (Ketik Manual):</label>
-                                    <textarea required rows="4" class="tugas-answer-field w-full bg-slate-900/90 border border-slate-600 rounded-xl p-4 text-white focus:border-brand-orange focus:outline-none transition-all shadow-inner resize-none" placeholder="Tuliskan jawaban untuk nomor ini..."></textarea>
-                                </div>
-                            </div>`;
-                        });
-                        qContainer.innerHTML = html;
-                    } else {
-                        qContainer.innerHTML = `
-                        <div class="bg-slate-800 p-5 rounded-2xl text-center text-gray-400">
-                            Belum ada soal tugas yang diisi untuk materi ini.
-                        </div>`;
-                    }
-                }
-
-                if(data.formatif) {
-                    if (data.formatifLink) {
-                        state.quiz.externalLink = data.formatifLink;
-                    } else if (Array.isArray(data.formatif)) {
-                        state.quiz.questions = data.formatif;
-                        state.quiz.answers = new Array(data.formatif.length).fill(null);
-                    }
-                }
-
-                if(data.refleksi && Array.isArray(data.refleksi.questions)) {
-                    state.refleksiList = data.refleksi.questions;
-                    const refContainer = document.getElementById('refleksiQuestionsContainer');
-                    refContainer.innerHTML = '';
-                    state.refleksiList.forEach((q, idx) => {
-                        refContainer.innerHTML += `
-                        <div class="bg-slate-900/60 border border-slate-700/60 p-5 rounded-2xl">
-                            <label class="block font-semibold text-white mb-2 text-base md:text-lg">${idx + 1}. ${formatText(q.text, true)}</label>
-                            <textarea required rows="3" data-qid="${q.id}" class="refleksi-field w-full bg-slate-900 border border-slate-600 rounded-xl p-4 text-white focus:border-teal-500" placeholder="Tuliskan refleksi Anda..."></textarea>
-                        </div>`;
-                    });
-                }
-            },
-            
-            markMateriDone: () => {
-                state.progress.materi = true;
-                document.getElementById('status-materi-icon').innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
-                app.updateProgress();
-                ui.showModal("Sukses", "Materi telah selesai dibaca!", "success");
-            },
-
-            submitLKM: async (e) => {
-                e.preventDefault();
-                const fields = document.querySelectorAll('.lkm-answer-field');
-                const answers = Array.from(fields).map(f => f.value.trim());
-                
-                const res = await api('submitData', {
-                    type: 'lkm', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: answers
-                });
-
-                state.progress.lkm = true;
-                document.getElementById('status-lkm-icon').innerHTML = '<i class="fa-solid fa-circle-check text-purple-500"></i>';
-                document.getElementById('lkmForm').classList.add('hidden');
-                
-                // TAMPILKAN UMPAN BALIK AI
-                const feedbackCard = document.getElementById('lkmAiFeedbackCard');
-                if (res.data && res.data.feedback) {
-                    document.getElementById('lkmAiScore').innerText = `Tingkat Pemahaman: ${res.data.score || 85}%`;
-                    document.getElementById('lkmAiFeedbackContent').innerHTML = formatText(res.data.feedback);
-                    feedbackCard.classList.remove('hidden');
-                } else {
-                    feedbackCard.classList.add('hidden');
-                }
-
-                document.getElementById('lkmDoneState').classList.remove('hidden');
-                app.updateProgress();
-                ui.showModal("Tersimpan", "Jawaban LKM berhasil dikirim & dievaluasi oleh AI!", "success");
-            },
-
-            submitTugas: async (e) => {
-                e.preventDefault();
-                const fields = document.querySelectorAll('.tugas-answer-field');
-                const answers = Array.from(fields).map(f => f.value.trim());
-                const link = document.getElementById('tugasLink').value.trim();
-
-                const res = await api('submitData', {
-                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: answers, fileUrl: link
-                });
-
-                state.progress.tugas = true;
-                document.getElementById('status-tugas-icon').innerHTML = '<i class="fa-solid fa-circle-check text-orange-500"></i>';
-                document.getElementById('tugasForm').classList.add('hidden');
-                
-                // TAMPILKAN UMPAN BALIK AI
-                const feedbackCard = document.getElementById('tugasAiFeedbackCard');
-                if (res.data && res.data.feedback) {
-                    document.getElementById('tugasAiScore').innerText = `Estimasi Nilai: ${res.data.score || 88}`;
-                    document.getElementById('tugasAiFeedbackContent').innerHTML = formatText(res.data.feedback);
-                    feedbackCard.classList.remove('hidden');
-                } else {
-                    feedbackCard.classList.add('hidden');
-                }
-
-                document.getElementById('tugasDoneState').classList.remove('hidden');
-                app.updateProgress();
-                ui.showModal("Tersimpan", "Tugas berhasil dikirim & dievaluasi oleh AI!", "success");
-            },
-
-            submitTugas: async (e) => {
-                e.preventDefault();
-                const fields = document.querySelectorAll('.tugas-answer-field');
-                const answers = Array.from(fields).map(f => f.value.trim());
-                const link = document.getElementById('tugasLink').value.trim();
-
-                await api('submitData', {
-                    type: 'tugas', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, jawaban: answers, fileUrl: link
-                });
-
-                state.progress.tugas = true;
-                document.getElementById('status-tugas-icon').innerHTML = '<i class="fa-solid fa-circle-check text-orange-500"></i>';
-                document.getElementById('tugasForm').classList.add('hidden');
-                document.getElementById('tugasDoneState').classList.remove('hidden');
-                app.updateProgress();
-                ui.showModal("Tersimpan", "Tugas berhasil dikirim!", "success");
-            },
-
-            startFormatif: () => {
-                document.getElementById('formatifIntro').classList.add('hidden');
-                if (state.quiz.externalLink) {
-                    const linkArea = document.getElementById('formatifLinkArea');
-                    document.getElementById('btnExternalQuizLink').href = state.quiz.externalLink;
-                    linkArea.classList.remove('hidden');
-                } else if (state.quiz.questions.length > 0) {
-                    document.getElementById('formatifQuizArea').classList.remove('hidden');
-                    app.renderQuizQuestion();
-                } else {
-                    ui.showModal("Informasi", "Belum ada soal formatif untuk materi ini.", "info");
-                }
-            },
-
-            renderQuizQuestion: () => {
-                const q = state.quiz.questions[state.quiz.currentIdx];
-                document.getElementById('quizCurrentNum').innerText = state.quiz.currentIdx + 1;
-                document.getElementById('quizTotalNum').innerText = state.quiz.questions.length;
-                document.getElementById('quizQuestion').innerHTML = formatText(q.text);
-
-                const percent = ((state.quiz.currentIdx + 1) / state.quiz.questions.length) * 100;
-                document.getElementById('quizProgressBar').style.width = `${percent}%`;
-
-                const optContainer = document.getElementById('quizOptions');
-                optContainer.innerHTML = '';
-                q.options.forEach((opt, idx) => {
-                    const isSelected = state.quiz.answers[state.quiz.currentIdx] === idx;
-                    optContainer.innerHTML += `
-                    <button onclick="app.selectQuizOption(${idx})" class="w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-red-600/30 border-red-500 text-white font-bold' : 'bg-slate-800/80 border-slate-700 hover:bg-slate-700 text-gray-200'}">
-                        <span class="font-bold mr-2">${String.fromCharCode(65 + idx)}.</span> ${formatText(opt, true)}
-                    </button>`;
-                });
-
-                document.getElementById('btnQuizPrev').disabled = state.quiz.currentIdx === 0;
-                if (state.quiz.currentIdx === state.quiz.questions.length - 1) {
-                    document.getElementById('btnQuizNext').classList.add('hidden');
-                    document.getElementById('btnQuizSubmit').classList.remove('hidden');
-                } else {
-                    document.getElementById('btnQuizNext').classList.remove('hidden');
-                    document.getElementById('btnQuizSubmit').classList.add('hidden');
-                }
-            },
-
-            selectQuizOption: (optIdx) => {
-                state.quiz.answers[state.quiz.currentIdx] = optIdx;
-                app.renderQuizQuestion();
-            },
-
-            quizNav: (dir) => {
-                state.quiz.currentIdx += dir;
-                app.renderQuizQuestion();
-            },
-
-            submitFormatif: async () => {
-                let correctCount = 0;
-                state.quiz.questions.forEach((q, i) => {
-                    if (state.quiz.answers[i] === q.answer) correctCount++;
-                });
-                const finalScore = Math.round((correctCount / state.quiz.questions.length) * 100);
-                state.progress.formatifScore = finalScore;
-
-                await api('submitData', {
-                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: state.quiz.answers, score: finalScore
-                });
-
-                state.progress.formatif = true;
-                document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
-                document.getElementById('formatifQuizArea').classList.add('hidden');
-                document.getElementById('scoreText').innerText = finalScore;
-                document.getElementById('formatifResultArea').classList.remove('hidden');
-                document.getElementById('profStatNilai').innerText = finalScore;
-                app.updateProgress();
-            },
-
-            markFormatifExternalDone: async () => {
-                await api('submitData', {
-                    type: 'formatif', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, answers: ["EXTERNAL_LINK"], score: 100
-                });
-
-                state.progress.formatif = true;
-                document.getElementById('status-formatif-icon').innerHTML = '<i class="fa-solid fa-circle-check text-red-500"></i>';
-                document.getElementById('formatifLinkArea').classList.add('hidden');
-                document.getElementById('scoreText').innerText = '100';
-                document.getElementById('formatifResultArea').classList.remove('hidden');
-                document.getElementById('profStatNilai').innerText = '100';
-                app.updateProgress();
-            },
-
-            submitRefleksi: async (e) => {
-                e.preventDefault();
-                const fields = document.querySelectorAll('.refleksi-field');
-                const answers = Array.from(fields).map(f => ({ qid: f.dataset.qid, answer: f.value.trim() }));
-
-                await api('submitData', {
-                    type: 'refleksi', studentName: state.studentName, className: state.studentClass, materialId: state.materialId, refleksi: answers
-                });
-
-                state.progress.refleksi = true;
-                document.getElementById('status-refleksi-icon').innerHTML = '<i class="fa-solid fa-circle-check text-teal-500"></i>';
-                document.getElementById('refleksiForm').classList.add('hidden');
-                document.getElementById('refleksiDoneState').classList.remove('hidden');
-                app.updateProgress();
-                ui.showModal("Tersimpan", "Refleksi berhasil dikirim!", "success");
-            },
-
-            updateProgress: () => {
-                let doneCount = 0;
-                if(state.progress.materi) doneCount++;
-                if(state.progress.lkm) doneCount++;
-                if(state.progress.tugas) doneCount++;
-                if(state.progress.formatif) doneCount++;
-                if(state.progress.refleksi) doneCount++;
-
-                const percent = Math.round((doneCount / 5) * 100);
-                document.getElementById('lblTotalProgress').innerText = `${percent}%`;
-
-                document.getElementById('profStatMateri').innerText = state.progress.materi ? '1/1' : '0/1';
-                document.getElementById('profStatTugas').innerText = state.progress.tugas ? '1/1' : '0/1';
-                document.getElementById('profStatRefleksi').innerText = state.progress.refleksi ? '1/1' : '0/1';
-            },
 
             logout: () => {
-                window.location.reload();
+                try {
+                    localStorage.removeItem('pjok_session');
+                } catch(e) {}
+                location.reload();
             }
         };
 
