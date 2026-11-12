@@ -623,18 +623,30 @@
                     const res = await api('getStudentsAndMaterials', { className: className });
                     if (res && res.data) {
                         selectStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
-                        (res.data.students || []).forEach(s => selectStudent.appendChild(new Option(s, s)));
-                        selectStudent.disabled = false;
+                        const students = res.data.students || [];
+                        if (students.length > 0) {
+                            students.forEach(s => selectStudent.appendChild(new Option(s, s)));
+                            selectStudent.disabled = false;
+                        } else {
+                            selectStudent.innerHTML = '<option value="">-- Tidak ada murid di kelas ini --</option>';
+                            selectStudent.disabled = true;
+                        }
 
                         selectMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
-                        (res.data.materials || []).forEach(m => selectMaterial.appendChild(new Option(m.title, m.id)));
-                        selectMaterial.disabled = false;
+                        const materials = res.data.materials || [];
+                        if (materials.length > 0) {
+                            materials.forEach(m => selectMaterial.appendChild(new Option(m.title, m.id)));
+                            selectMaterial.disabled = false;
+                        } else {
+                            selectMaterial.innerHTML = '<option value="">-- Tidak ada materi aktif --</option>';
+                            selectMaterial.disabled = true;
+                        }
 
-                        if (btnContinue) btnContinue.disabled = false;
+                        if (btnContinue) btnContinue.disabled = (students.length === 0);
                     }
                 } catch(e) {
-                    selectStudent.innerHTML = '<option value="">-- Gagal Memuat --</option>';
-                    selectMaterial.innerHTML = '<option value="">-- Gagal Memuat --</option>';
+                    selectStudent.innerHTML = '<option value="">-- Gagal Memuat Murid --</option>';
+                    selectMaterial.innerHTML = '<option value="">-- Gagal Memuat Materi --</option>';
                 }
             },
 
