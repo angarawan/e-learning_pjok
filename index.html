@@ -473,10 +473,12 @@
                             <h2 class="text-3xl font-bold text-white mb-1" id="profName">Nama Lengkap</h2>
                             <p class="text-brand-orange font-medium mb-4"><i class="fa-solid fa-graduation-cap"></i> <span id="profClass">Kelas</span></p>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Materi</p><p class="text-xl font-bold text-blue-400" id="profStatMateri">0/1</p></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Tugas</p><p class="text-xl font-bold text-orange-400" id="profStatTugas">0/1</p></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Nilai Formatif</p><p class="text-xl font-bold text-red-400" id="profStatNilai">-</p></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Refleksi</p><p class="text-xl font-bold text-teal-400" id="profStatRefleksi">0/1</p></div>
+                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Materi</p><p class="text-xl font-bold text-blue-400" id="profStatMateri">0/1</p></div>
+                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Tugas</p><p class="text-xl font-bold text-orange-400" id="profStatTugas">0/1</p></div>
+                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Nilai Formatif</p><p class="text-xl font-bold text-red-400" id="profStatNilai">-</p></div>
+                                <div class="bg-slate-900/80 p-4 rounded-xl text-center border border-slate-700"><p class="text-xs text-gray-400 mb-1">Refleksi</p><p class="text-xl font-bold text-teal-400" id="profStatRefleksi">0/1</p></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -486,7 +488,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzI9XJMVWfV8WhNq_wMZCeAdHEq7hF4jGMkO4Tyu3njkxKckW6yt979hD4HoxVjSXEt/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwyGvos6OFj83WKAVcmMxShyUrDN2w2xqKCrP-m-wZzc5_xc2vLtY-Wo-p0bth9UnUz/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -1196,10 +1198,6 @@
                 } else {
                     sidebar.classList.toggle('sidebar-collapsed');
                 }
-            },
-
-            toggleSidebar: () => {
-                document.getElementById('appSidebar').classList.toggle('sidebar-collapsed');
             },
             
             submitIdentity: async (e) => {
