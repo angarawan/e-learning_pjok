@@ -489,7 +489,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwsTg4VsvZUn7-Yd9J_tlc9-WXKOzRU2hpoOoTYWk_KV6vtGUH4nqv4l_2HCjDmgCZK/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyonVAgvajIB8f2YvZrIswWqE09x3wvdxtQyIqKi34eBi9CO4F-nJm7VQcIGqQluhu2/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -525,25 +525,89 @@
             }
         };
 
+        // HELPER EKSTRAK ID GOOGLE DRIVE & KONVERSI URL OTOMATIS
+        const extractDriveId = (url) => {
+            if (!url) return null;
+            const cleanUrl = String(url).trim();
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /[?&]id=([a-zA-Z0-9_-]+)/
+            ];
+            for (const pattern of patterns) {
+                const match = cleanUrl.match(pattern);
+                if (match && match[1]) return match[1];
+            }
+            return null;
+        };
+
+        const formatDriveImageUrl = (url) => {
+            const cleanUrl = String(url || '').trim();
+            if (cleanUrl.includes('drive.google.com') || cleanUrl.includes('docs.google.com')) {
+                const fileId = extractDriveId(cleanUrl);
+                if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+            }
+            return cleanUrl;
+        };
+
+        const formatDriveVideoUrl = (url) => {
+            let videoUrl = String(url || '').trim();
+            if (videoUrl.includes('youtube.com/watch?v=')) {
+                const videoId = videoUrl.split('v=')[1].split('&')[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+            } else if (videoUrl.includes('youtu.be/')) {
+                const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+            } else if (videoUrl.includes('youtube.com/shorts/')) {
+                const videoId = videoUrl.split('shorts/')[1].split('?')[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+            } else if (videoUrl.includes('drive.google.com')) {
+                const fileId = extractDriveId(videoUrl);
+                if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+            return videoUrl;
+        };
+
         const parseMediaTags = (text, highlightTheme = 'orange') => {
             if (!text) return "";
             let parsed = String(text);
+
+            // 1. TAG [GAMBAR: URL] (Mendukung Google Drive & URL Gambar Biasa)
             parsed = parsed.replace(/\[GAMBAR:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
-                return `<div class="media-container my-3 text-center"><img src="${url.trim()}" alt="Media Gambar" class="rounded-xl mx-auto shadow-md max-h-80 object-contain" onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat'"></div>`;
+                const imgSrc = formatDriveImageUrl(url);
+                const fallbackId = extractDriveId(url);
+                const fallbackAttr = fallbackId ? `onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://drive.google.com/uc?export=view&id=${fallbackId}';}else{this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat';}"` : `onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat'"`;
+                return `<div class="media-container my-3 text-center"><img src="${imgSrc}" alt="Media Gambar" class="rounded-xl mx-auto shadow-md max-h-80 object-contain" ${fallbackAttr}></div>`;
             });
+
+            // 2. TAG [VIDEO: URL] (Mendukung Google Drive & YouTube)
             parsed = parsed.replace(/\[VIDEO:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
-                let videoUrl = url.trim();
-                if (videoUrl.includes('youtube.com/watch?v=')) {
-                    const videoId = videoUrl.split('v=')[1].split('&')[0];
-                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
-                } else if (videoUrl.includes('youtu.be/')) {
-                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
-                }
-                return `<div class="media-container my-3"><iframe src="${videoUrl}" allowfullscreen class="w-full aspect-video rounded-xl shadow-md"></iframe></div>`;
+                const videoUrl = formatDriveVideoUrl(url);
+                return `<div class="media-container my-3"><iframe src="${videoUrl}" allow="autoplay; fullscreen" allowfullscreen class="w-full aspect-video rounded-xl shadow-md"></iframe></div>`;
             });
+
+            // 3. TAG [APP: URL] atau [EMBED: URL] (Untuk Aplikasi Web / Google Apps Script langsung di halaman)
+            parsed = parsed.replace(/\[(?:APP|EMBED):\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
+                return `<div class="media-container my-3"><iframe src="${url.trim()}" allow="fullscreen" class="w-full min-h-[450px] md:min-h-[550px] rounded-xl shadow-md bg-white"></iframe></div>`;
+            });
+
+            // 4. TAG TAUTAN MARKDOWN [Label Tombol](URL) (Termasuk Link Apps Script & Google Drive)
             parsed = parsed.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/gi, (match, label, url) => {
-                return `<a href="${url.trim()}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-brand-blue hover:bg-blue-600 text-white text-xs md:text-sm font-semibold rounded-lg my-1.5"><i class="fa-solid fa-external-link mr-2"></i> ${label}</a>`;
+                const cleanUrl = url.trim();
+                const isAppsScript = cleanUrl.includes('script.google.com');
+                const btnColor = isAppsScript ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-brand-blue hover:bg-blue-600';
+                const iconClass = isAppsScript ? 'fa-solid fa-rocket' : 'fa-solid fa-up-right-from-square';
+                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3.5 py-2 ${btnColor} text-white text-xs md:text-sm font-semibold rounded-xl my-1.5 shadow transition-all"><i class="${iconClass} mr-2"></i> ${label}</a>`;
+            });
+
+            // 5. DETEKSI LINK MENTAH GOOGLE APPS SCRIPT / DRIVE YANG DITEMPEL LANGSUNG TANPA KURUNG
+            parsed = parsed.replace(/(^|[\s>])(https?:\/\/(?:script\.google\.com|drive\.google\.com)[^\s<]+)/gi, (match, prefix, rawUrl) => {
+                const cleanUrl = rawUrl.trim();
+                const isAppsScript = cleanUrl.includes('script.google.com');
+                const label = isAppsScript ? 'Buka Aplikasi Interaktif' : 'Buka File Google Drive';
+                const btnColor = isAppsScript ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-brand-blue hover:bg-blue-600';
+                const iconClass = isAppsScript ? 'fa-solid fa-rocket' : 'fa-brands fa-google-drive';
+                return `${prefix}<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3.5 py-2 ${btnColor} text-white text-xs md:text-sm font-semibold rounded-xl my-1 shadow transition-all"><i class="${iconClass} mr-2"></i> ${label}</a>`;
             });
 
             // KONVERSI FORMAT TEBAL (**tulisan**) DENGAN LATAR BELAKANG MENYESUAIKAN TEMA KOLOM
@@ -822,7 +886,7 @@
             renderMateri: (materi) => {
                 if (!materi) return;
                 document.getElementById('materiJudul').innerText = materi.judul || state.materialTitle;
-                if (materi.cover) document.getElementById('materiCover').src = materi.cover;
+                if (materi.cover) document.getElementById('materiCover').src = formatDriveImageUrl(materi.cover);
                 
                 document.getElementById('materiTujuan').innerHTML = parseMediaTags(materi.tujuan || "Tujuan pembelajaran belum diisi.", 'blue');
                 document.getElementById('materiRangkuman').innerHTML = parseMediaTags(materi.rangkuman || "Belum ada rangkuman.", 'orange');
