@@ -265,34 +265,35 @@
 
             <!-- MATERI CONTENT -->
             <div id="content-materi" class="content-section hidden max-w-4xl mx-auto">
-                <div class="glass-card rounded-3xl overflow-hidden mb-8 shadow-2xl">
-                    <div class="h-64 md:h-80 w-full relative bg-slate-900">
-                        <img id="materiCover" src="https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" onerror="this.src='https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'" alt="Cover Materi" class="w-full h-full object-cover opacity-60">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 p-6 md:p-8">
-                            <span class="bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block tracking-wider uppercase"><i class="fa-solid fa-book-open mr-1"></i> BAHAN BACAAN</span>
-                            <h2 id="materiJudul" class="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-md">Materi Pembelajaran</h2>
+                <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="relative h-48 md:h-72">
+                        <img id="materiCover" src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1000" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-5 md:p-8">
+                            <div>
+                                <span class="bg-brand-orange text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block">Materi Pembelajaran</span>
+                                <h2 id="materiJudul" class="text-xl md:text-4xl font-bold text-white">Judul Materi</h2>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="p-6 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-8">
-                        <div id="materiTujuanContainer" class="bg-blue-900/30 border-l-4 border-blue-500 p-5 rounded-r-xl">
-                            <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
-                            <div id="materiTujuan" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
+                    <div class="p-4 md:p-10 bg-slate-900/90 text-gray-200 leading-relaxed space-y-6">
+                        <div id="materiTujuanContainer" class="bg-blue-900/30 border-l-4 border-blue-500 p-4 md:p-5 rounded-r-xl">
+                            <h4 class="text-blue-400 font-bold mb-2 flex items-center gap-2 text-sm md:text-lg"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h4>
+                            <div id="materiTujuan" class="text-xs md:text-base sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
 
-                        <div id="materiTocContainer" class="hidden bg-slate-800/80 p-5 rounded-xl border border-slate-700 shadow-inner mt-6">
-                            <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-ul text-brand-orange mr-2"></i> Pilih Sub Topik (Mode Fokus):</label>
-                            <select id="materiTocSelect" onchange="app.scrollToSubbab()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-orange">
+                        <div id="materiTocContainer" class="hidden bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner mt-4">
+                            <label class="block text-xs md:text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-ul text-brand-orange mr-2"></i> Pilih Sub Topik (Mode Fokus):</label>
+                            <select id="materiTocSelect" onchange="app.scrollToSubbab()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange">
                                 <option value="">-- Tampilkan Semua Bagian --</option>
                             </select>
                         </div>
 
-                        <div class="space-y-6 mt-8" id="materiIsiContainer"></div>
+                        <div class="space-y-4 md:space-y-6 mt-6" id="materiIsiContainer"></div>
                         
-                        <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-5 rounded-r-xl mt-8">
-                            <h4 class="text-brand-orange font-bold mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-clipboard-list"></i> Rangkuman</h4>
-                            <div id="materiRangkuman" class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
+                        <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-4 md:p-5 rounded-r-xl mt-6">
+                            <h4 class="text-brand-orange font-bold mb-2 flex items-center gap-2 text-sm md:text-lg"><i class="fa-solid fa-clipboard-list"></i> Rangkuman</h4>
+                            <div id="materiRangkuman" class="text-xs md:text-base sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
                     </div>
                     
@@ -310,15 +311,15 @@
                         <h2 id="lkmJudulUtama" class="text-2xl md:text-3xl font-bold text-white mb-2">Lembar Kerja Murid (LKM)</h2>
                     </div>
                     
-                    <div id="lkmInfoContainer" class="hidden bg-purple-900/20 border border-purple-500/30 p-5 rounded-2xl mb-6">
-                        <h3 class="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> A. Tujuan Pembelajaran</h3>
-                        <div id="lkmTujuan" class="text-gray-300 text-base md:text-lg sheet-text text-justify-custom leading-relaxed"></div>
+                    <div id="lkmInfoContainer" class="hidden bg-purple-900/20 border border-purple-500/30 p-4 md:p-5 rounded-2xl mb-5">
+                        <h3 class="text-base md:text-xl font-bold text-purple-400 mb-2 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> A. Tujuan Pembelajaran</h3>
+                        <div id="lkmTujuan" class="text-gray-300 text-xs md:text-base sheet-text text-justify-custom leading-relaxed"></div>
                     </div>
 
                     <!-- DROPDOWN NAVIGASI / MODE FOKUS UNTUK LKM -->
-                    <div id="lkmTocContainer" class="hidden bg-slate-800/80 p-5 rounded-xl border border-slate-700 shadow-inner mb-6">
-                        <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-check text-purple-400 mr-2"></i> Pilih Kegiatan LKM (Mode Fokus):</label>
-                        <select id="lkmTocSelect" onchange="app.scrollToLkmPhase()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500">
+                    <div id="lkmTocContainer" class="hidden bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner mb-5">
+                        <label class="block text-xs md:text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-check text-purple-400 mr-2"></i> Pilih Kegiatan LKM (Mode Fokus):</label>
+                        <select id="lkmTocSelect" onchange="app.scrollToLkmPhase()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500">
                             <option value="">-- Tampilkan Semua Kegiatan --</option>
                         </select>
                     </div>
@@ -488,7 +489,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw9P87I-UUnfnnlG_fMHn5HCkP0tRie8yfYyM18LckBCSA1xRdGPLzjcWLecTw33miX/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwp8uz4Yp22vbqtcuCVxrUaA19lcHa3oy82RJnizdUn3RMlr7rnlGAYXTtOXEYIQwBH/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -516,19 +517,19 @@
 
         const restoreSession = () => {
             try {
-                const data = localStorage.getItem('pjok_session');
-                return data ? JSON.parse(data) : null;
+                const raw = localStorage.getItem('pjok_session');
+                return raw ? JSON.parse(raw) : null;
             } catch (e) {
-                console.warn("Storage warning: Gagal membaca LocalStorage.", e);
+                console.warn("Storage warning: Gagal membaca sesi.", e);
                 return null;
             }
         };
 
-        const parseMediaTags = (text) => {
+        const parseMediaTags = (text, highlightTheme = 'orange') => {
             if (!text) return "";
             let parsed = String(text);
             parsed = parsed.replace(/\[GAMBAR:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
-                return `<div class="media-container my-4 text-center"><img src="${url.trim()}" alt="Media Gambar" class="rounded-xl mx-auto shadow-md max-h-96 object-contain" onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat'"></div>`;
+                return `<div class="media-container my-3 text-center"><img src="${url.trim()}" alt="Media Gambar" class="rounded-xl mx-auto shadow-md max-h-80 object-contain" onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Tidak+Dapat+Dimuat'"></div>`;
             });
             parsed = parsed.replace(/\[VIDEO:\s*(https?:\/\/[^\]]+)\]/gi, (match, url) => {
                 let videoUrl = url.trim();
@@ -539,11 +540,115 @@
                     const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
                     videoUrl = `https://www.youtube.com/embed/${videoId}`;
                 }
-                return `<div class="media-container my-4"><iframe src="${videoUrl}" allowfullscreen class="w-full aspect-video rounded-xl shadow-md"></iframe></div>`;
+                return `<div class="media-container my-3"><iframe src="${videoUrl}" allowfullscreen class="w-full aspect-video rounded-xl shadow-md"></iframe></div>`;
             });
             parsed = parsed.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/gi, (match, label, url) => {
-                return `<a href="${url.trim()}" target="_blank" class="inline-flex items-center px-4 py-2 bg-brand-blue hover:bg-blue-600 text-white font-semibold rounded-lg my-2"><i class="fa-solid fa-external-link mr-2"></i> ${label}</a>`;
+                return `<a href="${url.trim()}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-brand-blue hover:bg-blue-600 text-white text-xs md:text-sm font-semibold rounded-lg my-1.5"><i class="fa-solid fa-external-link mr-2"></i> ${label}</a>`;
             });
+
+            // KONVERSI FORMAT TEBAL (**tulisan**) DENGAN LATAR BELAKANG MENYESUAIKAN TEMA KOLOM
+            const badgeThemes = {
+                blue: 'bg-blue-500/20 text-blue-200 border-blue-400/30',
+                purple: 'bg-purple-500/20 text-purple-200 border-purple-400/30',
+                teal: 'bg-teal-500/20 text-teal-200 border-teal-400/30',
+                orange: 'bg-brand-orange/20 text-orange-200 border-brand-orange/30'
+            };
+
+            const boxThemes = {
+                blue: 'bg-blue-950/60 border-blue-500/40 text-blue-100',
+                purple: 'bg-purple-950/60 border-purple-500/40 text-purple-100',
+                teal: 'bg-teal-950/60 border-teal-500/40 text-teal-100',
+                orange: 'bg-slate-900/90 border-brand-orange/40 text-orange-100'
+            };
+
+            const titleThemes = {
+                blue: 'text-blue-300 border-blue-500/30',
+                purple: 'text-purple-300 border-purple-500/30',
+                teal: 'text-teal-300 border-teal-500/30',
+                orange: 'text-brand-orange border-brand-orange/30'
+            };
+
+            const activeBadge = badgeThemes[highlightTheme] || badgeThemes.orange;
+            const activeBox = boxThemes[highlightTheme] || boxThemes.orange;
+            const activeTitle = titleThemes[highlightTheme] || titleThemes.orange;
+
+            // HELPER FORMAT BARIS PENOMORAN / TANDA POIN AGAR RAPI (HANGING INDENT) TANPA DIWARNAI MENCOLOK
+            const formatListLine = (rawLine) => {
+                if (rawLine.trim() === "") {
+                    return `<div class="h-3"></div>`;
+                }
+                // Pertahankan spasi indentasi di awal baris jika ada
+                const leadingSpacesMatch = rawLine.match(/^(\s+)/);
+                const leadingSpaces = leadingSpacesMatch ? leadingSpacesMatch[1].replace(/ /g, '&nbsp;').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;') : '';
+                const restText = rawLine.trimStart();
+
+                // Deteksi penomoran (1., 2., 1), a., a), dll) atau simbol (-, •, *)
+                const listMatch = restText.match(/^(\d+[\.\)]|[a-zA-Z][\.\)]|[\-\•\*])\s+(.+)$/);
+                if (listMatch) {
+                    const marker = listMatch[1];
+                    const content = listMatch[2];
+                    return `<div class="flex items-start gap-2.5 pl-1 py-0.5 whitespace-pre-wrap">${leadingSpaces ? `<span>${leadingSpaces}</span>` : ''}<span class="font-semibold text-gray-200 shrink-0 min-w-[1.25rem] select-none">${marker}</span><span class="flex-1 text-gray-200 leading-relaxed">${content}</span></div>`;
+                }
+                return `<div class="leading-relaxed whitespace-pre-wrap">${leadingSpaces}${restText}</div>`;
+            };
+
+            const renderGroupedCard = (title, bodyLines) => {
+                // Hapus baris kosong berlebih hanya di paling awal/akhir kotak
+                while (bodyLines.length > 0 && bodyLines[0].trim() === "") bodyLines.shift();
+                while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1].trim() === "") bodyLines.pop();
+
+                const formattedBody = bodyLines.map(formatListLine).join('');
+                return `<div class="${activeBox} border rounded-xl p-3.5 md:p-4 my-2.5 shadow-sm space-y-1">` +
+                       `<div class="font-bold text-xs md:text-sm ${activeTitle} border-b pb-1.5 mb-2 flex items-center gap-2"><i class="fa-solid fa-bookmark text-[10px] opacity-80"></i><span>${title}</span></div>` +
+                       `<div class="text-xs md:text-sm text-gray-200">${formattedBody}</div>` +
+                       `</div>`;
+            };
+
+            // MEMBUNGKUS JUDUL TEBAL (**judul**) BERSAMA TULISAN & PENOMORAN DI BAWAHNYA DALAM SATU KOTAK TERPADU
+            const lines = parsed.split('\n');
+            let groupedHtml = [];
+            let currentBox = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmed = line.trim();
+
+                // Deteksi baris yang diawali dengan format tebal (**Judul**)
+                const headingMatch = trimmed.match(/^\*\*([^*]+)\*\*(.*)$/);
+
+                if (headingMatch) {
+                    if (currentBox) {
+                        groupedHtml.push(renderGroupedCard(currentBox.title, currentBox.body));
+                    }
+                    const headingTitle = headingMatch[1].trim();
+                    const restOfLine = headingMatch[2].trim();
+                    currentBox = {
+                        title: headingTitle,
+                        body: restOfLine ? [restOfLine] : []
+                    };
+                } else if (currentBox) {
+                    if (trimmed === "" && i + 1 < lines.length && lines[i + 1].trim().startsWith("**")) {
+                        // Tutup kotak saat bertemu baris kosong sebelum judul tebal berikutnya
+                        groupedHtml.push(renderGroupedCard(currentBox.title, currentBox.body));
+                        currentBox = null;
+                    } else {
+                        // Simpan semua baris termasuk baris kosong (Enter) di dalam kotak
+                        currentBox.body.push(line);
+                    }
+                } else {
+                    groupedHtml.push(formatListLine(line));
+                }
+            }
+
+            if (currentBox) {
+                groupedHtml.push(renderGroupedCard(currentBox.title, currentBox.body));
+            }
+
+            parsed = groupedHtml.join('');
+
+            // Sisa teks tebal (**kata**) yang berada di tengah kalimat tetap diberi sorotan lembut
+            parsed = parsed.replace(/\*\*([^*]+)\*\*/g, `<strong class="font-bold ${activeBadge} px-1.5 py-0.5 rounded-md border inline-block leading-snug">$1</strong>`);
+            parsed = parsed.replace(/\*([^*]+)\*/g, '<em class="italic text-gray-200">$1</em>');
             return parsed;
         };
 
@@ -719,8 +824,8 @@
                 document.getElementById('materiJudul').innerText = materi.judul || state.materialTitle;
                 if (materi.cover) document.getElementById('materiCover').src = materi.cover;
                 
-                document.getElementById('materiTujuan').innerHTML = parseMediaTags(materi.tujuan || "Tujuan pembelajaran belum diisi.");
-                document.getElementById('materiRangkuman').innerHTML = parseMediaTags(materi.rangkuman || "Belum ada rangkuman.");
+                document.getElementById('materiTujuan').innerHTML = parseMediaTags(materi.tujuan || "Tujuan pembelajaran belum diisi.", 'blue');
+                document.getElementById('materiRangkuman').innerHTML = parseMediaTags(materi.rangkuman || "Belum ada rangkuman.", 'orange');
 
                 const container = document.getElementById('materiIsiContainer');
                 const tocSelect = document.getElementById('materiTocSelect');
@@ -740,14 +845,11 @@
                         let bodyContent = sub;
 
                         if (rawLines.length > 0) {
-                            // Ambil baris pertama yang bukan tag media [GAMBAR/VIDEO] sebagai judul
                             const firstTextLine = rawLines.find(l => !l.startsWith('[GAMBAR:') && !l.startsWith('[VIDEO:'));
                             if (firstTextLine) {
-                                // Bersihkan simbol markdown (# atau *) jika ada dan batasi panjang teks untuk dropdown
                                 const cleanTitle = firstTextLine.replace(/^[#*\-\d\.]+\s*/, '').trim();
                                 extractedTitle = cleanTitle.length > 65 ? cleanTitle.substring(0, 65) + "..." : cleanTitle;
                                 
-                                // Jika baris selanjutnya adalah isi paragraf, pisahkan judul agar tidak dobel
                                 if (rawLines.length > 1) {
                                     bodyContent = String(sub).replace(firstTextLine, '').trim();
                                 }
@@ -761,12 +863,12 @@
 
                         const card = document.createElement('div');
                         card.id = subId;
-                        card.className = "bg-slate-800/80 p-6 md:p-8 rounded-2xl border border-slate-700/80 space-y-4 scroll-mt-24";
+                        card.className = "bg-slate-800/80 p-4 md:p-7 rounded-2xl border border-slate-700/80 space-y-3 scroll-mt-24";
                         card.innerHTML = `
-                            <h3 class="text-xl md:text-2xl font-bold text-brand-orange border-b border-slate-700 pb-3">
+                            <h3 class="text-base md:text-xl font-bold text-brand-orange border-b border-slate-700 pb-2.5">
                                 ${extractedTitle}
                             </h3>
-                            <div class="text-base md:text-lg sheet-text text-justify-custom leading-relaxed">${parseMediaTags(bodyContent)}</div>
+                            <div class="text-xs md:text-base sheet-text text-justify-custom leading-relaxed">${parseMediaTags(bodyContent, 'orange')}</div>
                         `;
                         container.appendChild(card);
                     });
@@ -794,7 +896,7 @@
                 document.getElementById('lkmJudulUtama').innerText = lkm.judul || "Lembar Kerja Murid";
                 if (lkm.tujuan) {
                     document.getElementById('lkmInfoContainer').classList.remove('hidden');
-                    document.getElementById('lkmTujuan').innerHTML = parseMediaTags(lkm.tujuan);
+                    document.getElementById('lkmTujuan').innerHTML = parseMediaTags(lkm.tujuan, 'purple');
                 }
 
                 const container = document.getElementById('lkmQuestionsContainer');
@@ -822,30 +924,30 @@
 
                         const card = document.createElement('div');
                         card.id = p.id;
-                        card.className = "lkm-phase-card bg-slate-900/90 border border-slate-700 rounded-2xl p-6 space-y-4 scroll-mt-24";
+                        card.className = "lkm-phase-card bg-slate-900/90 border border-slate-700 rounded-2xl p-4 md:p-6 space-y-3 scroll-mt-24";
                         
                         let questionsHtml = "";
                         if (p.data.soalList && Array.isArray(p.data.soalList)) {
                             p.data.soalList.forEach((q, qIdx) => {
                                 questionsHtml += `
-                                    <div class="mt-4">
-                                        <label class="block text-sm md:text-base font-semibold text-gray-200 mb-2">${qIdx + 1}. ${q}</label>
-                                        <textarea required name="lkm_${p.id}_${qIdx}" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                                    <div class="mt-3">
+                                        <label class="block text-xs md:text-base font-semibold text-gray-200 mb-1.5">${qIdx + 1}. ${parseMediaTags(q, p.color)}</label>
+                                        <textarea required name="lkm_${p.id}_${qIdx}" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
                                     </div>
                                 `;
                             });
                         } else if (p.data.soal) {
                             questionsHtml = `
-                                <div class="mt-4">
-                                    <label class="block text-sm md:text-base font-semibold text-gray-200 mb-2">${p.data.soal}</label>
-                                    <textarea required name="lkm_${p.id}_0" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                                <div class="mt-3">
+                                    <label class="block text-xs md:text-base font-semibold text-gray-200 mb-1.5">${parseMediaTags(p.data.soal, p.color)}</label>
+                                    <textarea required name="lkm_${p.id}_0" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
                                 </div>
                             `;
                         }
 
                         card.innerHTML = `
-                            <h3 class="text-lg md:text-xl font-bold text-white border-b border-slate-700 pb-2">${p.title}</h3>
-                            ${p.data.teks ? `<div class="text-sm md:text-base text-gray-300 sheet-text leading-relaxed">${parseMediaTags(p.data.teks)}</div>` : ''}
+                            <h3 class="text-sm md:text-xl font-bold text-white border-b border-slate-700 pb-2">${p.title}</h3>
+                            ${p.data.teks ? `<div class="text-xs md:text-base text-gray-300 sheet-text leading-relaxed">${parseMediaTags(p.data.teks, p.color)}</div>` : ''}
                             ${questionsHtml}
                         `;
                         container.appendChild(card);
@@ -914,7 +1016,7 @@
                 
                 if (tugas.deskripsi) {
                     document.getElementById('tugasDeskripsiContainer').classList.remove('hidden');
-                    document.getElementById('tugasDeskripsiContainer').innerHTML = parseMediaTags(tugas.deskripsi);
+                    document.getElementById('tugasDeskripsiContainer').innerHTML = parseMediaTags(tugas.deskripsi, 'orange');
                 }
 
                 const container = document.getElementById('tugasQuestionsContainer');
@@ -924,11 +1026,11 @@
 
                 questions.forEach((q, idx) => {
                     const box = document.createElement('div');
-                    box.className = "bg-slate-900/90 border border-slate-700 rounded-2xl p-6 space-y-3";
+                    box.className = "bg-slate-900/90 border border-slate-700 rounded-2xl p-4 md:p-6 space-y-2.5";
                     box.innerHTML = `
-                        <label class="block text-sm md:text-base font-bold text-white mb-2">Soal ${idx + 1}:</label>
-                        <div class="text-sm md:text-base text-gray-300 sheet-text leading-relaxed mb-3">${parseMediaTags(q)}</div>
-                        <textarea required name="tugas_answer_${idx}" rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-3 text-white focus:outline-none focus:border-brand-orange" placeholder="Tuliskan jawaban soal nomor ${idx + 1} di sini..."></textarea>
+                        <label class="block text-xs md:text-base font-bold text-white mb-1.5">Soal ${idx + 1}:</label>
+                        <div class="text-xs md:text-base text-gray-300 sheet-text leading-relaxed mb-2.5">${parseMediaTags(q, 'orange')}</div>
+                        <textarea required name="tugas_answer_${idx}" rows="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange" placeholder="Tuliskan jawaban soal nomor ${idx + 1} di sini..."></textarea>
                     `;
                     container.appendChild(box);
                 });
