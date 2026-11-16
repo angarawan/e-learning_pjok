@@ -291,7 +291,7 @@
 
                         <div class="space-y-4 md:space-y-6 mt-6" id="materiIsiContainer"></div>
                         
-                        <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-4 md:p-5 rounded-r-xl mt-6">
+                        <div id="materiRangkumanContainer" class="bg-brand-orange/10 border-l-4 border-brand-orange p-4 md:p-5 rounded-r-xl mt-6">
                             <h4 class="text-brand-orange font-bold mb-2 flex items-center gap-2 text-sm md:text-lg"><i class="fa-solid fa-clipboard-list"></i> Rangkuman</h4>
                             <div id="materiRangkuman" class="text-xs md:text-base sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
@@ -489,7 +489,7 @@
 
     <script>
         // PASTIKAN URL DI BAWAH INI ADALAH URL WEB APP DEPLOYMENT ANDA YANG TERBARU
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwp8uz4Yp22vbqtcuCVxrUaA19lcHa3oy82RJnizdUn3RMlr7rnlGAYXTtOXEYIQwBH/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwsTg4VsvZUn7-Yd9J_tlc9-WXKOzRU2hpoOoTYWk_KV6vtGUH4nqv4l_2HCjDmgCZK/exec"; 
 
         const state = {
             studentName: "", studentClass: "", materialId: "", materialTitle: "",
@@ -878,15 +878,34 @@
             },
 
             scrollToSubbab: () => {
-                const val = document.getElementById('materiTocSelect').value;
+                const selectEl = document.getElementById('materiTocSelect');
+                const val = selectEl.value;
+                const rangkumanContainer = document.getElementById('materiRangkumanContainer');
+                const subbabCards = document.querySelectorAll('#materiIsiContainer > div');
+
                 if (!val) {
-                    document.querySelectorAll('#materiIsiContainer > div').forEach(el => el.classList.remove('hidden'));
+                    // Tampilkan semua sub topik beserta rangkumannya
+                    subbabCards.forEach(el => el.classList.remove('hidden'));
+                    if (rangkumanContainer) rangkumanContainer.classList.remove('hidden');
                     return;
                 }
-                document.querySelectorAll('#materiIsiContainer > div').forEach(el => {
+
+                // Tampilkan hanya sub topik yang dipilih
+                subbabCards.forEach(el => {
                     if (el.id === val) el.classList.remove('hidden');
                     else el.classList.add('hidden');
                 });
+
+                // Cek apakah sub topik yang dipilih adalah sub topik terakhir
+                const lastSubbabId = subbabCards.length > 0 ? subbabCards[subbabCards.length - 1].id : null;
+                if (rangkumanContainer) {
+                    if (val === lastSubbabId) {
+                        rangkumanContainer.classList.remove('hidden');
+                    } else {
+                        rangkumanContainer.classList.add('hidden');
+                    }
+                }
+
                 const target = document.getElementById(val);
                 if (target) target.scrollIntoView({ behavior: 'smooth' });
             },
