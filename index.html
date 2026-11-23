@@ -103,6 +103,32 @@
         </div>
     </div>
 
+    <!-- FULLSCREEN OVERLAY APLIKASI FORMATIF PIHAK KE-2 -->
+    <div id="formatifFullscreenOverlay" class="fixed inset-0 z-[120] hidden flex-col bg-slate-950">
+        <div class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-white/10 shrink-0 shadow-lg">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+                <span class="w-8 h-8 rounded-lg bg-red-600/20 text-red-400 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </span>
+                <div class="truncate">
+                    <h4 class="text-xs md:text-sm font-bold text-white truncate">Asesmen Formatif</h4>
+                    <p class="text-[10px] md:text-xs text-gray-400 truncate">Kerjakan dengan jujur, lalu klik Selesai & Kembali</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a id="formatifOverlayTabBtn" href="#" target="_blank" rel="noopener noreferrer" class="bg-slate-800 hover:bg-slate-700 text-gray-200 px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 border border-slate-700" title="Buka di tab baru jika aplikasi memblokir iframe">
+                    <i class="fa-solid fa-up-right-from-square"></i> <span class="hidden sm:inline">Tab Baru</span>
+                </a>
+                <button type="button" onclick="app.closeFormatifFullscreen(true)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs md:text-sm font-bold inline-flex items-center gap-1.5 shadow-lg transition-all cursor-pointer">
+                    <i class="fa-solid fa-circle-check"></i> Selesai & Kembali
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 w-full h-full bg-white relative">
+            <iframe id="formatifFullscreenIframe" src="" class="w-full h-full border-none" allow="fullscreen; camera; microphone"></iframe>
+        </div>
+    </div>
+
     <!-- VIEW 1: WELCOME SCREEN -->
     <div id="view-welcome" class="min-h-screen flex flex-col items-center justify-center bg-cinematic p-6 relative">
         <div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-transparent"></div>
@@ -276,6 +302,11 @@
                             <div id="materiTujuan" class="text-xs md:text-base sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
 
+                        <div id="materiMediaExtraContainer" class="hidden bg-slate-800/70 border border-slate-700 p-4 rounded-2xl">
+                            <h4 class="text-brand-orange font-bold mb-2 text-xs md:text-sm flex items-center gap-2"><i class="fa-solid fa-photo-film"></i> Media Pendukung Materi</h4>
+                            <div id="materiMediaExtra" class="media-container"></div>
+                        </div>
+
                         <div id="materiTocContainer" class="hidden bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner mt-4">
                             <label class="block text-xs md:text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-list-ul text-brand-orange mr-2"></i> Pilih Sub Topik (Mode Fokus):</label>
                             <select id="materiTocSelect" onchange="app.scrollToSubbab()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange">
@@ -446,15 +477,9 @@
                         Silakan klik tombol di bawah ini untuk membuka aplikasi asesmen formatif.
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <a id="formatifExternalBtn" href="#" target="_blank" rel="noopener noreferrer" onclick="app.markFormatifLinkDone()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-sm md:text-base inline-flex items-center justify-center gap-2 transition-all">
-                            <i class="fa-solid fa-up-right-from-square"></i> BUKA APLIKASI ASESMEN FORMATIF
-                        </a>
-                        <button type="button" id="btnToggleEmbedFormatif" onclick="app.toggleFormatifEmbed()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-semibold py-4 px-6 rounded-xl text-xs md:text-sm inline-flex items-center justify-center gap-2 transition-all">
-                            <i class="fa-solid fa-window-maximize"></i> Tampilkan di Layar Ini
+                        <button type="button" onclick="app.openFormatifFullscreen()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-sm md:text-base inline-flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            <i class="fa-solid fa-expand"></i> BUKA APLIKASI ASESMEN (LAYAR PENUH)
                         </button>
-                    </div>
-                    <div id="formatifEmbedContainer" class="hidden mt-6 rounded-2xl overflow-hidden border border-slate-700 bg-slate-900">
-                        <iframe id="formatifExternalIframe" src="" class="w-full h-[520px] md:h-[650px] border-none" allow="fullscreen"></iframe>
                     </div>
                 </div>
 
@@ -538,7 +563,7 @@
 
     <script>
         // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw37PkXGQDH8ZwlDErfHRu1oI4pAc9OV5hTTBoO81GC4LGRWKuS9sqPKUVP2KpmdDPn/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxbOmdfRa3hRhMKLYMOSV1DLtFTVOBC9OuCvlD_RGJEPZ50kcUn-FfRNcConqT-XrF_/exec";
         window.app = window.app || {};
 
         function showModal(title, message, iconHtml) {
@@ -940,6 +965,22 @@
                 document.getElementById('materiTujuan').innerHTML = this.parseMediaTags(materi.tujuan || '-', 'blue');
                 document.getElementById('materiRangkuman').innerHTML = this.parseMediaTags(materi.rangkuman || '-', 'orange');
 
+                const mediaExtraBox = document.getElementById('materiMediaExtraContainer');
+                const mediaExtraContent = document.getElementById('materiMediaExtra');
+                if (materi.mediaUrl) {
+                    mediaExtraBox.classList.remove('hidden');
+                    const mUrl = materi.mediaUrl.trim();
+                    if (mUrl.includes('youtube.com') || mUrl.includes('youtu.be') || mUrl.includes('/preview')) {
+                        mediaExtraContent.innerHTML = `<iframe src="${this.convertMediaEmbedUrl(mUrl)}" allowfullscreen></iframe>`;
+                    } else if (mUrl.includes('drive.google.com')) {
+                        mediaExtraContent.innerHTML = `<img src="${this.convertDriveImageUrl(mUrl)}" alt="Media Materi" loading="lazy">`;
+                    } else {
+                        mediaExtraContent.innerHTML = `<img src="${mUrl}" alt="Media Materi" loading="lazy">`;
+                    }
+                } else {
+                    mediaExtraBox.classList.add('hidden');
+                }
+
                 const isiContainer = document.getElementById('materiIsiContainer');
                 const tocContainer = document.getElementById('materiTocContainer');
                 const tocSelect = document.getElementById('materiTocSelect');
@@ -1145,7 +1186,7 @@
                             const parsed = this.parseLkmQuestionItem(rawSoal);
                             const currentNum = qCounter++;
                             phaseHtml += `<div class="bg-slate-900/90 border border-slate-700/90 rounded-2xl p-4 shadow-md space-y-3 lkm-question-card" data-qnum="${currentNum}" data-qtype="${parsed.type}" data-qprompt="${parsed.prompt.replace(/"/g, '&quot;')}">`;
-                            phaseHtml += `<div class="flex items-start gap-2.5"><span class="bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">No. ${currentNum}</span><div class="text-xs md:text-sm font-medium text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(parsed.prompt, 'purple')}</div></div>`;
+                            phaseHtml += `<div class="flex items-start gap-2.5"><span class="bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${currentNum}.</span><div class="text-xs md:text-sm font-medium text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(parsed.prompt, 'purple')}</div></div>`;
 
                             if (parsed.type === 'pg' && parsed.options.length > 0) {
                                 phaseHtml += `<div class="space-y-2 pl-1">`;
@@ -1325,7 +1366,10 @@
                         const div = document.createElement('div');
                         div.className = 'bg-slate-800/80 border border-slate-700 rounded-2xl p-4 space-y-3';
                         div.innerHTML = `
-                            <div class="text-xs md:text-sm font-semibold text-white sheet-text text-justify-custom">${idx + 1}. ${this.parseMediaTags(soal, 'orange')}</div>
+                            <div class="flex items-start gap-2.5">
+                                <span class="bg-orange-500/20 text-brand-orange border border-brand-orange/40 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${idx + 1}.</span>
+                                <div class="text-xs md:text-sm font-semibold text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(soal, 'orange')}</div>
+                            </div>
                             <textarea rows="3" required class="tugas-answer-input w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange" placeholder="Ketik jawaban tugas Anda di sini..."></textarea>
                         `;
                         qContainer.appendChild(div);
@@ -1388,15 +1432,15 @@
 
                 playArea.classList.add('hidden');
                 resArea.classList.add('hidden');
+                this.state.formatifExternalUrl = linkUrl || '';
 
                 if (linkUrl) {
                     introArea.classList.add('hidden');
                     linkArea.classList.remove('hidden');
-                    document.getElementById('formatifExternalBtn').href = linkUrl;
-                    document.getElementById('formatifExternalIframe').src = linkUrl;
+                    document.getElementById('formatifOverlayTabBtn').href = linkUrl;
                     document.getElementById('formatifLinkDescription').innerHTML = linkDesc
                         ? this.parseMediaTags(linkDesc, 'orange')
-                        : 'Silakan klik tombol <strong>BUKA APLIKASI ASESMEN FORMATIF</strong> di bawah ini untuk mengerjakan evaluasi dengan jujur dan teliti.';
+                        : 'Silakan klik tombol <strong>BUKA APLIKASI ASESMEN (LAYAR PENUH)</strong> di bawah ini untuk mengerjakan evaluasi dengan jujur dan teliti.';
                     return;
                 }
 
@@ -1411,10 +1455,35 @@
                 }
             },
 
-            toggleFormatifEmbed() {
-                const box = document.getElementById('formatifEmbedContainer');
-                box.classList.toggle('hidden');
-                this.markFormatifLinkDone();
+            openFormatifFullscreen() {
+                const url = this.state.formatifExternalUrl;
+                if (!url) return;
+                const overlay = document.getElementById('formatifFullscreenOverlay');
+                const iframe = document.getElementById('formatifFullscreenIframe');
+                iframe.src = url;
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+
+                // Aktifkan native browser fullscreen bila didukung perangkat
+                if (overlay.requestFullscreen) {
+                    overlay.requestFullscreen().catch(() => {});
+                }
+            },
+
+            closeFormatifFullscreen(markDone = true) {
+                const overlay = document.getElementById('formatifFullscreenOverlay');
+                const iframe = document.getElementById('formatifFullscreenIframe');
+                if (document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+                iframe.src = '';
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+
+                if (markDone) {
+                    this.markFormatifLinkDone();
+                    showModal('Asesmen Formatif Selesai', 'Anda telah kembali ke PJOK Digital Learning dan status Asesmen Formatif telah diperbarui.', '<i class="fa-solid fa-circle-check text-green-500"></i>');
+                }
             },
 
             markFormatifLinkDone() {
@@ -1446,7 +1515,7 @@
 
                 const optContainer = document.getElementById('qOptionsContainer');
                 optContainer.innerHTML = '';
-                const letters = ['A', 'B', 'C', 'D'];
+                const letters = ['A', 'B', 'C', 'D', 'E'];
 
                 q.options.forEach((opt, oIdx) => {
                     if (!opt) return;
