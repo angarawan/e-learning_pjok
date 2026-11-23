@@ -394,9 +394,9 @@
                         <div id="lkmAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-purple-500/40 rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
                                 <span class="text-purple-400 font-bold text-base md:text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-comments text-purple-400 text-xl"></i> Umpan Balik Hasil LKM
+                                    <i class="fa-solid fa-comments text-purple-400 text-xl"></i> Umpan Balik Kerja Murid
                                 </span>
-                                <span id="lkmAiScore" class="bg-purple-500/20 text-purple-300 font-extrabold px-3 py-1 rounded-full text-xs md:text-sm border border-purple-400/30">Pemahaman: -%</span>
+                                <span id="lkmAiScore" class="bg-purple-500/20 text-purple-300 font-extrabold px-3.5 py-1.5 rounded-full text-xs md:text-sm border border-purple-400/30">Nilai: -</span>
                             </div>
                             <div id="lkmAiFeedbackContent" class="text-gray-200 text-xs md:text-sm sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
@@ -430,7 +430,7 @@
 
                         <div id="tugasLinkArea" class="pt-4 border-t border-white/10">
                             <label class="block text-sm font-medium text-gray-300 mb-2"><i class="fa-solid fa-link text-orange-400 mr-2"></i> Link Bukti (Foto/Video G-Drive) - Opsional</label>
-                            <input type="url" id="tugasLink" data-allow-paste="true" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="https://drive.google.com/...">
+                            <input type="url" id="tugasLink" data-allow-paste="true" oninput="app.saveDraft()" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="https://drive.google.com/...">
                         </div>
                         <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl mt-4 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-paper-plane"></i> KIRIM TUGAS
@@ -441,14 +441,14 @@
                         <i class="fa-solid fa-cloud-check text-6xl text-brand-orange mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-2">Tugas Berhasil Terkirim!</h3>
                         
-                        <div id="tugasAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-orange-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
+                        <div id="tugasAiFeedbackCard" class="hidden mt-6 text-left bg-slate-900/90 border border-orange-500/40 rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
                             <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                                <span class="text-orange-400 font-bold text-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-clipboard-check text-orange-400 text-xl"></i> Umpan Balik Tugas
+                                <span class="text-orange-400 font-bold text-base md:text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-clipboard-check text-orange-400 text-xl"></i> Umpan Balik Kerja Tugas
                                 </span>
-                                <span id="tugasAiScore" class="bg-orange-500/20 text-orange-300 font-extrabold px-3 py-1 rounded-full text-sm border border-orange-400/30">Nilai: -</span>
+                                <span id="tugasAiScore" class="bg-orange-500/20 text-orange-300 font-extrabold px-3.5 py-1.5 rounded-full text-xs md:text-sm border border-orange-400/30">Nilai Tugas: -</span>
                             </div>
-                            <div id="tugasAiFeedbackContent" class="text-gray-200 text-sm md:text-base sheet-text leading-relaxed"></div>
+                            <div id="tugasAiFeedbackContent" class="text-gray-200 text-xs md:text-sm sheet-text text-justify-custom leading-relaxed"></div>
                         </div>
 
                         <button type="button" onclick="app.navigateTo('dashboard')" class="mt-6 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl text-white font-semibold"><i class="fa-solid fa-house mr-2"></i> Kembali ke Dashboard</button>
@@ -563,7 +563,8 @@
 
     <script>
         // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxbOmdfRa3hRhMKLYMOSV1DLtFTVOBC9OuCvlD_RGJEPZ50kcUn-FfRNcConqT-XrF_/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwhEAkUW0hSBMsdqot73kFdwDEJNunNiokinz2ogOKPjfmjX4vHcpX4U9zwKpM1WPTH/exec";
+        const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
         function showModal(title, message, iconHtml) {
@@ -623,6 +624,11 @@
                     }
                 }
             }, true);
+
+            // PULIHKAN SESI OTOMATIS SAAT HALAMAN DI-REFRESH DI HP ATAU LAPTOP
+            if (window.app && typeof window.app.restoreSession === 'function') {
+                window.app.restoreSession();
+            }
         });
 
         Object.assign(window.app, {
@@ -636,6 +642,7 @@
                 selectedLkmIndex: 0,
                 quizIndex: 0,
                 quizAnswers: [],
+                quizActive: false,
                 progress: {
                     materi: false,
                     lkm: false,
@@ -643,6 +650,127 @@
                     formatif: false,
                     refleksi: false,
                     formatifScore: null
+                },
+                drafts: {
+                    lkm: {},
+                    tugas: [],
+                    tugasLink: '',
+                    refleksi: [],
+                    lkmFeedback: null,
+                    tugasFeedback: null
+                }
+            },
+
+            saveSession() {
+                try {
+                    if (!this.state.studentName || !this.state.className || !this.state.materialId) return;
+                    const payload = {
+                        studentName: this.state.studentName,
+                        className: this.state.className,
+                        materialId: this.state.materialId,
+                        materialTitle: this.state.materialTitle,
+                        currentSection: this.state.currentSection,
+                        dashboardData: this.state.dashboardData,
+                        selectedLkmIndex: this.state.selectedLkmIndex,
+                        quizIndex: this.state.quizIndex,
+                        quizAnswers: this.state.quizAnswers,
+                        quizActive: this.state.quizActive,
+                        progress: this.state.progress,
+                        drafts: this.state.drafts
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                } catch (e) {}
+            },
+
+            saveDraft() {
+                try {
+                    const lkmIdx = String(this.state.selectedLkmIndex || 0);
+                    const lkmCards = document.querySelectorAll('.lkm-question-card');
+                    if (lkmCards.length > 0) {
+                        const lkmEntry = {};
+                        lkmCards.forEach(card => {
+                            const num = card.dataset.qnum;
+                            const type = card.dataset.qtype;
+                            if (type === 'pg') {
+                                const checked = card.querySelector('input[type="radio"]:checked');
+                                lkmEntry[num] = checked ? checked.value : '';
+                            } else {
+                                const inp = card.querySelector('.lkm-text-input');
+                                lkmEntry[num] = inp ? inp.value : '';
+                            }
+                        });
+                        this.state.drafts.lkm[lkmIdx] = lkmEntry;
+                    }
+
+                    const tugasInputs = document.querySelectorAll('.tugas-answer-input');
+                    if (tugasInputs.length > 0) {
+                        this.state.drafts.tugas = Array.from(tugasInputs).map(inp => inp.value);
+                    }
+                    const tugasLinkEl = document.getElementById('tugasLink');
+                    if (tugasLinkEl) {
+                        this.state.drafts.tugasLink = tugasLinkEl.value;
+                    }
+
+                    const refInputs = document.querySelectorAll('.refleksi-answer-input');
+                    if (refInputs.length > 0) {
+                        this.state.drafts.refleksi = Array.from(refInputs).map(inp => inp.value);
+                    }
+
+                    this.saveSession();
+                } catch (e) {}
+            },
+
+            restoreSession() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return;
+                    const saved = JSON.parse(raw);
+                    if (!saved || !saved.studentName || !saved.className || !saved.materialId) return;
+
+                    this.state.studentName = saved.studentName;
+                    this.state.className = saved.className;
+                    this.state.materialId = saved.materialId;
+                    this.state.materialTitle = saved.materialTitle || '';
+                    this.state.currentSection = saved.currentSection || 'dashboard';
+                    this.state.dashboardData = saved.dashboardData || null;
+                    this.state.selectedLkmIndex = saved.selectedLkmIndex || 0;
+                    this.state.quizIndex = saved.quizIndex || 0;
+                    this.state.quizAnswers = saved.quizAnswers || [];
+                    this.state.quizActive = Boolean(saved.quizActive);
+                    if (saved.progress) {
+                        this.state.progress = Object.assign(this.state.progress, saved.progress);
+                    }
+                    if (saved.drafts) {
+                        this.state.drafts = Object.assign(this.state.drafts, saved.drafts);
+                    }
+
+                    document.getElementById('view-welcome').classList.add('hidden');
+                    document.getElementById('view-identity').classList.add('hidden');
+                    document.getElementById('view-identity').classList.remove('flex');
+                    document.getElementById('view-main').classList.remove('hidden');
+
+                    if (this.state.dashboardData) {
+                        this.setupDashboard(true);
+                    } else {
+                        this.refreshDashboardFromServer();
+                    }
+                } catch (e) {}
+            },
+
+            async refreshDashboardFromServer() {
+                showLoading(true);
+                try {
+                    const dashData = await this.api({
+                        action: 'getDashboardData',
+                        studentName: this.state.studentName,
+                        className: this.state.className,
+                        materialId: this.state.materialId
+                    });
+                    this.state.dashboardData = dashData;
+                    this.setupDashboard(true);
+                } catch (e) {
+                } finally {
+                    showLoading(false);
                 }
             },
 
@@ -869,6 +997,7 @@
                 this.state.studentName = student;
                 this.state.materialId = matId;
                 this.state.materialTitle = matTitle;
+                this.state.currentSection = 'dashboard';
 
                 showLoading(true);
                 try {
@@ -882,7 +1011,8 @@
                     document.getElementById('view-identity').classList.add('hidden');
                     document.getElementById('view-identity').classList.remove('flex');
                     document.getElementById('view-main').classList.remove('hidden');
-                    this.setupDashboard();
+                    this.setupDashboard(false);
+                    this.saveSession();
                 } catch (err) {
                     showModal('Gagal Masuk Sesi', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
                 } finally {
@@ -890,7 +1020,7 @@
                 }
             },
 
-            setupDashboard() {
+            setupDashboard(isRestored = false) {
                 const d = this.state.dashboardData || {};
                 document.getElementById('lblStudentName').innerText = this.state.studentName;
                 document.getElementById('lblStudentClass').innerText = this.state.className;
@@ -904,12 +1034,14 @@
                 }
 
                 this.renderMateri(d.materi);
-                this.renderLKM(d.lkmList || (d.lkm ? [d.lkm] : []));
-                this.renderTugas(d.tugas);
-                this.renderFormatif(d.formatif || [], d.formatifLink || '', d.formatifDesc || '');
-                this.renderRefleksi(d.refleksi);
+                this.renderLKM(d.lkmList || (d.lkm ? [d.lkm] : []), isRestored);
+                this.renderTugas(d.tugas, isRestored);
+                this.renderFormatif(d.formatif || [], d.formatifLink || '', d.formatifDesc || '', isRestored);
+                this.renderRefleksi(d.refleksi, isRestored);
                 this.updateProgress();
-                this.navigateTo('dashboard');
+
+                const targetSection = isRestored ? (this.state.currentSection || 'dashboard') : 'dashboard';
+                this.navigateTo(targetSection, true);
             },
 
             toggleSidebar() {
@@ -931,7 +1063,7 @@
                 }
             },
 
-            navigateTo(target) {
+            navigateTo(target, skipSave = false) {
                 this.state.currentSection = target;
                 document.querySelectorAll('.content-section').forEach(sec => sec.classList.add('hidden'));
                 const activeSec = document.getElementById(`content-${target}`);
@@ -954,6 +1086,8 @@
                     document.getElementById('appSidebar').classList.remove('mobile-open');
                     document.getElementById('sidebarOverlay').classList.remove('active');
                 }
+
+                if (!skipSave) this.saveSession();
             },
 
             renderMateri(materi) {
@@ -1075,6 +1209,7 @@
             markMateriDone() {
                 this.state.progress.materi = true;
                 this.updateProgress();
+                this.saveSession();
                 showModal('Materi Selesai', 'Bagian materi telah ditandai selesai. Silakan lanjut ke LKM!', '<i class="fa-solid fa-circle-check text-green-500"></i>');
             },
 
@@ -1103,7 +1238,7 @@
                 };
             },
 
-            renderLKM(lkmList) {
+            renderLKM(lkmList, isRestored = false) {
                 const meetingBox = document.getElementById('lkmMeetingSelectorContainer');
                 const meetingSelect = document.getElementById('lkmMeetingSelect');
                 const infoBox = document.getElementById('lkmInfoContainer');
@@ -1125,8 +1260,19 @@
                     meetingSelect.appendChild(opt);
                 });
 
-                this.state.selectedLkmIndex = 0;
-                this.renderSelectedLkmItem(lkmList[0]);
+                const activeIdx = isRestored ? (this.state.selectedLkmIndex || 0) : 0;
+                this.state.selectedLkmIndex = activeIdx;
+                meetingSelect.value = String(activeIdx);
+                this.renderSelectedLkmItem(lkmList[activeIdx] || lkmList[0]);
+
+                if (isRestored && this.state.progress.lkm && this.state.drafts.lkmFeedback) {
+                    document.getElementById('lkmForm').classList.add('hidden');
+                    document.getElementById('lkmDoneState').classList.remove('hidden');
+                    const fbCard = document.getElementById('lkmAiFeedbackCard');
+                    fbCard.classList.remove('hidden');
+                    document.getElementById('lkmAiScore').innerText = `Nilai LKM: ${this.state.drafts.lkmFeedback.score || 80}`;
+                    document.getElementById('lkmAiFeedbackContent').innerHTML = this.parseMediaTags(this.state.drafts.lkmFeedback.feedback, 'purple');
+                }
             },
 
             onSelectLkmMeeting() {
@@ -1137,6 +1283,7 @@
                     document.getElementById('lkmForm').classList.remove('hidden');
                     document.getElementById('lkmDoneState').classList.add('hidden');
                     this.renderSelectedLkmItem(lkmList[idx]);
+                    this.saveSession();
                 }
             },
 
@@ -1163,6 +1310,8 @@
                 qContainer.innerHTML = '';
                 tocSelect.innerHTML = '<option value="">-- Tampilkan Semua Kegiatan --</option>';
 
+                const savedDraft = (this.state.drafts.lkm && this.state.drafts.lkm[String(this.state.selectedLkmIndex)]) || {};
+
                 let qCounter = 1;
                 phases.forEach((phase, pIdx) => {
                     const opt = document.createElement('option');
@@ -1185,25 +1334,28 @@
                         soalList.forEach(rawSoal => {
                             const parsed = this.parseLkmQuestionItem(rawSoal);
                             const currentNum = qCounter++;
+                            const prevVal = savedDraft[String(currentNum)] || '';
+
                             phaseHtml += `<div class="bg-slate-900/90 border border-slate-700/90 rounded-2xl p-4 shadow-md space-y-3 lkm-question-card" data-qnum="${currentNum}" data-qtype="${parsed.type}" data-qprompt="${parsed.prompt.replace(/"/g, '&quot;')}">`;
                             phaseHtml += `<div class="flex items-start gap-2.5"><span class="bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${currentNum}.</span><div class="text-xs md:text-sm font-medium text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(parsed.prompt, 'purple')}</div></div>`;
 
                             if (parsed.type === 'pg' && parsed.options.length > 0) {
                                 phaseHtml += `<div class="space-y-2 pl-1">`;
-                                parsed.options.forEach((optText, oIdx) => {
+                                parsed.options.forEach((optText) => {
                                     const radioName = `lkm_pg_${currentNum}`;
+                                    const checkedAttr = prevVal === optText ? 'checked' : '';
                                     phaseHtml += `
                                         <label class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-purple-500 cursor-pointer text-xs md:text-sm text-gray-200">
-                                            <input type="radio" name="${radioName}" value="${optText.replace(/"/g, '&quot;')}" class="accent-purple-500 w-4 h-4 shrink-0">
+                                            <input type="radio" name="${radioName}" value="${optText.replace(/"/g, '&quot;')}" ${checkedAttr} onchange="app.saveDraft()" class="accent-purple-500 w-4 h-4 shrink-0">
                                             <span>${optText}</span>
                                         </label>
                                     `;
                                 });
                                 phaseHtml += `</div>`;
                             } else if (parsed.type === 'isian') {
-                                phaseHtml += `<input type="text" class="lkm-text-input w-full bg-slate-800 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Ketik jawaban singkat Anda di sini...">`;
+                                phaseHtml += `<input type="text" value="${prevVal.replace(/"/g, '&quot;')}" oninput="app.saveDraft()" class="lkm-text-input w-full bg-slate-800 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Ketik jawaban singkat Anda di sini...">`;
                             } else {
-                                phaseHtml += `<textarea rows="3" class="lkm-text-input w-full bg-slate-800 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Ketik uraian jawaban Anda dengan kalimat sendiri..."></textarea>`;
+                                phaseHtml += `<textarea rows="3" oninput="app.saveDraft()" class="lkm-text-input w-full bg-slate-800 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Ketik uraian jawaban Anda dengan kalimat sendiri...">${prevVal.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>`;
                             }
                             phaseHtml += `</div>`;
                         });
@@ -1291,10 +1443,10 @@
                     }
 
                     if (!val) {
-                        showModal('Jawaban Belum Lengkap', `Silakan lengkapi jawaban untuk pertanyaan No. ${num} terlebih dahulu.`, '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
+                        showModal('Jawaban Belum Lengkap', `Silakan lengkapi jawaban untuk pertanyaan ${num}. terlebih dahulu.`, '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
                         return;
                     }
-                    answers.push(`No.${num}: ${val}`);
+                    answers.push(`${num}. ${val}`);
                     detailedParts.push(`Pertanyaan ${num}: ${prompt}\nJawaban Murid: ${val}`);
                 }
 
@@ -1315,7 +1467,9 @@
                     });
 
                     this.state.progress.lkm = true;
+                    this.state.drafts.lkmFeedback = res || null;
                     this.updateProgress();
+                    this.saveSession();
 
                     document.getElementById('lkmForm').classList.add('hidden');
                     document.getElementById('lkmDoneState').classList.remove('hidden');
@@ -1323,7 +1477,7 @@
                     const fbCard = document.getElementById('lkmAiFeedbackCard');
                     if (res && res.feedback) {
                         fbCard.classList.remove('hidden');
-                        document.getElementById('lkmAiScore').innerText = `Pemahaman: ${res.score || 88}%`;
+                        document.getElementById('lkmAiScore').innerText = `Nilai LKM: ${res.score || 80}`;
                         document.getElementById('lkmAiFeedbackContent').innerHTML = this.parseMediaTags(res.feedback, 'purple');
                     }
                 } catch (err) {
@@ -1334,19 +1488,18 @@
             },
 
             resetLkmForAnotherMeeting() {
-                document.getElementById('lkmDoneState').classList.add('hidden');
                 document.getElementById('lkmForm').classList.remove('hidden');
+                document.getElementById('lkmDoneState').classList.add('hidden');
             },
 
-            renderTugas(tugas) {
-                const descBox = document.getElementById('tugasDeskripsiContainer');
+            renderTugas(tugas, isRestored = false) {
                 const qContainer = document.getElementById('tugasQuestionsContainer');
+                const descContainer = document.getElementById('tugasDeskripsiContainer');
                 qContainer.innerHTML = '';
 
                 if (!tugas) {
-                    document.getElementById('tugasJudulUtama').innerText = 'Penugasan';
-                    document.getElementById('tugasDeadline').innerText = 'Belum ada tugas aktif';
-                    descBox.classList.add('hidden');
+                    descContainer.classList.add('hidden');
+                    qContainer.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Tidak ada penugasan khusus untuk materi ini.</p>';
                     return;
                 }
 
@@ -1354,43 +1507,54 @@
                 document.getElementById('tugasDeadline').innerText = `Batas waktu: ${tugas.deadline || '-'}`;
 
                 if (tugas.deskripsi) {
-                    descBox.classList.remove('hidden');
-                    descBox.innerHTML = this.parseMediaTags(tugas.deskripsi, 'orange');
+                    descContainer.classList.remove('hidden');
+                    descContainer.innerHTML = this.parseMediaTags(tugas.deskripsi, 'orange');
                 } else {
-                    descBox.classList.add('hidden');
+                    descContainer.classList.add('hidden');
                 }
 
                 const soalList = tugas.soalList || [];
-                if (soalList.length > 0) {
-                    soalList.forEach((soal, idx) => {
-                        const div = document.createElement('div');
-                        div.className = 'bg-slate-800/80 border border-slate-700 rounded-2xl p-4 space-y-3';
-                        div.innerHTML = `
-                            <div class="flex items-start gap-2.5">
-                                <span class="bg-orange-500/20 text-brand-orange border border-brand-orange/40 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${idx + 1}.</span>
-                                <div class="text-xs md:text-sm font-semibold text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(soal, 'orange')}</div>
-                            </div>
-                            <textarea rows="3" required class="tugas-answer-input w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange" placeholder="Ketik jawaban tugas Anda di sini..."></textarea>
-                        `;
-                        qContainer.appendChild(div);
-                    });
-                } else {
-                    qContainer.innerHTML = `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Jawaban / Laporan Tugas</label>
-                            <textarea rows="4" required class="tugas-answer-input w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white focus:border-brand-orange" placeholder="Tuliskan jawaban atau laporan praktik Anda di sini..."></textarea>
+                const savedTugas = this.state.drafts.tugas || [];
+                soalList.forEach((soal, idx) => {
+                    const prevVal = savedTugas[idx] || '';
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-900/90 border border-slate-700 rounded-2xl p-4 space-y-3';
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5">
+                            <span class="bg-brand-orange/20 text-brand-orange border border-brand-orange/30 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${idx + 1}.</span>
+                            <div class="text-xs md:text-sm font-medium text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(soal, 'orange')}</div>
                         </div>
+                        <textarea rows="3" required oninput="app.saveDraft()" class="tugas-answer-input w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange" placeholder="Ketik jawaban tugas Anda dengan kalimat sendiri...">${prevVal.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                     `;
+                    qContainer.appendChild(card);
+                });
+
+                if (this.state.drafts.tugasLink) {
+                    document.getElementById('tugasLink').value = this.state.drafts.tugasLink;
+                }
+
+                if (isRestored && this.state.progress.tugas && this.state.drafts.tugasFeedback) {
+                    document.getElementById('tugasForm').classList.add('hidden');
+                    document.getElementById('tugasDoneState').classList.remove('hidden');
+                    const fbCard = document.getElementById('tugasAiFeedbackCard');
+                    fbCard.classList.remove('hidden');
+                    document.getElementById('tugasAiScore').innerText = `Nilai Tugas: ${this.state.drafts.tugasFeedback.score || 80}`;
+                    document.getElementById('tugasAiFeedbackContent').innerHTML = this.parseMediaTags(this.state.drafts.tugasFeedback.feedback, 'orange');
                 }
             },
 
             async submitTugas(e) {
                 e.preventDefault();
                 const inputs = document.querySelectorAll('.tugas-answer-input');
-                const jawaban = [];
-                inputs.forEach((inp, idx) => {
-                    if (inp.value.trim()) jawaban.push(`No.${idx + 1}: ${inp.value.trim()}`);
-                });
+                const answers = [];
+                for (let i = 0; i < inputs.length; i++) {
+                    const val = inputs[i].value.trim();
+                    if (!val) {
+                        showModal('Tugas Belum Lengkap', `Silakan isi jawaban tugas ${i + 1}. terlebih dahulu.`, '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
+                        return;
+                    }
+                    answers.push(`${i + 1}. ${val}`);
+                }
                 const linkVal = document.getElementById('tugasLink').value.trim();
 
                 showLoading(true);
@@ -1401,12 +1565,14 @@
                         studentName: this.state.studentName,
                         className: this.state.className,
                         materialId: this.state.materialId,
-                        jawaban: jawaban,
+                        jawaban: answers,
                         fileUrl: linkVal
                     });
 
                     this.state.progress.tugas = true;
+                    this.state.drafts.tugasFeedback = res || null;
                     this.updateProgress();
+                    this.saveSession();
 
                     document.getElementById('tugasForm').classList.add('hidden');
                     document.getElementById('tugasDoneState').classList.remove('hidden');
@@ -1414,7 +1580,7 @@
                     const fbCard = document.getElementById('tugasAiFeedbackCard');
                     if (res && res.feedback) {
                         fbCard.classList.remove('hidden');
-                        document.getElementById('tugasAiScore').innerText = `Nilai: ${res.score || 88}`;
+                        document.getElementById('tugasAiScore').innerText = `Nilai Tugas: ${res.score || 80}`;
                         document.getElementById('tugasAiFeedbackContent').innerHTML = this.parseMediaTags(res.feedback, 'orange');
                     }
                 } catch (err) {
@@ -1424,119 +1590,123 @@
                 }
             },
 
-            renderFormatif(questions, linkUrl, linkDesc) {
-                const introArea = document.getElementById('formatifIntro');
+            renderFormatif(questions, externalLink, externalDesc, isRestored = false) {
+                const intro = document.getElementById('formatifIntro');
                 const linkArea = document.getElementById('formatifLinkArea');
                 const playArea = document.getElementById('formatifPlayArea');
-                const resArea = document.getElementById('formatifResultArea');
+                const resultArea = document.getElementById('formatifResultArea');
 
+                intro.classList.add('hidden');
+                linkArea.classList.add('hidden');
                 playArea.classList.add('hidden');
-                resArea.classList.add('hidden');
-                this.state.formatifExternalUrl = linkUrl || '';
+                resultArea.classList.add('hidden');
 
-                if (linkUrl) {
-                    introArea.classList.add('hidden');
+                if (externalLink) {
                     linkArea.classList.remove('hidden');
-                    document.getElementById('formatifOverlayTabBtn').href = linkUrl;
-                    document.getElementById('formatifLinkDescription').innerHTML = linkDesc
-                        ? this.parseMediaTags(linkDesc, 'orange')
-                        : 'Silakan klik tombol <strong>BUKA APLIKASI ASESMEN (LAYAR PENUH)</strong> di bawah ini untuk mengerjakan evaluasi dengan jujur dan teliti.';
+                    document.getElementById('formatifLinkDescription').innerHTML = externalDesc
+                        ? this.parseMediaTags(externalDesc, 'orange')
+                        : 'Silakan klik tombol di bawah ini untuk membuka aplikasi asesmen formatif secara layar penuh. Kerjakan dengan jujur dan teliti!';
                     return;
                 }
 
-                linkArea.classList.add('hidden');
-                introArea.classList.remove('hidden');
+                if (isRestored && this.state.progress.formatif && this.state.progress.formatifScore !== null) {
+                    resultArea.classList.remove('hidden');
+                    document.getElementById('formatifScoreVal').innerText = this.state.progress.formatifScore;
+                    return;
+                }
+
                 if (!questions || questions.length === 0) {
+                    intro.classList.remove('hidden');
                     document.getElementById('formatifIntroDesc').innerText = 'Belum ada soal asesmen formatif untuk materi ini.';
                     document.getElementById('btnStartFormatif').classList.add('hidden');
+                    return;
+                }
+
+                document.getElementById('btnStartFormatif').classList.remove('hidden');
+                if (isRestored && this.state.quizActive) {
+                    playArea.classList.remove('hidden');
+                    this.renderQuizQuestion();
                 } else {
-                    document.getElementById('formatifIntroDesc').innerText = `Terdapat ${questions.length} butir soal pilihan ganda. Kerjakan dengan jujur dan teliti.`;
-                    document.getElementById('btnStartFormatif').classList.remove('hidden');
+                    intro.classList.remove('hidden');
                 }
             },
 
             openFormatifFullscreen() {
-                const url = this.state.formatifExternalUrl;
+                const url = (this.state.dashboardData && this.state.dashboardData.formatifLink) || '';
                 if (!url) return;
+                document.getElementById('formatifFullscreenIframe').src = url;
+                document.getElementById('formatifOverlayTabBtn').href = url;
                 const overlay = document.getElementById('formatifFullscreenOverlay');
-                const iframe = document.getElementById('formatifFullscreenIframe');
-                iframe.src = url;
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
-
-                // Aktifkan native browser fullscreen bila didukung perangkat
-                if (overlay.requestFullscreen) {
-                    overlay.requestFullscreen().catch(() => {});
-                }
             },
 
-            closeFormatifFullscreen(markDone = true) {
+            closeFormatifFullscreen(markDone) {
                 const overlay = document.getElementById('formatifFullscreenOverlay');
-                const iframe = document.getElementById('formatifFullscreenIframe');
-                if (document.fullscreenElement && document.exitFullscreen) {
-                    document.exitFullscreen().catch(() => {});
-                }
-                iframe.src = '';
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
+                document.getElementById('formatifFullscreenIframe').src = '';
 
                 if (markDone) {
-                    this.markFormatifLinkDone();
-                    showModal('Asesmen Formatif Selesai', 'Anda telah kembali ke PJOK Digital Learning dan status Asesmen Formatif telah diperbarui.', '<i class="fa-solid fa-circle-check text-green-500"></i>');
+                    this.state.progress.formatif = true;
+                    this.updateProgress();
+                    this.saveSession();
+                    showModal('Asesmen Formatif Selesai', 'Terima kasih telah menyelesaikan asesmen formatif!', '<i class="fa-solid fa-circle-check text-green-500"></i>');
                 }
-            },
-
-            markFormatifLinkDone() {
-                this.state.progress.formatif = true;
-                this.state.progress.formatifScore = 'Selesai (Aplikasi)';
-                this.updateProgress();
             },
 
             startFormatif() {
                 const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
                 if (questions.length === 0) return;
-
                 this.state.quizIndex = 0;
                 this.state.quizAnswers = new Array(questions.length).fill(null);
-
+                this.state.quizActive = true;
                 document.getElementById('formatifIntro').classList.add('hidden');
                 document.getElementById('formatifPlayArea').classList.remove('hidden');
-                document.getElementById('qTotal').innerText = questions.length;
                 this.renderQuizQuestion();
+                this.saveSession();
             },
 
             renderQuizQuestion() {
-                const questions = this.state.dashboardData.formatif;
+                const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
                 const idx = this.state.quizIndex;
                 const q = questions[idx];
+                if (!q) return;
 
                 document.getElementById('qCurrentIdx').innerText = idx + 1;
+                document.getElementById('qTotal').innerText = questions.length;
                 document.getElementById('qText').innerHTML = this.parseMediaTags(q.text, 'orange');
 
                 const optContainer = document.getElementById('qOptionsContainer');
                 optContainer.innerHTML = '';
                 const letters = ['A', 'B', 'C', 'D', 'E'];
 
-                q.options.forEach((opt, oIdx) => {
-                    if (!opt) return;
+                (q.options || []).forEach((optText, oIdx) => {
+                    if (!optText) return;
                     const optNum = oIdx + 1;
                     const isSelected = this.state.quizAnswers[idx] === optNum;
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = `w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 text-xs md:text-base ${
+                    btn.className = `w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
                         isSelected
-                            ? 'bg-red-600/30 border-red-500 text-white font-bold'
+                            ? 'bg-red-600/30 border-red-500 text-white font-semibold'
                             : 'bg-slate-800/80 border-slate-700 text-gray-200 hover:border-red-400'
                     }`;
-                    btn.innerHTML = `<span class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0 ${isSelected ? 'bg-red-500 text-white' : 'bg-slate-700 text-gray-300'}">${letters[oIdx]}</span><span>${opt}</span>`;
+                    btn.innerHTML = `
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                            isSelected ? 'bg-red-500 text-white' : 'bg-slate-700 text-gray-300'
+                        }">${letters[oIdx] || optNum}</span>
+                        <span class="text-xs md:text-sm">${optText}</span>
+                    `;
                     btn.onclick = () => {
                         this.state.quizAnswers[idx] = optNum;
                         this.renderQuizQuestion();
+                        this.saveSession();
                     };
                     optContainer.appendChild(btn);
                 });
 
-                document.getElementById('btnQuizPrev').classList.toggle('invisible', idx === 0);
+                document.getElementById('btnQuizPrev').disabled = idx === 0;
                 if (idx === questions.length - 1) {
                     document.getElementById('btnQuizNext').classList.add('hidden');
                     document.getElementById('btnQuizSubmit').classList.remove('hidden');
@@ -1547,26 +1717,32 @@
             },
 
             quizNav(step) {
-                const total = this.state.dashboardData.formatif.length;
+                const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
                 const next = this.state.quizIndex + step;
-                if (next >= 0 && next < total) {
+                if (next >= 0 && next < questions.length) {
                     this.state.quizIndex = next;
                     this.renderQuizQuestion();
+                    this.saveSession();
                 }
             },
 
             async submitFormatif() {
-                const questions = this.state.dashboardData.formatif;
-                if (this.state.quizAnswers.includes(null)) {
-                    showModal('Belum Selesai', 'Masih ada soal yang belum dijawab. Periksa kembali seluruh nomor soal!', '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
+                const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
+                const unanswered = this.state.quizAnswers.findIndex(a => a === null);
+                if (unanswered !== -1) {
+                    showModal('Jawaban Belum Lengkap', `Anda belum menjawab soal nomor ${unanswered + 1}.`, '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
                     return;
                 }
 
-                let correct = 0;
-                questions.forEach((q, idx) => {
-                    if (Number(this.state.quizAnswers[idx]) === Number(q.answer)) correct++;
+                let correctCount = 0;
+                const letters = ['A', 'B', 'C', 'D', 'E'];
+                const answerLabels = questions.map((q, idx) => {
+                    const chosen = this.state.quizAnswers[idx];
+                    if (chosen === Number(q.answer)) correctCount++;
+                    return `${idx + 1}:${letters[chosen - 1] || chosen}`;
                 });
-                const score = Math.round((correct / questions.length) * 100);
+
+                const score = Math.round((correctCount / questions.length) * 100);
 
                 showLoading(true);
                 try {
@@ -1576,53 +1752,71 @@
                         studentName: this.state.studentName,
                         className: this.state.className,
                         materialId: this.state.materialId,
-                        answers: this.state.quizAnswers,
+                        answers: answerLabels,
                         score: score
                     });
 
+                    this.state.quizActive = false;
                     this.state.progress.formatif = true;
                     this.state.progress.formatifScore = score;
                     this.updateProgress();
+                    this.saveSession();
 
                     document.getElementById('formatifPlayArea').classList.add('hidden');
                     document.getElementById('formatifResultArea').classList.remove('hidden');
                     document.getElementById('formatifScoreVal').innerText = score;
                 } catch (err) {
-                    showModal('Gagal Menyimpan Nilai', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                    showModal('Gagal Mengirim Jawaban', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
                 } finally {
                     showLoading(false);
                 }
             },
 
-            renderRefleksi(refleksi) {
+            renderRefleksi(refleksi, isRestored = false) {
                 const container = document.getElementById('refleksiQuestionsContainer');
                 container.innerHTML = '';
-                const questions = (refleksi && refleksi.questions) ? refleksi.questions : [
-                    { id: 'R1', text: 'Apa hal baru yang kamu pelajari hari ini?' },
-                    { id: 'R2', text: 'Bagian gerakan atau materi mana yang menurutmu paling menantang?' }
-                ];
 
+                const questions = (refleksi && refleksi.questions && refleksi.questions.length > 0)
+                    ? refleksi.questions
+                    : [
+                        { id: 'R1', text: 'Apa hal baru yang kamu pelajari dari materi hari ini?' },
+                        { id: 'R2', text: 'Bagaimana perasaanmu setelah mengikuti pembelajaran PJOK hari ini?' }
+                    ];
+
+                const savedRef = this.state.drafts.refleksi || [];
                 questions.forEach((q, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'bg-slate-800/80 border border-slate-700 rounded-2xl p-4 space-y-2';
-                    div.innerHTML = `
-                        <label class="block text-xs md:text-sm font-semibold text-teal-300">${idx + 1}. ${q.text}</label>
-                        <textarea rows="3" required data-question="${q.text.replace(/"/g, '&quot;')}" class="refleksi-answer-input w-full bg-slate-900 border border-slate-600 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Tuliskan refleksi Anda dengan kalimat sendiri..."></textarea>
+                    const prevVal = savedRef[idx] || '';
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-900/90 border border-slate-700 rounded-2xl p-4 space-y-3';
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5">
+                            <span class="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">${idx + 1}.</span>
+                            <div class="text-xs md:text-sm font-medium text-white sheet-text text-justify-custom flex-1">${this.parseMediaTags(q.text, 'teal')}</div>
+                        </div>
+                        <textarea rows="3" required data-question="${q.text.replace(/"/g, '&quot;')}" oninput="app.saveDraft()" class="refleksi-answer-input w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-xs md:text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Tuliskan refleksi Anda dengan jujur...">${prevVal.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                     `;
-                    container.appendChild(div);
+                    container.appendChild(card);
                 });
+
+                if (isRestored && this.state.progress.refleksi) {
+                    document.getElementById('refleksiForm').classList.add('hidden');
+                    document.getElementById('refleksiDoneState').classList.remove('hidden');
+                }
             },
 
             async submitRefleksi(e) {
                 e.preventDefault();
                 const inputs = document.querySelectorAll('.refleksi-answer-input');
-                const refleksiList = [];
-                inputs.forEach(inp => {
-                    refleksiList.push({
-                        question: inp.dataset.question,
-                        answer: inp.value.trim()
-                    });
-                });
+                const items = [];
+                for (let i = 0; i < inputs.length; i++) {
+                    const ans = inputs[i].value.trim();
+                    const qText = inputs[i].dataset.question || `Pertanyaan ${i + 1}`;
+                    if (!ans) {
+                        showModal('Refleksi Belum Lengkap', `Silakan lengkapi refleksi nomor ${i + 1} terlebih dahulu.`, '<i class="fa-solid fa-triangle-exclamation text-brand-orange"></i>');
+                        return;
+                    }
+                    items.push({ question: qText, answer: ans });
+                }
 
                 showLoading(true);
                 try {
@@ -1632,11 +1826,12 @@
                         studentName: this.state.studentName,
                         className: this.state.className,
                         materialId: this.state.materialId,
-                        refleksi: refleksiList
+                        refleksi: items
                     });
 
                     this.state.progress.refleksi = true;
                     this.updateProgress();
+                    this.saveSession();
 
                     document.getElementById('refleksiForm').classList.add('hidden');
                     document.getElementById('refleksiDoneState').classList.remove('hidden');
@@ -1649,12 +1844,12 @@
 
             updateProgress() {
                 const p = this.state.progress;
-                const items = ['materi', 'lkm', 'tugas', 'formatif', 'refleksi'];
+                const keys = ['materi', 'lkm', 'tugas', 'formatif', 'refleksi'];
                 let doneCount = 0;
 
-                items.forEach(key => {
-                    const iconEl = document.getElementById(`status-${key}-icon`);
-                    if (p[key]) {
+                keys.forEach(k => {
+                    const iconEl = document.getElementById(`status-${k}-icon`);
+                    if (p[k]) {
                         doneCount++;
                         if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-green-400 text-sm"></i>';
                     } else {
@@ -1662,18 +1857,22 @@
                     }
                 });
 
-                const pct = Math.round((doneCount / items.length) * 100);
-                document.getElementById('lblTotalProgress').innerText = `${pct}%`;
+                const pct = Math.round((doneCount / keys.length) * 100);
+                const lblPct = document.getElementById('lblTotalProgress');
+                if (lblPct) lblPct.innerText = `${pct}%`;
 
                 if (document.getElementById('profStatMateri')) {
                     document.getElementById('profStatMateri').innerText = p.materi ? 'Selesai' : 'Belum Selesai';
-                    document.getElementById('profStatTugas').innerText = p.tugas ? 'Sudah Dikirim' : 'Belum Dikirim';
-                    document.getElementById('profStatNilai').innerText = p.formatifScore !== null ? String(p.formatifScore) : '-';
+                    document.getElementById('profStatTugas').innerText = p.tugas ? 'Terkirim' : 'Belum Dikirim';
+                    document.getElementById('profStatNilai').innerText = p.formatifScore !== null ? String(p.formatifScore) : (p.formatif ? 'Selesai' : '-');
                     document.getElementById('profStatRefleksi').innerText = p.refleksi ? 'Sudah Diisi' : 'Belum Diisi';
                 }
             },
 
             logout() {
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (e) {}
                 location.reload();
             }
         });
