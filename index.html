@@ -894,7 +894,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbykQ1MWtmkl0o85Wk4ROO7_jwDWH0TPGD3lD43YnCwyEQBE38mOWu3euki7fae6uPBu/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby5pH1QFFNXkenFtP4mfXFQ92DACClvxhAr0pMiUrlm-GqX5obw7kg0_FNg7CEogE1p/exec";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -2363,7 +2363,15 @@
                 const dash = this.state.dashboardData || {};
                 const pwdSetting = String(dash.formatifPassword || '').trim();
                 const codeSheet = String(dash.formatifCode || '').trim();
-                return pwdSetting || codeSheet || '';
+                return pwdSetting || codeSheet || 'PJOK2026';
+            },
+
+            getExpectedFormatifExitPassword() {
+                const dash = this.state.dashboardData || {};
+                const pwdSetting = String(dash.formatifPassword || '').trim();
+                const refreshSetting = String(dash.refreshCode || '').trim();
+                const codeSheet = String(dash.formatifCode || '').trim();
+                return pwdSetting || refreshSetting || codeSheet || 'PJOK2026';
             },
 
             renderFormatif(questions, externalLink, externalDesc, accessCode, isRestored = false) {
@@ -3230,17 +3238,63 @@
             },
 
             promptRefreshFormatif() {
-                const expectedRefresh = (this.state.dashboardData && this.state.dashboardData.refreshCode) ? String(this.state.dashboardData.refreshCode).trim() : '';
-                if (!expectedRefresh) {
-                    this.executeRefreshFormatif();
-                    return;
-                }
+                const dash = this.state.dashboardData || {};
+                const expectedRefresh = String(dash.refreshCode || '').trim() || '12345';
                 this.openCodePrompt({
                     title: 'Password Refresh Formatif',
                     desc: 'Masukkan Kode Refresh dari sheet PENGATURAN untuk menyegarkan layar Asesmen Formatif.',
                     expectedCode: expectedRefresh,
                     icon: '<i class="fa-solid fa-arrows-rotate text-sky-400"></i>',
                     onSuccess: () => this.executeRefreshFormatif()
+                });
+            },
+
+            async executeRefreshFormatif() {
+                if (this.state.externalFormatifActive) {
+                    const iframe = document.getElementById('formatifFullscreenIframe');
+                    const finalUrl = this.buildFormatifExternalUrl();
+                    if (iframe && finalUrl) {
+                        iframe.src = finalUrl;
+                    }
+                    this.requestExamFullscreen();
+                    return;
+                }
+
+                await this.refreshDashboardFromServer();
+                this.saveSession();
+                showModal('Formatif Diperbarui', 'Data & soal Asesmen Formatif terbaru dari Spreadsheet berhasil dimuat ulang!', '<i class="fa-solid fa-circle-check text-sky-400"></i>');
+            },
+
+            promptExitFormatif() {
+                const performExit = () => {
+                    if (this.state.externalFormatifActive) {
+                        this.state.externalFormatifActive = false;
+                        const overlay = document.getElementById('formatifFullscreenOverlay');
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                        document.getElementById('formatifFullscreenIframe').src = '';
+                        this.exitExamFullscreen();
+                    } else if (this.state.quizActive) {
+                        this.state.quizActive = false;
+                        if (this.state.examTimerId) {
+                            clearInterval(this.state.examTimerId);
+                            this.state.examTimerId = null;
+                        }
+                        this.exitExamFullscreen();
+                        document.getElementById('formatifPlayArea').classList.add('hidden');
+                        document.getElementById('formatifIntro').classList.remove('hidden');
+                    }
+                    this.saveSession();
+                    this.navigateTo('dashboard');
+                };
+
+                const exitPassword = this.getExpectedFormatifExitPassword();
+                this.openCodePrompt({
+                    title: 'Password Keluar Formatif',
+                    desc: 'Masukkan password untuk keluar dari layar Asesmen Formatif.',
+                    expectedCode: exitPassword,
+                    icon: '<i class="fa-solid fa-right-from-bracket text-red-400"></i>',
+                    onSuccess: performExit
                 });
             },
 
