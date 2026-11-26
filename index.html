@@ -1029,6 +1029,193 @@
         const REF_CACHE_KEY = "pjok_ref_cache_v1";
 
         Object.assign(window.app, {
+            api(payload) {
+                if (!GAS_URL || GAS_URL.indexOf('script.google.com') === -1) {
+                    return Promise.reject(new Error('URL Google Apps Script belum dikonfigurasi.'));
+                }
+                return fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(function(json) {
+                    if (!json || json.status !== 'success') {
+                        throw new Error((json && json.message) || 'Terjadi kesalahan pada server.');
+                    }
+                    return json.data;
+                });
+            },
+
+            async preloadInitialData() {
+                try {
+                    const raw = localStorage.getItem(REF_CACHE_KEY);
+                    if (raw) {
+                        const cached = JSON.parse(raw);
+                        if (cached && cached.classes) {
+                            this.state.refData = cached;
+                            this.populateClassSelect(cached.classes);
+                        }
+                    }
+                } catch (e) {}
+
+                if (this.state.refPromise) return this.state.refPromise;
+
+                this.state.refPromise = this.api({ action: 'getInitialData' })
+                    .then((data) => {
+                        this.state.refData = data;
+                        try {
+                            localStorage.setItem(REF_CACHE_KEY, JSON.stringify(data));
+                        } catch (e) {}
+                        this.populateClassSelect(data.classes || []);
+                        return data;
+                    })
+                    .catch((err) => {
+                        console.warn('Preload initial data gagal:', err);
+                        return this.state.refData;
+                    })
+                    .finally(() => {
+                        this.state.refPromise = null;
+                    });
+
+                return this.state.refPromise;
+            },
+
+            populateClassSelect(classes) {
+                const selectClass = document.getElementById('selectClass');
+                if (!selectClass) return;
+                const currentVal = selectClass.value;
+                selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                (classes || []).forEach((cls) => {
+                    const opt = document.createElement('option');
+                    opt.value = cls;
+                    opt.textContent = cls;
+                    selectClass.appendChild(opt);
+                });
+                if (currentVal) selectClass.value = currentVal;
+            },
+
+            async checkConnectionAndStart() {
+                showLoading(true);
+                try {
+                    const data = this.state.refData || await this.preloadInitialData();
+                    if (data && Array.isArray(data.classes)) {
+                        this.populateClassSelect(data.classes);
+                    }
+                    document.getElementById('view-welcome').classList.add('hidden');
+                    const idView = document.getElementById('view-identity');
+                    idView.classList.remove('hidden');
+                    idView.classList.add('flex');
+                } catch (err) {
+                    showModal('Koneksi Gagal', err.message || 'Tidak dapat terhubung ke server.', '<i class="fa-solid fa-wifi text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            async onClassChange() {
+                const selectClass = document.getElementById('selectClass');
+                const selectStudent = document.getElementById('selectStudent');
+                const selectMaterial = document.getElementById('selectMaterial');
+                const btnContinue = document.getElementById('btnContinue');
+                const className = selectClass ? selectClass.value : '';
+
+                selectStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                selectMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
+                selectStudent.disabled = true;
+                selectMaterial.disabled = true;
+                if (btnContinue) btnContinue.disabled = true;
+
+                if (!className) return;
+
+                showLoading(true);
+                try {
+                    let students = [];
+                    let materials = [];
+
+                    const cachedRef = this.state.refData;
+                    if (cachedRef && cachedRef.studentsByClass && cachedRef.studentsByClass[className]) {
+                        students = cachedRef.studentsByClass[className];
+                    }
+
+                    const res = await this.api({ action: 'getStudentsAndMaterials', className: className });
+                    if (res) {
+                        if (Array.isArray(res.students) && res.students.length > 0) students = res.students;
+                        if (Array.isArray(res.materials)) materials = res.materials;
+                    }
+
+                    if (materials.length === 0 && cachedRef && Array.isArray(cachedRef.allMaterials)) {
+                        materials = cachedRef.allMaterials.filter((m) => !m.className || m.className.toLowerCase() === className.toLowerCase() || m.className.toLowerCase() === 'semua');
+                    }
+
+                    students.forEach((st) => {
+                        const opt = document.createElement('option');
+                        opt.value = st;
+                        opt.textContent = st;
+                        selectStudent.appendChild(opt);
+                    });
+
+                    materials.forEach((mat) => {
+                        const opt = document.createElement('option');
+                        opt.value = mat.id;
+                        opt.textContent = mat.title;
+                        selectMaterial.appendChild(opt);
+                    });
+
+                    selectStudent.disabled = false;
+                    selectMaterial.disabled = false;
+                    if (btnContinue) btnContinue.disabled = false;
+                } catch (err) {
+                    showModal('Gagal Memuat Data', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            async submitIdentity(e) {
+                e.preventDefault();
+                const className = document.getElementById('selectClass').value;
+                const studentName = document.getElementById('selectStudent').value;
+                const materialId = document.getElementById('selectMaterial').value;
+                const materialSelect = document.getElementById('selectMaterial');
+                const materialTitle = materialSelect.options[materialSelect.selectedIndex] ? materialSelect.options[materialSelect.selectedIndex].text : '';
+
+                if (!className || !studentName || !materialId) return;
+
+                showLoading(true);
+                try {
+                    const dash = await this.api({
+                        action: 'getDashboardData',
+                        studentName: studentName,
+                        className: className,
+                        materialId: materialId
+                    });
+
+                    this.state.className = className;
+                    this.state.studentName = studentName;
+                    this.state.materialId = materialId;
+                    this.state.materialTitle = materialTitle;
+                    this.state.dashboardData = dash;
+                    this.state.shuffledFormatifQuestions = [];
+                    this.saveSession();
+
+                    this.setupDashboard();
+
+                    document.getElementById('view-identity').classList.add('hidden');
+                    document.getElementById('view-identity').classList.remove('flex');
+                    const mainView = document.getElementById('view-main');
+                    mainView.classList.remove('hidden');
+                    mainView.classList.add('flex');
+                    this.navigateTo('dashboard');
+                } catch (err) {
+                    showModal('Gagal Masuk', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
             state: {
                 studentName: '',
                 className: '',
@@ -1210,6 +1397,32 @@
                 }
                 const d = this.state.dashboardData || {};
                 return d.formatif || [];
+            },
+
+            isExamLockActive() {
+                return Boolean((this.state.quizActive || this.state.externalFormatifActive) && !this.state.examSubmitting);
+            },
+
+            requestExamFullscreen() {
+                try {
+                    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                        const promise = document.documentElement.requestFullscreen();
+                        if (promise && typeof promise.catch === 'function') {
+                            promise.catch(function() {});
+                        }
+                    }
+                } catch (err) {}
+            },
+
+            exitExamFullscreen() {
+                try {
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        const promise = document.exitFullscreen();
+                        if (promise && typeof promise.catch === 'function') {
+                            promise.catch(function() {});
+                        }
+                    }
+                } catch (err) {}
             },
 
             startFormatif() {
