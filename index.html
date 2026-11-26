@@ -894,7 +894,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxI9BvWq1FpiWSnmtWzQ3SGWMof1F2hx5l2n-a9kgAqz0YY7gkDw6PplgFyhYeWU4gb/exec";
+        const GAS_URL = "";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -2368,10 +2368,8 @@
 
             getExpectedFormatifExitPassword() {
                 const dash = this.state.dashboardData || {};
-                const pwdSetting = String(dash.formatifPassword || '').trim();
-                const refreshSetting = String(dash.refreshCode || '').trim();
-                const codeSheet = String(dash.formatifCode || '').trim();
-                return pwdSetting || refreshSetting || codeSheet || 'PJOK2026';
+                const exitSetting = String(dash.formatifExitPassword || '').trim();
+                return exitSetting || 'KELUAR2026';
             },
 
             renderFormatif(questions, externalLink, externalDesc, accessCode, isRestored = false) {
