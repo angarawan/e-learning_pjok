@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <!-- SECURITY CODE PROMPT MODAL (REFRESH & KELUAR FORMATIF) -->
+    <!-- SECURITY CODE PROMPT MODAL (KELUAR FORMATIF) -->
     <div id="codePromptModal" class="fixed inset-0 z-[155] hidden items-center justify-center bg-black/85 backdrop-blur-sm">
         <div class="glass-card p-6 md:p-8 rounded-2xl max-w-sm w-full mx-4 text-center shadow-2xl border border-brand-orange/40">
             <div id="codePromptIcon" class="text-4xl mb-3 text-brand-orange"><i class="fa-solid fa-key"></i></div>
@@ -488,7 +488,7 @@
                 </div>
             </div>
 
-            <!-- FORMATIF CONTENT (PASSWORD MASUK SOAL + MODE TERKUNCI + TOMBOL REFRESH & KELUAR DI POJOK KANAN ATAS) -->
+            <!-- FORMATIF CONTENT (PASSWORD MASUK SOAL + MODE TERKUNCI + KOTAK NOMOR + TOMBOL REFRESH & KELUAR DI POJOK KANAN ATAS) -->
             <div id="content-formatif" class="content-section hidden max-w-4xl mx-auto">
                 <div class="flex items-center justify-end gap-2 mb-4">
                     <button type="button" onclick="app.promptRefreshFormatif()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-lg transition-all cursor-pointer">
@@ -507,6 +507,7 @@
                     <div class="bg-red-950/40 border border-red-500/40 rounded-2xl p-4 max-w-lg mx-auto mb-6 text-left text-xs text-red-200 space-y-1.5">
                         <p class="font-bold text-red-300 flex items-center gap-1.5"><i class="fa-solid fa-lock"></i> Aturan Mode Ujian Terkunci:</p>
                         <ul class="list-disc pl-5 space-y-1">
+                            <li id="formatifIntroDurationInfo" class="hidden text-amber-300 font-semibold"></li>
                             <li>Layar otomatis terkunci penuh (<em>Fullscreen</em>) saat asesmen dimulai.</li>
                             <li>Dilarang keluar layar penuh, berpindah tab, atau membuka aplikasi lain.</li>
                             <li>Jika melanggar 2 kali, asesmen otomatis dihentikan &amp; nilai langsung tersimpan.</li>
@@ -556,7 +557,7 @@
 
                 <!-- QUIZ PLAY AREA (TERKUNCI PENUH SAAT AKTIF) -->
                 <div id="formatifPlayArea" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl border-2 border-red-500/40">
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-6 border-b border-white/10 pb-4">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4 border-b border-white/10 pb-4">
                         <div class="flex items-center gap-3">
                             <span class="text-sm font-bold text-red-400">Soal <span id="qCurrentIdx">1</span> dari <span id="qTotal">0</span></span>
                             <span id="formatifTimerBadge" class="hidden bg-slate-800 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-lg text-xs font-mono font-bold">
@@ -572,6 +573,16 @@
                             </span>
                         </div>
                     </div>
+
+                    <!-- KOTAK NAVIGASI NOMOR SOAL MEMANJANG KE SAMPING (HIJAU JIKA SUDAH DIJAWAB) -->
+                    <div class="mb-5 bg-slate-900/80 border border-slate-700/80 rounded-2xl p-3">
+                        <div class="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                            <span class="font-semibold"><i class="fa-solid fa-grip text-brand-orange mr-1"></i> Navigasi Nomor Soal:</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"></span> Sudah dijawab</span>
+                        </div>
+                        <div id="formatifNumberBoxes" class="flex items-center gap-2 overflow-x-auto pb-1"></div>
+                    </div>
+
                     <div id="qText" class="text-base md:text-xl font-semibold text-white mb-6 sheet-text text-justify-custom leading-relaxed"></div>
                     <div id="qOptionsContainer" class="space-y-3 mb-8"></div>
                     <div class="flex justify-between items-center pt-4 border-t border-white/10">
@@ -833,7 +844,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 border border-slate-700 p-4 rounded-2xl">
                         <div class="flex items-center gap-2.5">
                             <label class="text-xs font-bold text-gray-300 shrink-0">Filter Materi:</label>
-                            <select id="latihanCategorySelect" onchange="app.renderLatihanList()" class="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500 max-w-full">
+                            <select id="latihanCategorySelect" onchange="app.onLatihanCategoryChange()" class="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500 max-w-full">
                                 <option value="semua">Semua Topik PJOK</option>
                             </select>
                         </div>
@@ -894,7 +905,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxvSkdF02j_m3_xYU7v-HCPtvW4a3p3VhhOrzpiuQ0CjbUyoG6MVXLP-n1MkPaQgLIx/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxmWGKaStGQqid3bq9hedF_7ShhhBSXghKs6HoagoW_m7M10OaBOAmmlVFEfD9Lj_YY/exec";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -2435,9 +2446,21 @@
                 }
 
                 document.getElementById('btnStartFormatif').classList.remove('hidden');
+                const durInfoEl = document.getElementById('formatifIntroDurationInfo');
+                const dashDur = (this.state.dashboardData && this.state.dashboardData.formatifDuration) || 0;
+                if (durInfoEl) {
+                    if (dashDur > 0) {
+                        durInfoEl.innerText = `Waktu pengerjaan: ${dashDur} menit (otomatis terkirim saat waktu habis).`;
+                        durInfoEl.classList.remove('hidden');
+                    } else {
+                        durInfoEl.classList.add('hidden');
+                    }
+                }
+
                 if (isRestored && this.state.quizActive) {
                     playArea.classList.remove('hidden');
                     this.updateViolationBadges();
+                    this.startExamTimer(dashDur);
                     this.renderQuizQuestion();
                 } else {
                     intro.classList.remove('hidden');
@@ -2595,7 +2618,7 @@
                     }
                     if (typed !== expectedPwd) {
                         if (pwdErr) {
-                            pwdErr.innerText = 'Password salah! Periksa kembali password masuk soal dengan guru.';
+                            pwdErr.innerText = 'Password salah! Minta password masuk soal kepada guru.';
                             pwdErr.classList.remove('hidden');
                         }
                         if (pwdInput) pwdInput.focus();
@@ -2609,15 +2632,52 @@
                 this.state.quizActive = true;
                 this.state.examViolations = 0;
                 this.state.examSubmitting = false;
-
                 this.updateViolationBadges();
-                this.requestExamFullscreen();
 
                 document.getElementById('formatifIntro').classList.add('hidden');
                 document.getElementById('formatifPlayArea').classList.remove('hidden');
-                this.startExamTimer(dash.formatifDuration || 0);
+                this.requestExamFullscreen();
+
+                const durationMinutes = Number(dash.formatifDuration || 0);
+                this.startExamTimer(durationMinutes);
+
                 this.renderQuizQuestion();
                 this.saveSession();
+            },
+
+            renderFormatifNumberBoxes() {
+                const container = document.getElementById('formatifNumberBoxes');
+                if (!container) return;
+                const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
+                const activeIdx = this.state.quizIndex;
+
+                container.innerHTML = questions.map((_, i) => {
+                    const isAnswered = this.state.quizAnswers[i] !== null && this.state.quizAnswers[i] !== undefined;
+                    const isCurrent = i === activeIdx;
+
+                    let boxClass = 'bg-slate-800 border-slate-600 text-gray-300 hover:border-gray-400';
+                    if (isAnswered) {
+                        boxClass = 'bg-emerald-600 border-emerald-400 text-white shadow-md shadow-emerald-950/60';
+                    }
+                    if (isCurrent) {
+                        boxClass += ' ring-2 ring-brand-orange ring-offset-2 ring-offset-slate-900 scale-105';
+                    }
+
+                    return `
+                        <button type="button" onclick="app.jumpToQuizQuestion(${i})" class="w-9 h-9 md:w-10 md:h-10 rounded-xl border font-bold text-xs md:text-sm flex items-center justify-center shrink-0 transition-all cursor-pointer ${boxClass}">
+                            ${i + 1}
+                        </button>
+                    `;
+                }).join('');
+            },
+
+            jumpToQuizQuestion(targetIdx) {
+                const questions = (this.state.dashboardData && this.state.dashboardData.formatif) || [];
+                if (targetIdx >= 0 && targetIdx < questions.length) {
+                    this.state.quizIndex = targetIdx;
+                    this.renderQuizQuestion();
+                    this.saveSession();
+                }
             },
 
             renderQuizQuestion() {
@@ -2626,6 +2686,7 @@
                 const q = questions[idx];
                 if (!q) return;
 
+                this.renderFormatifNumberBoxes();
                 document.getElementById('qCurrentIdx').innerText = idx + 1;
                 document.getElementById('qTotal').innerText = questions.length;
                 document.getElementById('qText').innerHTML = this.parseMediaTags(q.text, 'orange');
@@ -3101,6 +3162,12 @@
             },
 
             latihanUserAnswers: {},
+            latihanCurrentIndex: 0,
+
+            onLatihanCategoryChange() {
+                this.latihanCurrentIndex = 0;
+                this.renderLatihanList();
+            },
 
             renderLatihanList() {
                 const container = document.getElementById('latihanQuestionsContainer');
@@ -3110,58 +3177,119 @@
                 const filtered = allQuestions.filter(q => cat === 'semua' || q.category === cat);
                 const letters = ['A', 'B', 'C', 'D', 'E'];
 
-                container.innerHTML = filtered.map((q, idx) => {
-                    const chosen = this.latihanUserAnswers[q.id];
-                    const hasAnswered = chosen !== undefined;
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Belum ada soal latihan pada topik ini.</div>';
+                    this.updateLatihanScore();
+                    return;
+                }
 
-                    const optionsHtml = q.options.map((optText, oIdx) => {
-                        let btnStyle = 'bg-slate-800/80 border-slate-700 text-gray-200 hover:border-violet-400';
-                        let badgeStyle = 'bg-slate-700 text-gray-300';
-                        let statusIcon = '';
+                if (this.latihanCurrentIndex >= filtered.length) {
+                    this.latihanCurrentIndex = 0;
+                }
 
-                        if (hasAnswered) {
-                            if (oIdx === q.answer) {
-                                btnStyle = 'bg-emerald-950/60 border-emerald-500 text-emerald-200 font-semibold';
-                                badgeStyle = 'bg-emerald-600 text-white';
-                                statusIcon = '<i class="fa-solid fa-circle-check text-emerald-400 ml-auto shrink-0"></i>';
-                            } else if (oIdx === chosen && chosen !== q.answer) {
-                                btnStyle = 'bg-rose-950/60 border-rose-500 text-rose-200';
-                                badgeStyle = 'bg-rose-600 text-white';
-                                statusIcon = '<i class="fa-solid fa-circle-xmark text-rose-400 ml-auto shrink-0"></i>';
-                            } else {
-                                btnStyle = 'bg-slate-800/40 border-slate-800 text-gray-400 opacity-75';
-                            }
+                const idx = this.latihanCurrentIndex;
+                const q = filtered[idx];
+                const chosen = this.latihanUserAnswers[q.id];
+                const hasAnswered = chosen !== undefined;
+                const isLastQuestion = idx === filtered.length - 1;
+
+                const optionsHtml = q.options.map((optText, oIdx) => {
+                    let btnStyle = 'bg-slate-800/80 border-slate-700 text-gray-200 hover:border-violet-400';
+                    let badgeStyle = 'bg-slate-700 text-gray-300';
+                    let statusIcon = '';
+
+                    if (hasAnswered) {
+                        if (oIdx === q.answer) {
+                            btnStyle = 'bg-emerald-950/60 border-emerald-500 text-emerald-200 font-semibold';
+                            badgeStyle = 'bg-emerald-600 text-white';
+                            statusIcon = '<i class="fa-solid fa-circle-check text-emerald-400 ml-auto shrink-0"></i>';
+                        } else if (oIdx === chosen && chosen !== q.answer) {
+                            btnStyle = 'bg-rose-950/60 border-rose-500 text-rose-200';
+                            badgeStyle = 'bg-rose-600 text-white';
+                            statusIcon = '<i class="fa-solid fa-circle-xmark text-rose-400 ml-auto shrink-0"></i>';
+                        } else {
+                            btnStyle = 'bg-slate-800/40 border-slate-800 text-gray-400 opacity-75';
                         }
-
-                        return `
-                            <button type="button" onclick="app.answerLatihan('${q.id}', ${oIdx})" class="w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 text-xs md:text-sm cursor-pointer ${btnStyle}">
-                                <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${badgeStyle}">${letters[oIdx]}</span>
-                                <span class="flex-1 min-w-0 break-words">${optText}</span>
-                                ${statusIcon}
-                            </button>
-                        `;
-                    }).join('');
-
-                    const explanationHtml = hasAnswered && q.explanation ? `
-                        <div class="mt-3 p-3.5 rounded-xl bg-violet-950/50 border border-violet-500/40 text-xs text-violet-200 leading-relaxed text-justify-custom">
-                            <strong class="text-violet-300"><i class="fa-solid fa-lightbulb mr-1"></i> Pembahasan:</strong> ${q.explanation}
-                        </div>
-                    ` : '';
+                    }
 
                     return `
-                        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 md:p-5 space-y-3">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-bold text-violet-400">Latihan ${idx + 1}</span>
-                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-400/30">${q.category}</span>
-                            </div>
-                            <p class="text-xs md:text-sm font-medium text-white leading-relaxed text-justify-custom">${q.question}</p>
-                            <div class="space-y-2">${optionsHtml}</div>
-                            ${explanationHtml}
-                        </div>
+                        <button type="button" onclick="app.answerLatihan('${q.id}', ${oIdx})" class="w-full text-left p-3.5 rounded-xl border transition-all flex items-center gap-3 text-xs md:text-sm cursor-pointer ${btnStyle}">
+                            <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${badgeStyle}">${letters[oIdx]}</span>
+                            <span class="flex-1 min-w-0 break-words">${optText}</span>
+                            ${statusIcon}
+                        </button>
                     `;
                 }).join('');
 
+                const resultStatusBanner = hasAnswered ? (
+                    chosen === q.answer
+                        ? `<div class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-xs md:text-sm text-emerald-300 font-bold flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Jawaban Kamu Benar!</div>`
+                        : `<div class="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-xs md:text-sm text-rose-300 font-bold flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i> Jawaban Kurang Tepat. Kunci Jawaban: ${letters[q.answer] || '-'}</div>`
+                ) : '';
+
+                const explanationHtml = hasAnswered && q.explanation ? `
+                    <div class="p-3.5 rounded-xl bg-violet-950/50 border border-violet-500/40 text-xs md:text-sm text-violet-200 leading-relaxed text-justify-custom">
+                        <strong class="text-violet-300"><i class="fa-solid fa-lightbulb mr-1"></i> Pembahasan:</strong> ${q.explanation}
+                    </div>
+                ` : '';
+
+                const actionFooterHtml = hasAnswered ? `
+                    <div class="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                        ${idx > 0
+                            ? `<button type="button" onclick="app.prevLatihanQuestion()" class="bg-slate-800 hover:bg-slate-700 text-gray-200 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold inline-flex items-center gap-1.5 cursor-pointer"><i class="fa-solid fa-arrow-left"></i> Sebelumnya</button>`
+                            : `<span></span>`}
+                        ${!isLastQuestion
+                            ? `<button type="button" onclick="app.nextLatihanQuestion()" class="ml-auto bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold inline-flex items-center gap-2 shadow-lg transition-all cursor-pointer">Lanjutkan <i class="fa-solid fa-arrow-right"></i></button>`
+                            : `<button type="button" onclick="app.finishLatihanSummary()" class="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold inline-flex items-center gap-2 shadow-lg transition-all cursor-pointer"><i class="fa-solid fa-flag-checkered"></i> Selesai Latihan</button>`}
+                    </div>
+                ` : '';
+
+                container.innerHTML = `
+                    <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 md:p-6 space-y-4">
+                        <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                            <span class="text-xs md:text-sm font-bold text-violet-400">Soal ${idx + 1} dari ${filtered.length}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-400/30">${q.category}</span>
+                        </div>
+                        <p class="text-xs md:text-base font-medium text-white leading-relaxed text-justify-custom">${q.question}</p>
+                        <div class="space-y-2.5">${optionsHtml}</div>
+                        ${resultStatusBanner}
+                        ${explanationHtml}
+                        ${actionFooterHtml}
+                    </div>
+                `;
+
                 this.updateLatihanScore();
+            },
+
+            prevLatihanQuestion() {
+                if (this.latihanCurrentIndex > 0) {
+                    this.latihanCurrentIndex--;
+                    this.renderLatihanList();
+                }
+            },
+
+            nextLatihanQuestion() {
+                const cat = document.getElementById('latihanCategorySelect')?.value || 'semua';
+                const filtered = this.getLatihanData().filter(q => cat === 'semua' || q.category === cat);
+                if (this.latihanCurrentIndex < filtered.length - 1) {
+                    this.latihanCurrentIndex++;
+                    this.renderLatihanList();
+                }
+            },
+
+            finishLatihanSummary() {
+                const cat = document.getElementById('latihanCategorySelect')?.value || 'semua';
+                const filtered = this.getLatihanData().filter(q => cat === 'semua' || q.category === cat);
+                let correct = 0;
+                filtered.forEach(q => {
+                    if (this.latihanUserAnswers[q.id] === q.answer) correct++;
+                });
+                const scorePct = filtered.length > 0 ? Math.round((correct / filtered.length) * 100) : 0;
+                showModal(
+                    'Latihan Soal Selesai!',
+                    `Kamu berhasil menjawab benar ${correct} dari ${filtered.length} soal latihan (Skor: ${scorePct}). Tekan tombol "Ulangi" jika ingin berlatih kembali.`,
+                    '<i class="fa-solid fa-award text-violet-400"></i>'
+                );
             },
 
             answerLatihan(qId, optIdx) {
@@ -3186,6 +3314,7 @@
 
             resetLatihan() {
                 this.latihanUserAnswers = {};
+                this.latihanCurrentIndex = 0;
                 this.renderLatihanList();
             },
 
