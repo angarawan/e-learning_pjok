@@ -894,7 +894,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby5pH1QFFNXkenFtP4mfXFQ92DACClvxhAr0pMiUrlm-GqX5obw7kg0_FNg7CEogE1p/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxI9BvWq1FpiWSnmtWzQ3SGWMof1F2hx5l2n-a9kgAqz0YY7gkDw6PplgFyhYeWU4gb/exec";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -3238,15 +3238,7 @@
             },
 
             promptRefreshFormatif() {
-                const dash = this.state.dashboardData || {};
-                const expectedRefresh = String(dash.refreshCode || '').trim() || '12345';
-                this.openCodePrompt({
-                    title: 'Password Refresh Formatif',
-                    desc: 'Masukkan Kode Refresh dari sheet PENGATURAN untuk menyegarkan layar Asesmen Formatif.',
-                    expectedCode: expectedRefresh,
-                    icon: '<i class="fa-solid fa-arrows-rotate text-sky-400"></i>',
-                    onSuccess: () => this.executeRefreshFormatif()
-                });
+                this.executeRefreshFormatif();
             },
 
             async executeRefreshFormatif() {
@@ -3296,62 +3288,6 @@
                     icon: '<i class="fa-solid fa-right-from-bracket text-red-400"></i>',
                     onSuccess: performExit
                 });
-            },
-
-            async executeRefreshFormatif() {
-                if (this.state.externalFormatifActive) {
-                    const iframe = document.getElementById('formatifFullscreenIframe');
-                    const finalUrl = this.buildFormatifExternalUrl();
-                    if (iframe && finalUrl) {
-                        iframe.src = finalUrl;
-                    }
-                    this.requestExamFullscreen();
-                    return;
-                }
-
-                await this.refreshDashboardFromServer();
-                this.saveSession();
-                showModal('Formatif Diperbarui', 'Data & soal Asesmen Formatif terbaru dari Spreadsheet berhasil dimuat ulang!', '<i class="fa-solid fa-circle-check text-sky-400"></i>');
-            },
-
-            promptExitFormatif() {
-                const performExit = () => {
-                    if (this.state.externalFormatifActive) {
-                        this.state.externalFormatifActive = false;
-                        const overlay = document.getElementById('formatifFullscreenOverlay');
-                        overlay.classList.add('hidden');
-                        overlay.classList.remove('flex');
-                        document.getElementById('formatifFullscreenIframe').src = '';
-                        this.exitExamFullscreen();
-                    } else if (this.state.quizActive) {
-                        this.state.quizActive = false;
-                        if (this.state.examTimerId) {
-                            clearInterval(this.state.examTimerId);
-                            this.state.examTimerId = null;
-                        }
-                        this.exitExamFullscreen();
-                        document.getElementById('formatifPlayArea').classList.add('hidden');
-                        document.getElementById('formatifIntro').classList.remove('hidden');
-                    }
-                    this.saveSession();
-                    this.navigateTo('dashboard');
-                };
-
-                const dash = this.state.dashboardData || {};
-                const exitPassword = String(dash.formatifPassword || dash.refreshCode || dash.formatifCode || '').trim();
-
-                if (exitPassword) {
-                    this.openCodePrompt({
-                        title: 'Password Keluar Formatif',
-                        desc: 'Masukkan password untuk keluar dari layar Asesmen Formatif.',
-                        expectedCode: exitPassword,
-                        icon: '<i class="fa-solid fa-right-from-bracket text-red-400"></i>',
-                        onSuccess: performExit
-                    });
-                    return;
-                }
-
-                performExit();
             },
 
             logout() {
