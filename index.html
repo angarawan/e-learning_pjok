@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PJOK Digital Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         var app = window.app = window.app || {};
@@ -908,9 +910,14 @@
                         <button type="button" id="btnAgreeKesepakatan" onclick="app.agreeKesepakatan()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-6 py-3.5 rounded-xl text-xs md:text-sm transition-all shadow-lg cursor-pointer">
                             <i class="fa-solid fa-circle-check mr-2"></i> SAYA SETUJU & SIAP MEMATUHI KESEPAKATAN KELAS
                         </button>
-                        <p id="kesepakatanAgreedInfo" class="hidden text-emerald-400 font-bold text-xs md:text-sm mt-2">
-                            <i class="fa-solid fa-shield-check mr-1"></i> Terima kasih! Komitmen & tanda tangan kesepakatan kelasmu sudah tercatat pada sesi ini.
-                        </p>
+                        <div id="kesepakatanAgreedInfo" class="hidden space-y-3 mt-2">
+                            <p class="text-emerald-400 font-bold text-xs md:text-sm">
+                                <i class="fa-solid fa-shield-check mr-1"></i> Terima kasih! Komitmen & tanda tangan kesepakatan kelasmu sudah tercatat pada sesi ini.
+                            </p>
+                            <button type="button" id="btnDownloadKesepakatanPdf" onclick="app.downloadKesepakatanPDF()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs md:text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer">
+                                <i class="fa-solid fa-file-pdf"></i> UNDUH KESEPAKATAN KELAS (PDF)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -919,7 +926,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxmWGKaStGQqid3bq9hedF_7ShhhBSXghKs6HoagoW_m7M10OaBOAmmlVFEfD9Lj_YY/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzj3rEh9k-7DuKNv5tbsvkcehTnhJL0Dwy67cm-M-wm3d2ebfGDeliC8qRIPWhcewR1/exec";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -1029,193 +1036,6 @@
         const REF_CACHE_KEY = "pjok_ref_cache_v1";
 
         Object.assign(window.app, {
-            api(payload) {
-                if (!GAS_URL || GAS_URL.indexOf('script.google.com') === -1) {
-                    return Promise.reject(new Error('URL Google Apps Script belum dikonfigurasi.'));
-                }
-                return fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                })
-                .then(function(res) {
-                    return res.json();
-                })
-                .then(function(json) {
-                    if (!json || json.status !== 'success') {
-                        throw new Error((json && json.message) || 'Terjadi kesalahan pada server.');
-                    }
-                    return json.data;
-                });
-            },
-
-            async preloadInitialData() {
-                try {
-                    const raw = localStorage.getItem(REF_CACHE_KEY);
-                    if (raw) {
-                        const cached = JSON.parse(raw);
-                        if (cached && cached.classes) {
-                            this.state.refData = cached;
-                            this.populateClassSelect(cached.classes);
-                        }
-                    }
-                } catch (e) {}
-
-                if (this.state.refPromise) return this.state.refPromise;
-
-                this.state.refPromise = this.api({ action: 'getInitialData' })
-                    .then((data) => {
-                        this.state.refData = data;
-                        try {
-                            localStorage.setItem(REF_CACHE_KEY, JSON.stringify(data));
-                        } catch (e) {}
-                        this.populateClassSelect(data.classes || []);
-                        return data;
-                    })
-                    .catch((err) => {
-                        console.warn('Preload initial data gagal:', err);
-                        return this.state.refData;
-                    })
-                    .finally(() => {
-                        this.state.refPromise = null;
-                    });
-
-                return this.state.refPromise;
-            },
-
-            populateClassSelect(classes) {
-                const selectClass = document.getElementById('selectClass');
-                if (!selectClass) return;
-                const currentVal = selectClass.value;
-                selectClass.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-                (classes || []).forEach((cls) => {
-                    const opt = document.createElement('option');
-                    opt.value = cls;
-                    opt.textContent = cls;
-                    selectClass.appendChild(opt);
-                });
-                if (currentVal) selectClass.value = currentVal;
-            },
-
-            async checkConnectionAndStart() {
-                showLoading(true);
-                try {
-                    const data = this.state.refData || await this.preloadInitialData();
-                    if (data && Array.isArray(data.classes)) {
-                        this.populateClassSelect(data.classes);
-                    }
-                    document.getElementById('view-welcome').classList.add('hidden');
-                    const idView = document.getElementById('view-identity');
-                    idView.classList.remove('hidden');
-                    idView.classList.add('flex');
-                } catch (err) {
-                    showModal('Koneksi Gagal', err.message || 'Tidak dapat terhubung ke server.', '<i class="fa-solid fa-wifi text-red-500"></i>');
-                } finally {
-                    showLoading(false);
-                }
-            },
-
-            async onClassChange() {
-                const selectClass = document.getElementById('selectClass');
-                const selectStudent = document.getElementById('selectStudent');
-                const selectMaterial = document.getElementById('selectMaterial');
-                const btnContinue = document.getElementById('btnContinue');
-                const className = selectClass ? selectClass.value : '';
-
-                selectStudent.innerHTML = '<option value="">-- Pilih Nama --</option>';
-                selectMaterial.innerHTML = '<option value="">-- Pilih Materi --</option>';
-                selectStudent.disabled = true;
-                selectMaterial.disabled = true;
-                if (btnContinue) btnContinue.disabled = true;
-
-                if (!className) return;
-
-                showLoading(true);
-                try {
-                    let students = [];
-                    let materials = [];
-
-                    const cachedRef = this.state.refData;
-                    if (cachedRef && cachedRef.studentsByClass && cachedRef.studentsByClass[className]) {
-                        students = cachedRef.studentsByClass[className];
-                    }
-
-                    const res = await this.api({ action: 'getStudentsAndMaterials', className: className });
-                    if (res) {
-                        if (Array.isArray(res.students) && res.students.length > 0) students = res.students;
-                        if (Array.isArray(res.materials)) materials = res.materials;
-                    }
-
-                    if (materials.length === 0 && cachedRef && Array.isArray(cachedRef.allMaterials)) {
-                        materials = cachedRef.allMaterials.filter((m) => !m.className || m.className.toLowerCase() === className.toLowerCase() || m.className.toLowerCase() === 'semua');
-                    }
-
-                    students.forEach((st) => {
-                        const opt = document.createElement('option');
-                        opt.value = st;
-                        opt.textContent = st;
-                        selectStudent.appendChild(opt);
-                    });
-
-                    materials.forEach((mat) => {
-                        const opt = document.createElement('option');
-                        opt.value = mat.id;
-                        opt.textContent = mat.title;
-                        selectMaterial.appendChild(opt);
-                    });
-
-                    selectStudent.disabled = false;
-                    selectMaterial.disabled = false;
-                    if (btnContinue) btnContinue.disabled = false;
-                } catch (err) {
-                    showModal('Gagal Memuat Data', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
-                } finally {
-                    showLoading(false);
-                }
-            },
-
-            async submitIdentity(e) {
-                e.preventDefault();
-                const className = document.getElementById('selectClass').value;
-                const studentName = document.getElementById('selectStudent').value;
-                const materialId = document.getElementById('selectMaterial').value;
-                const materialSelect = document.getElementById('selectMaterial');
-                const materialTitle = materialSelect.options[materialSelect.selectedIndex] ? materialSelect.options[materialSelect.selectedIndex].text : '';
-
-                if (!className || !studentName || !materialId) return;
-
-                showLoading(true);
-                try {
-                    const dash = await this.api({
-                        action: 'getDashboardData',
-                        studentName: studentName,
-                        className: className,
-                        materialId: materialId
-                    });
-
-                    this.state.className = className;
-                    this.state.studentName = studentName;
-                    this.state.materialId = materialId;
-                    this.state.materialTitle = materialTitle;
-                    this.state.dashboardData = dash;
-                    this.state.shuffledFormatifQuestions = [];
-                    this.saveSession();
-
-                    this.setupDashboard();
-
-                    document.getElementById('view-identity').classList.add('hidden');
-                    document.getElementById('view-identity').classList.remove('flex');
-                    const mainView = document.getElementById('view-main');
-                    mainView.classList.remove('hidden');
-                    mainView.classList.add('flex');
-                    this.navigateTo('dashboard');
-                } catch (err) {
-                    showModal('Gagal Masuk', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
-                } finally {
-                    showLoading(false);
-                }
-            },
-
             state: {
                 studentName: '',
                 className: '',
@@ -1228,13 +1048,13 @@
                 selectedLkmIndex: 0,
                 quizIndex: 0,
                 quizAnswers: [],
-                shuffledFormatifQuestions: [],
                 quizActive: false,
                 externalFormatifActive: false,
                 examViolations: 0,
                 examSubmitting: false,
                 examTimerId: null,
                 examRemainingSec: 0,
+                activeFormatifQuestions: [],
                 progress: {
                     materi: false,
                     lkm: false,
@@ -1320,9 +1140,6 @@
                     this.state.materialId = saved.materialId;
                     this.state.materialTitle = saved.materialTitle || '';
                     this.state.selectedLkmIndex = saved.selectedLkmIndex || 0;
-                    if (saved.shuffledFormatifQuestions && Array.isArray(saved.shuffledFormatifQuestions)) {
-                        this.state.shuffledFormatifQuestions = saved.shuffledFormatifQuestions;
-                    }
                     if (saved.progress) {
                         this.state.progress = Object.assign(this.state.progress, saved.progress);
                     }
@@ -1355,80 +1172,812 @@
                 }
             },
 
-            shuffleArray(arr) {
-                const copy = Array.isArray(arr) ? arr.slice() : [];
-                for (let i = copy.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    const temp = copy[i];
-                    copy[i] = copy[j];
-                    copy[j] = temp;
+            async api(payload) {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'error') {
+                    throw new Error(json.message || 'Terjadi kesalahan pada server.');
                 }
-                return copy;
+                return json.data;
             },
 
-            buildShuffledFormatifQuestions(rawQuestions) {
-                const letters = ['A', 'B', 'C', 'D', 'E'];
-                const mappedQuestions = (rawQuestions || []).map((q, qIdx) => {
-                    const rawOptions = Array.isArray(q.options) ? q.options : [];
-                    const correctNum = Number(q.answer) || 1;
-                    const items = rawOptions.map((optText, oIdx) => ({
-                        text: optText,
-                        originalLetter: letters[oIdx] || String(oIdx + 1),
-                        isCorrect: (oIdx + 1) === correctNum
-                    }));
-                    const shuffledOptions = this.shuffleArray(items);
-                    const newCorrectIdx = shuffledOptions.findIndex(item => item.isCorrect);
+            async preloadInitialData() {
+                try {
+                    const cached = localStorage.getItem(REF_CACHE_KEY);
+                    if (cached) {
+                        this.state.refData = JSON.parse(cached);
+                    }
+                } catch (e) {}
 
-                    return {
-                        id: q.id || ('F' + (qIdx + 1)),
-                        text: q.text,
-                        options: shuffledOptions.map(item => item.text),
-                        optionOriginalLetters: shuffledOptions.map(item => item.originalLetter),
-                        answer: newCorrectIdx >= 0 ? (newCorrectIdx + 1) : 1
+                this.state.refPromise = this.api({ action: 'getInitialData' })
+                    .then(data => {
+                        this.state.refData = data;
+                        try { localStorage.setItem(REF_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+                        return data;
+                    })
+                    .catch(err => {
+                        console.warn('Preload awal tertunda:', err);
+                        return this.state.refData;
+                    });
+            },
+
+            async checkConnectionAndStart() {
+                showLoading(true);
+                try {
+                    let ref = this.state.refData;
+                    if (!ref && this.state.refPromise) {
+                        ref = await this.state.refPromise;
+                    }
+                    if (!ref) {
+                        ref = await this.api({ action: 'getInitialData' });
+                        this.state.refData = ref;
+                    }
+
+                    const classSelect = document.getElementById('selectClass');
+                    classSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                    (ref.classes || []).forEach(cls => {
+                        const opt = document.createElement('option');
+                        opt.value = cls;
+                        opt.textContent = cls;
+                        classSelect.appendChild(opt);
+                    });
+
+                    document.getElementById('view-welcome').classList.add('hidden');
+                    const idView = document.getElementById('view-identity');
+                    idView.classList.remove('hidden');
+                    idView.classList.add('flex');
+                } catch (err) {
+                    showModal('Koneksi Gagal', 'Tidak dapat terhubung ke server Spreadsheet: ' + err.message, '<i class="fa-solid fa-wifi text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            async onClassChange() {
+                const cls = document.getElementById('selectClass').value;
+                const studentSelect = document.getElementById('selectStudent');
+                const matSelect = document.getElementById('selectMaterial');
+                const btnCont = document.getElementById('btnContinue');
+
+                studentSelect.innerHTML = '<option value="">-- Memuat Nama... --</option>';
+                matSelect.innerHTML = '<option value="">-- Memuat Materi... --</option>';
+                studentSelect.disabled = true;
+                matSelect.disabled = true;
+                btnCont.disabled = true;
+
+                if (!cls) {
+                    studentSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                    matSelect.innerHTML = '<option value="">-- Pilih Materi --</option>';
+                    return;
+                }
+
+                try {
+                    let students = [];
+                    let materials = [];
+                    const ref = this.state.refData;
+
+                    if (ref && ref.studentsByClass && ref.studentsByClass[cls]) {
+                        students = ref.studentsByClass[cls];
+                        const targetCls = cls.toLowerCase();
+                        materials = (ref.allMaterials || []).filter(m => {
+                            const mc = (m.className || '').toLowerCase();
+                            return !mc || mc === 'semua' || mc === 'all' || mc === targetCls || targetCls.indexOf(mc) !== -1;
+                        });
+                    } else {
+                        const res = await this.api({ action: 'getStudentsAndMaterials', className: cls });
+                        students = res.students || [];
+                        materials = res.materials || [];
+                    }
+
+                    studentSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                    students.forEach(st => {
+                        const opt = document.createElement('option');
+                        opt.value = st;
+                        opt.textContent = st;
+                        studentSelect.appendChild(opt);
+                    });
+
+                    matSelect.innerHTML = '<option value="">-- Pilih Materi --</option>';
+                    materials.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = m.title;
+                        matSelect.appendChild(opt);
+                    });
+
+                    studentSelect.disabled = false;
+                    matSelect.disabled = false;
+
+                    const checkReady = () => {
+                        btnCont.disabled = !(studentSelect.value && matSelect.value);
                     };
+                    studentSelect.onchange = checkReady;
+                    matSelect.onchange = checkReady;
+                } catch (err) {
+                    showModal('Gagal Memuat Data', err.message, '<i class="fa-solid fa-triangle-exclamation text-red-500"></i>');
+                }
+            },
+
+            async submitIdentity(e) {
+                e.preventDefault();
+                const cls = document.getElementById('selectClass').value;
+                const student = document.getElementById('selectStudent').value;
+                const matSelect = document.getElementById('selectMaterial');
+                const matId = matSelect.value;
+                const matTitle = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '';
+
+                if (!cls || !student || !matId) return;
+
+                this.state.className = cls;
+                this.state.studentName = student;
+                this.state.materialId = matId;
+                this.state.materialTitle = matTitle;
+
+                showLoading(true);
+                try {
+                    const dash = await this.api({
+                        action: 'getDashboardData',
+                        studentName: student,
+                        className: cls,
+                        materialId: matId
+                    });
+                    this.state.dashboardData = dash;
+                    this.setupDashboard();
+                    this.saveSession();
+
+                    document.getElementById('view-identity').classList.add('hidden');
+                    const mainView = document.getElementById('view-main');
+                    mainView.classList.remove('hidden');
+                    mainView.classList.add('flex');
+                    this.navigateTo('dashboard');
+                } catch (err) {
+                    showModal('Gagal Masuk Sesi', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            setupDashboard() {
+                const d = this.state.dashboardData || {};
+                document.getElementById('lblStudentName').innerText = this.state.studentName;
+                document.getElementById('lblStudentClass').innerText = this.state.className;
+                document.getElementById('lblMaterialTitle').innerText = (d.materi && d.materi.judul) ? d.materi.judul : this.state.materialTitle;
+                document.getElementById('lblMotivation').innerText = '"' + (d.motivation || 'Belajar aktif, bergerak sehat, dan raih prestasi terbaikmu!') + '"';
+
+                document.getElementById('profName').innerText = this.state.studentName;
+                document.getElementById('profClass').innerText = this.state.className;
+                document.getElementById('profilInisial').innerText = (this.state.studentName || 'M').charAt(0).toUpperCase();
+
+                this.renderMateri(d.materi);
+                this.renderLKM(d.lkmList || (d.lkm ? [d.lkm] : []));
+                this.renderTugas(d.tugas);
+                this.setupFormatif();
+                this.renderRefleksi(d.refleksi);
+                this.renderGlosarium(d.glosarium || []);
+                this.renderKisiKisi(d.kisiKisi || []);
+                this.renderLatihan(d.latihanSoal || []);
+                this.renderKesepakatan(d.kesepakatan || []);
+                this.updateProgress();
+            },
+
+            toggleSidebar() {
+                const sidebar = document.getElementById('appSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (window.innerWidth < 768) {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    sidebar.classList.toggle('md:w-64');
+                    sidebar.classList.toggle('md:w-20');
+                }
+            },
+
+            goBack() {
+                if (this.isExamLockActive()) return;
+                if (this.state.currentSection !== 'dashboard') {
+                    this.navigateTo('dashboard');
+                }
+            },
+
+            navigateTo(target) {
+                if (this.isExamLockActive() && target !== 'formatif') {
+                    showModal('Layar Terkunci', 'Selesaikan atau gunakan password keluar pada fitur Formatif terlebih dahulu.', '<i class="fa-solid fa-lock text-red-500"></i>');
+                    return;
+                }
+
+                this.state.currentSection = target;
+                document.querySelectorAll('.content-section').forEach(sec => sec.classList.add('hidden'));
+                const targetEl = document.getElementById('content-' + target);
+                if (targetEl) targetEl.classList.remove('hidden');
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('bg-brand-orange', 'text-white', 'font-bold');
+                    link.classList.add('text-gray-300');
+                    if (link.dataset.target === target) {
+                        link.classList.add('bg-brand-orange', 'text-white', 'font-bold');
+                        link.classList.remove('text-gray-300');
+                    }
                 });
 
-                return this.shuffleArray(mappedQuestions);
-            },
+                const titles = {
+                    dashboard: 'Dashboard',
+                    materi: 'Materi Pembelajaran',
+                    lkm: 'Lembar Kerja Murid (LKM)',
+                    tugas: 'Penugasan',
+                    formatif: 'Asesmen Formatif',
+                    refleksi: 'Refleksi & Umpan Balik',
+                    kalkulator: 'Kalkulator Kebugaran',
+                    glosarium: 'Glosarium PJOK',
+                    kisikisi: 'Kisi-Kisi Asesmen',
+                    latihan: 'Latihan Soal Mandiri',
+                    kesepakatan: 'Kesepakatan Kelas',
+                    profil: 'Profil Saya'
+                };
+                const mobileTitle = document.getElementById('lblMobileHeaderTitle');
+                if (mobileTitle) mobileTitle.innerText = titles[target] || 'Dashboard';
 
-            getActiveFormatifQuestions() {
-                if (Array.isArray(this.state.shuffledFormatifQuestions) && this.state.shuffledFormatifQuestions.length > 0) {
-                    return this.state.shuffledFormatifQuestions;
+                const sidebar = document.getElementById('appSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
                 }
-                const d = this.state.dashboardData || {};
-                return d.formatif || [];
+
+                if (target === 'kesepakatan') {
+                    setTimeout(() => this.initKesepakatanSignaturePad(), 60);
+                }
+                if (target === 'formatif') {
+                    this.setupFormatif();
+                }
+
+                this.saveSession();
             },
 
+            updateProgress() {
+                const p = this.state.progress;
+                const steps = [p.materi, p.lkm, p.tugas, p.formatif, p.refleksi];
+                const doneCount = steps.filter(Boolean).length;
+                const pct = Math.round((doneCount / steps.length) * 100);
+                document.getElementById('lblTotalProgress').innerText = pct + '%';
+
+                const setIcon = (id, done) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.innerHTML = done
+                        ? '<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>'
+                        : '<i class="fa-regular fa-circle text-gray-500 text-xs"></i>';
+                };
+                setIcon('status-materi-icon', p.materi);
+                setIcon('status-lkm-icon', p.lkm);
+                setIcon('status-tugas-icon', p.tugas);
+                setIcon('status-formatif-icon', p.formatif);
+                setIcon('status-refleksi-icon', p.refleksi);
+
+                document.getElementById('profStatMateri').innerText = p.materi ? 'Selesai' : 'Belum Selesai';
+                document.getElementById('profStatTugas').innerText = p.tugas ? 'Sudah Dikirim' : 'Belum Dikirim';
+                document.getElementById('profStatNilai').innerText = p.formatifScore !== null ? p.formatifScore : (p.formatif ? 'Tercatat' : '-');
+                document.getElementById('profStatRefleksi').innerText = p.refleksi ? 'Sudah Diisi' : 'Belum Diisi';
+            },
+
+            formatMediaEmbed(url) {
+                if (!url) return '';
+                const clean = url.trim();
+                const ytMatch = clean.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch) {
+                    return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
+                }
+                const gdMatch = clean.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (gdMatch) {
+                    return `<iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" allowfullscreen></iframe>`;
+                }
+                if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(clean)) {
+                    return `<img src="${clean}" alt="Media Pembelajaran">`;
+                }
+                return `<a href="${clean}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-brand-orange underline text-xs md:text-sm font-semibold"><i class="fa-solid fa-up-right-from-square"></i> Buka Media Pendukung</a>`;
+            },
+
+            parseMediaTags(text) {
+                const lines = String(text || '').split(/\r?\n/);
+                let html = '';
+                let inHighlightBox = false;
+
+                lines.forEach(rawLine => {
+                    const line = rawLine.trim();
+                    if (!line) {
+                        if (inHighlightBox) html += '<div class="h-2"></div>';
+                        return;
+                    }
+
+                    const boldHeaderMatch = line.match(/^\*\*(.+?)\*\*:?$/);
+                    if (boldHeaderMatch) {
+                        if (inHighlightBox) {
+                            html += '</div>';
+                        }
+                        html += `<div class="bg-orange-500/20 border border-orange-400/60 rounded-2xl p-4 md:p-5 space-y-2 shadow-inner">`;
+                        html += `<h5 class="text-orange-400 font-bold text-sm md:text-base mb-1">${boldHeaderMatch[1]}</h5>`;
+                        inHighlightBox = true;
+                        return;
+                    }
+
+                    const formattedLine = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-orange-300 font-semibold">$1</strong>');
+                    if (inHighlightBox) {
+                        html += `<p class="text-xs md:text-sm text-gray-100 leading-relaxed text-justify-custom">${formattedLine}</p>`;
+                    } else {
+                        html += `<p class="text-xs md:text-base text-gray-200 leading-relaxed text-justify-custom mb-2">${formattedLine}</p>`;
+                    }
+                });
+
+                if (inHighlightBox) {
+                    html += '</div>';
+                }
+                return html;
+            },
+
+            renderMateri(materi) {
+                if (!materi) {
+                    document.getElementById('materiJudul').innerText = this.state.materialTitle || 'Materi Pembelajaran';
+                    document.getElementById('materiTujuan').innerText = 'Materi belum tersedia di Spreadsheet.';
+                    document.getElementById('materiIsiContainer').innerHTML = '';
+                    document.getElementById('materiRangkuman').innerText = '-';
+                    return;
+                }
+
+                document.getElementById('materiJudul').innerText = materi.judul || this.state.materialTitle;
+                if (materi.cover) {
+                    document.getElementById('materiCover').src = materi.cover;
+                }
+                document.getElementById('materiTujuan').innerText = materi.tujuan || '-';
+                document.getElementById('materiRangkuman').innerText = materi.rangkuman || '-';
+
+                const mediaBox = document.getElementById('materiMediaExtraContainer');
+                const mediaEl = document.getElementById('materiMediaExtra');
+                if (materi.mediaUrl) {
+                    mediaEl.innerHTML = this.formatMediaEmbed(materi.mediaUrl);
+                    mediaBox.classList.remove('hidden');
+                } else {
+                    mediaBox.classList.add('hidden');
+                }
+
+                const container = document.getElementById('materiIsiContainer');
+                const tocContainer = document.getElementById('materiTocContainer');
+                const tocSelect = document.getElementById('materiTocSelect');
+                container.innerHTML = '';
+                tocSelect.innerHTML = '<option value="">-- Tampilkan Semua Bagian --</option>';
+
+                const subbabList = materi.subbab || [];
+                if (subbabList.length > 0) {
+                    tocContainer.classList.remove('hidden');
+                } else {
+                    tocContainer.classList.add('hidden');
+                }
+
+                subbabList.forEach((rawSub, idx) => {
+                    const splitLines = String(rawSub).split(/\r?\n/);
+                    const firstLine = (splitLines[0] || '').replace(/\*\*/g, '').trim();
+                    const restBody = splitLines.slice(1).join('\n').trim();
+                    const titleText = firstLine || `Sub Topik ${idx + 1}`;
+
+                    const opt = document.createElement('option');
+                    opt.value = String(idx);
+                    opt.textContent = `${idx + 1}. ${titleText}`;
+                    tocSelect.appendChild(opt);
+
+                    const card = document.createElement('div');
+                    card.className = 'materi-subbab-card bg-slate-800/70 border border-slate-700 rounded-2xl p-4 md:p-6 space-y-4 shadow-lg';
+                    card.dataset.idx = String(idx);
+                    card.innerHTML = `
+                        <h3 class="text-orange-400 font-bold text-base md:text-xl border-b border-white/10 pb-2">${titleText}</h3>
+                        <div class="space-y-3">${this.parseMediaTags(restBody || rawSub)}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                this.scrollToSubbab();
+            },
+
+            scrollToSubbab() {
+                const select = document.getElementById('materiTocSelect');
+                const val = select ? select.value : '';
+                const cards = document.querySelectorAll('.materi-subbab-card');
+                const btnPrev = document.getElementById('btnPrevSubbab');
+                const btnNext = document.getElementById('btnNextSubbab');
+
+                if (val === '') {
+                    cards.forEach(c => c.classList.remove('hidden'));
+                    btnPrev.classList.add('hidden');
+                    btnNext.classList.add('hidden');
+                } else {
+                    const targetIdx = parseInt(val, 10);
+                    cards.forEach((c, i) => {
+                        if (i === targetIdx) c.classList.remove('hidden');
+                        else c.classList.add('hidden');
+                    });
+                    btnPrev.classList.toggle('hidden', targetIdx <= 0);
+                    btnPrev.classList.toggle('inline-flex', targetIdx > 0);
+                    btnNext.classList.toggle('hidden', targetIdx >= cards.length - 1);
+                    btnNext.classList.toggle('inline-flex', targetIdx < cards.length - 1);
+                }
+            },
+
+            navigateSubbab(delta) {
+                const select = document.getElementById('materiTocSelect');
+                if (!select || select.value === '') return;
+                const nextIdx = parseInt(select.value, 10) + delta;
+                if (nextIdx >= 0 && nextIdx < select.options.length - 1) {
+                    select.value = String(nextIdx);
+                    this.scrollToSubbab();
+                    document.getElementById('content-materi').scrollIntoView({ behavior: 'smooth' });
+                }
+            },
+
+            markMateriDone() {
+                this.state.progress.materi = true;
+                this.updateProgress();
+                this.saveSession();
+                showModal('Materi Selesai', 'Progres membaca materi berhasil ditandai selesai!', '<i class="fa-solid fa-circle-check text-emerald-400"></i>');
+            },
+
+            renderLKM(lkmList) {
+                const form = document.getElementById('lkmForm');
+                const doneState = document.getElementById('lkmDoneState');
+                const meetBox = document.getElementById('lkmMeetingSelectorContainer');
+                const meetSelect = document.getElementById('lkmMeetingSelect');
+
+                form.classList.remove('hidden');
+                doneState.classList.add('hidden');
+
+                if (!lkmList || lkmList.length === 0) {
+                    document.getElementById('lkmJudulUtama').innerText = 'Lembar Kerja Murid (LKM)';
+                    document.getElementById('lkmQuestionsContainer').innerHTML = '<p class="text-center text-gray-400 text-sm py-6">Belum ada LKM aktif untuk materi ini.</p>';
+                    document.getElementById('btnSubmitLkm').classList.add('hidden');
+                    meetBox.classList.add('hidden');
+                    return;
+                }
+
+                document.getElementById('btnSubmitLkm').classList.remove('hidden');
+                if (lkmList.length > 1) {
+                    meetBox.classList.remove('hidden');
+                    meetSelect.innerHTML = '';
+                    lkmList.forEach((item, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = String(i);
+                        opt.textContent = item.judul || `LKM Pertemuan ${i + 1}`;
+                        meetSelect.appendChild(opt);
+                    });
+                    if (this.state.selectedLkmIndex >= lkmList.length) this.state.selectedLkmIndex = 0;
+                    meetSelect.value = String(this.state.selectedLkmIndex);
+                } else {
+                    meetBox.classList.add('hidden');
+                    this.state.selectedLkmIndex = 0;
+                }
+
+                const activeLkm = lkmList[this.state.selectedLkmIndex] || lkmList[0];
+                document.getElementById('lkmJudulUtama').innerText = activeLkm.judul || 'Lembar Kerja Murid (LKM)';
+                const infoBox = document.getElementById('lkmInfoContainer');
+                if (activeLkm.tujuan) {
+                    infoBox.classList.remove('hidden');
+                    document.getElementById('lkmTujuan').innerText = activeLkm.tujuan;
+                } else {
+                    infoBox.classList.add('hidden');
+                }
+
+                const container = document.getElementById('lkmQuestionsContainer');
+                const tocBox = document.getElementById('lkmTocContainer');
+                const tocSelect = document.getElementById('lkmTocSelect');
+                container.innerHTML = '';
+                tocSelect.innerHTML = '<option value="">-- Tampilkan Semua Kegiatan --</option>';
+
+                const phases = [
+                    { title: 'Kegiatan 1', data: activeLkm.kegiatan1 },
+                    { title: 'Kegiatan 2', data: activeLkm.kegiatan2 },
+                    { title: 'Kegiatan 3', data: activeLkm.kegiatan3 },
+                    { title: 'Refleksi LKM', data: activeLkm.refleksi }
+                ].filter(p => p.data && (p.data.teks || (p.data.soalList && p.data.soalList.length > 0)));
+
+                if (phases.length > 1) tocBox.classList.remove('hidden');
+                else tocBox.classList.add('hidden');
+
+                const savedDrafts = (this.state.drafts.lkmByMeeting && this.state.drafts.lkmByMeeting[this.state.selectedLkmIndex]) || [];
+                let globalQIdx = 0;
+
+                phases.forEach((phase, pIdx) => {
+                    const opt = document.createElement('option');
+                    opt.value = String(pIdx);
+                    opt.textContent = phase.title;
+                    tocSelect.appendChild(opt);
+
+                    const card = document.createElement('div');
+                    card.className = 'lkm-phase-card bg-slate-800/80 border border-slate-700 rounded-2xl p-4 md:p-6 space-y-4';
+                    card.dataset.phaseIdx = String(pIdx);
+
+                    let inner = `<h4 class="text-purple-400 font-bold text-sm md:text-lg border-b border-white/10 pb-2">${phase.title}</h4>`;
+                    if (phase.data.teks) {
+                        inner += `<div class="text-gray-300 text-xs md:text-sm sheet-text text-justify-custom leading-relaxed">${phase.data.teks}</div>`;
+                    }
+                    (phase.data.soalList || []).forEach(q => {
+                        const draftVal = savedDrafts[globalQIdx] || '';
+                        inner += `
+                            <div class="space-y-1.5 pt-2">
+                                <label class="block text-xs md:text-sm font-semibold text-white">${q}</label>
+                                <textarea rows="3" required oninput="app.saveDraft()" data-question="${q.replace(/"/g, '&quot;')}" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Ketik jawabanmu di sini...">${draftVal}</textarea>
+                            </div>
+                        `;
+                        globalQIdx++;
+                    });
+                    card.innerHTML = inner;
+                    container.appendChild(card);
+                });
+
+                this.scrollToLkmPhase();
+            },
+
+            onSelectLkmMeeting() {
+                const sel = document.getElementById('lkmMeetingSelect');
+                this.state.selectedLkmIndex = parseInt(sel.value, 10) || 0;
+                const d = this.state.dashboardData || {};
+                this.renderLKM(d.lkmList || (d.lkm ? [d.lkm] : []));
+            },
+
+            scrollToLkmPhase() {
+                const sel = document.getElementById('lkmTocSelect');
+                const val = sel ? sel.value : '';
+                const cards = document.querySelectorAll('.lkm-phase-card');
+                const btnPrev = document.getElementById('btnPrevLkm');
+                const btnNext = document.getElementById('btnNextLkm');
+
+                if (val === '') {
+                    cards.forEach(c => c.classList.remove('hidden'));
+                    btnPrev.classList.add('hidden');
+                    btnNext.classList.add('hidden');
+                } else {
+                    const target = parseInt(val, 10);
+                    cards.forEach((c, i) => c.classList.toggle('hidden', i !== target));
+                    btnPrev.classList.toggle('hidden', target <= 0);
+                    btnPrev.classList.toggle('inline-flex', target > 0);
+                    btnNext.classList.toggle('hidden', target >= cards.length - 1);
+                    btnNext.classList.toggle('inline-flex', target < cards.length - 1);
+                }
+            },
+
+            navigateLkmPhase(delta) {
+                const sel = document.getElementById('lkmTocSelect');
+                if (!sel || sel.value === '') return;
+                const next = parseInt(sel.value, 10) + delta;
+                if (next >= 0 && next < sel.options.length - 1) {
+                    sel.value = String(next);
+                    this.scrollToLkmPhase();
+                }
+            },
+
+            async submitLKM(e) {
+                e.preventDefault();
+                const inputs = document.querySelectorAll('#lkmQuestionsContainer textarea');
+                const answers = [];
+                const summaryParts = [];
+                inputs.forEach((inp, idx) => {
+                    const ans = inp.value.trim();
+                    answers.push(`${idx + 1}. ${ans}`);
+                    summaryParts.push(`Soal ${idx + 1}: ${inp.dataset.question || ''}\nJawaban: ${ans}`);
+                });
+
+                const lkmTitle = document.getElementById('lkmJudulUtama').innerText;
+                showLoading(true);
+                try {
+                    const res = await this.api({
+                        action: 'submitData',
+                        type: 'lkm',
+                        studentName: this.state.studentName,
+                        className: this.state.className,
+                        materialId: this.state.materialId,
+                        lkmTitle: lkmTitle,
+                        answers: answers,
+                        detailedSummary: summaryParts.join('\n\n')
+                    });
+
+                    this.state.progress.lkm = true;
+                    this.updateProgress();
+                    this.saveSession();
+
+                    document.getElementById('lkmForm').classList.add('hidden');
+                    document.getElementById('lkmDoneState').classList.remove('hidden');
+                    if (res && res.feedback) {
+                        document.getElementById('lkmAiFeedbackCard').classList.remove('hidden');
+                        document.getElementById('lkmAiScore').innerText = 'Nilai: ' + (res.score || '-');
+                        document.getElementById('lkmAiFeedbackContent').innerText = res.feedback;
+                    }
+                } catch (err) {
+                    showModal('Gagal Mengirim LKM', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            resetLkmForAnotherMeeting() {
+                document.getElementById('lkmDoneState').classList.add('hidden');
+                document.getElementById('lkmForm').classList.remove('hidden');
+            },
+
+            renderTugas(tugas) {
+                const container = document.getElementById('tugasQuestionsContainer');
+                const descBox = document.getElementById('tugasDeskripsiContainer');
+                container.innerHTML = '';
+
+                if (!tugas) {
+                    document.getElementById('tugasJudulUtama').innerText = 'Penugasan';
+                    document.getElementById('tugasDeadline').innerText = 'Batas waktu: -';
+                    descBox.classList.add('hidden');
+                    container.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Belum ada tugas aktif untuk materi ini.</p>';
+                    return;
+                }
+
+                document.getElementById('tugasJudulUtama').innerText = tugas.judul || 'Penugasan';
+                document.getElementById('tugasDeadline').innerText = 'Batas waktu: ' + (tugas.deadline || '-');
+                if (tugas.deskripsi) {
+                    descBox.classList.remove('hidden');
+                    descBox.innerText = tugas.deskripsi;
+                } else {
+                    descBox.classList.add('hidden');
+                }
+
+                const questions = (tugas.soalList && tugas.soalList.length > 0) ? tugas.soalList : ['Tuliskan jawaban atau laporan tugas Anda di bawah ini:'];
+                const drafts = this.state.drafts.tugas || {};
+                questions.forEach((q, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'space-y-2';
+                    div.innerHTML = `
+                        <label class="block text-xs md:text-sm font-semibold text-white">${q}</label>
+                        <textarea rows="4" required oninput="app.saveDraft()" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-xs md:text-sm text-white focus:outline-none focus:border-brand-orange" placeholder="Ketik jawaban tugas di sini...">${drafts[idx] || ''}</textarea>
+                    `;
+                    container.appendChild(div);
+                });
+
+                const linkInput = document.getElementById('tugasLink');
+                if (linkInput && this.state.drafts.tugasLink) {
+                    linkInput.value = this.state.drafts.tugasLink;
+                }
+            },
+
+            async submitTugas(e) {
+                e.preventDefault();
+                const inputs = document.querySelectorAll('#tugasQuestionsContainer textarea');
+                const jawaban = [];
+                inputs.forEach((inp, idx) => jawaban.push(`${idx + 1}. ${inp.value.trim()}`));
+                const fileUrl = (document.getElementById('tugasLink').value || '').trim();
+
+                showLoading(true);
+                try {
+                    const res = await this.api({
+                        action: 'submitData',
+                        type: 'tugas',
+                        studentName: this.state.studentName,
+                        className: this.state.className,
+                        materialId: this.state.materialId,
+                        jawaban: jawaban,
+                        fileUrl: fileUrl
+                    });
+
+                    this.state.progress.tugas = true;
+                    this.updateProgress();
+                    this.saveSession();
+
+                    document.getElementById('tugasForm').classList.add('hidden');
+                    document.getElementById('tugasDoneState').classList.remove('hidden');
+                    if (res && res.feedback) {
+                        document.getElementById('tugasAiFeedbackCard').classList.remove('hidden');
+                        document.getElementById('tugasAiScore').innerText = 'Nilai Tugas: ' + (res.score || '-');
+                        document.getElementById('tugasAiFeedbackContent').innerText = res.feedback;
+                    }
+                } catch (err) {
+                    showModal('Gagal Mengirim Tugas', err.message, '<i class="fa-solid fa-circle-xmark text-red-500"></i>');
+                } finally {
+                    showLoading(false);
+                }
+            },
+
+            // =========================================================================
+            // FITUR FORMATIF (PASSWORD MASUK & KELUAR TERPISAH, TIMER, KOTAK NOMOR)
+            // =========================================================================
             isExamLockActive() {
-                return Boolean((this.state.quizActive || this.state.externalFormatifActive) && !this.state.examSubmitting);
+                return Boolean(this.state.quizActive || this.state.externalFormatifActive);
             },
 
             requestExamFullscreen() {
                 try {
-                    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-                        const promise = document.documentElement.requestFullscreen();
-                        if (promise && typeof promise.catch === 'function') {
-                            promise.catch(function() {});
-                        }
+                    const el = document.documentElement;
+                    if (!document.fullscreenElement && el.requestFullscreen) {
+                        el.requestFullscreen().catch(() => {});
                     }
-                } catch (err) {}
+                } catch (e) {}
             },
 
             exitExamFullscreen() {
                 try {
                     if (document.fullscreenElement && document.exitFullscreen) {
-                        const promise = document.exitFullscreen();
-                        if (promise && typeof promise.catch === 'function') {
-                            promise.catch(function() {});
-                        }
+                        document.exitFullscreen().catch(() => {});
                     }
-                } catch (err) {}
+                } catch (e) {}
+            },
+
+            setupFormatif() {
+                const d = this.state.dashboardData || {};
+                const introArea = document.getElementById('formatifIntro');
+                const linkArea = document.getElementById('formatifLinkArea');
+                const playArea = document.getElementById('formatifPlayArea');
+                const resultArea = document.getElementById('formatifResultArea');
+
+                introArea.classList.add('hidden');
+                linkArea.classList.add('hidden');
+                playArea.classList.add('hidden');
+                resultArea.classList.add('hidden');
+
+                const externalLink = (d.formatifLink || '').trim();
+                const questions = d.formatif || [];
+                const durationMin = parseInt(d.formatifDuration, 10) || 0;
+
+                if (this.state.progress.formatif) {
+                    resultArea.classList.remove('hidden');
+                    const scoreValEl = document.getElementById('formatifScoreVal');
+                    const subtextEl = document.getElementById('formatifResultSubtext');
+                    const statsBox = document.getElementById('formatifStatsContainer');
+                    if (this.state.progress.formatifScore !== null) {
+                        scoreValEl.innerText = this.state.progress.formatifScore;
+                        subtextEl.innerText = 'Nilai akhir Anda telah otomatis tercatat di Spreadsheet:';
+                        if (statsBox && this.state.progress.formatifCorrect !== null && this.state.progress.formatifWrong !== null) {
+                            statsBox.classList.remove('hidden');
+                            document.getElementById('formatifCorrectVal').innerText = this.state.progress.formatifCorrect;
+                            document.getElementById('formatifWrongVal').innerText = this.state.progress.formatifWrong;
+                            document.getElementById('formatifSummaryScoreVal').innerText = this.state.progress.formatifScore;
+                        } else if (statsBox) {
+                            statsBox.classList.add('hidden');
+                        }
+                    } else {
+                        scoreValEl.innerText = 'TERCATAT';
+                        subtextEl.innerText = 'Sesi asesmen formatif telah selesai dan otomatis tercatat di Spreadsheet.';
+                        if (statsBox) statsBox.classList.add('hidden');
+                    }
+                    return;
+                }
+
+                if (externalLink) {
+                    linkArea.classList.remove('hidden');
+                    if (d.formatifDesc) {
+                        document.getElementById('formatifLinkDescription').innerText = d.formatifDesc;
+                    }
+                    return;
+                }
+
+                introArea.classList.remove('hidden');
+                const durInfo = document.getElementById('formatifIntroDurationInfo');
+                if (durInfo) {
+                    if (durationMin > 0) {
+                        durInfo.classList.remove('hidden');
+                        durInfo.innerText = `Waktu pengerjaan asesmen: ${durationMin} menit (otomatis terkirim saat waktu habis).`;
+                    } else {
+                        durInfo.classList.add('hidden');
+                    }
+                }
+
+                const btnStart = document.getElementById('btnStartFormatif');
+                if (questions.length === 0) {
+                    document.getElementById('formatifIntroDesc').innerText = 'Belum ada soal asesmen formatif aktif untuk materi ini.';
+                    btnStart.disabled = true;
+                    btnStart.classList.add('opacity-50');
+                } else {
+                    document.getElementById('formatifIntroDesc').innerText = `Terdapat ${questions.length} soal asesmen formatif. Masukkan password dari guru untuk memulai.`;
+                    btnStart.disabled = false;
+                    btnStart.classList.remove('opacity-50');
+                }
             },
 
             startFormatif() {
                 const d = this.state.dashboardData || {};
-                const rawQuestions = d.formatif || [];
-                if (rawQuestions.length === 0) return;
+                const questions = d.formatif || [];
+                if (questions.length === 0) return;
 
                 const expectedPwd = (d.formatifPassword || 'PJOK2026').trim();
                 const inputEl = document.getElementById('formatifStartPasswordInput');
@@ -1444,8 +1993,40 @@
                 }
                 if (errEl) errEl.classList.add('hidden');
 
-                const shuffledQuestions = this.buildShuffledFormatifQuestions(rawQuestions);
-                this.state.shuffledFormatifQuestions = shuffledQuestions;
+                // Helper Fisher-Yates shuffle untuk mengacak array tanpa mengubah array asli
+                const shuffleArray = (arr) => {
+                    const copy = arr.slice();
+                    for (let i = copy.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        const tmp = copy[i];
+                        copy[i] = copy[j];
+                        copy[j] = tmp;
+                    }
+                    return copy;
+                };
+
+                // Acak urutan pilihan pada setiap soal dan simpan indeks kunci jawaban aslinya
+                const preparedQuestions = questions.map((q) => {
+                    const originalCorrectIdx = Math.max(0, (Number(q.answer) || 1) - 1);
+                    const wrappedOptions = (q.options || []).map((optText, oIdx) => ({
+                        text: optText,
+                        isCorrect: oIdx === originalCorrectIdx
+                    }));
+                    const shuffledOptions = shuffleArray(wrappedOptions);
+                    const newCorrectIdx = shuffledOptions.findIndex(item => item.isCorrect);
+
+                    return {
+                        id: q.id,
+                        text: q.text,
+                        options: shuffledOptions.map(item => item.text),
+                        correctIndex: newCorrectIdx >= 0 ? newCorrectIdx : 0
+                    };
+                });
+
+                // Acak urutan seluruh soal formatif
+                const shuffledQuestions = shuffleArray(preparedQuestions);
+
+                this.state.activeFormatifQuestions = shuffledQuestions;
                 this.state.quizActive = true;
                 this.state.quizIndex = 0;
                 this.state.quizAnswers = new Array(shuffledQuestions.length).fill(null);
@@ -1503,7 +2084,10 @@
             renderFormatifNumberBoxes() {
                 const container = document.getElementById('formatifNumberBoxes');
                 if (!container) return;
-                const questions = this.getActiveFormatifQuestions();
+                const d = this.state.dashboardData || {};
+                const questions = (this.state.activeFormatifQuestions && this.state.activeFormatifQuestions.length > 0)
+                    ? this.state.activeFormatifQuestions
+                    : (d.formatif || []);
                 container.innerHTML = '';
 
                 questions.forEach((_, idx) => {
@@ -1534,14 +2118,19 @@
             },
 
             renderQuizQuestion() {
-                const questions = this.getActiveFormatifQuestions();
+                const d = this.state.dashboardData || {};
+                const questions = (this.state.activeFormatifQuestions && this.state.activeFormatifQuestions.length > 0)
+                    ? this.state.activeFormatifQuestions
+                    : (d.formatif || []);
                 const idx = this.state.quizIndex;
                 const q = questions[idx];
                 if (!q) return;
 
                 document.getElementById('qCurrentIdx').innerText = String(idx + 1);
                 document.getElementById('qTotal').innerText = String(questions.length);
-                document.getElementById('qText').innerText = `${idx + 1}. ${q.text}`;
+                // Hapus awalan nomor seperti "1. " atau "1) " jika ada pada teks soal, dan tampilkan tanpa nomor di depan
+                const cleanQuestionText = String(q.text || '').replace(/^\s*\d+\s*[\.\)]\s*/, '');
+                document.getElementById('qText').innerText = cleanQuestionText;
 
                 const optContainer = document.getElementById('qOptionsContainer');
                 optContainer.innerHTML = '';
@@ -1575,7 +2164,10 @@
             },
 
             quizNav(delta) {
-                const questions = this.getActiveFormatifQuestions();
+                const d = this.state.dashboardData || {};
+                const questions = (this.state.activeFormatifQuestions && this.state.activeFormatifQuestions.length > 0)
+                    ? this.state.activeFormatifQuestions
+                    : (d.formatif || []);
                 const next = this.state.quizIndex + delta;
                 if (next >= 0 && next < questions.length) {
                     this.state.quizIndex = next;
@@ -1708,19 +2300,22 @@
                 }
                 this.exitExamFullscreen();
 
-                const questions = this.getActiveFormatifQuestions();
+                const d = this.state.dashboardData || {};
+                const questions = (this.state.activeFormatifQuestions && this.state.activeFormatifQuestions.length > 0)
+                    ? this.state.activeFormatifQuestions
+                    : (d.formatif || []);
                 const letters = ['A', 'B', 'C', 'D', 'E'];
                 let correctCount = 0;
                 const answerLabels = [];
 
                 questions.forEach((q, idx) => {
                     const chosenIdx = this.state.quizAnswers[idx];
-                    const origLetters = q.optionOriginalLetters || letters;
-                    const chosenLabel = (chosenIdx !== null && chosenIdx !== undefined)
-                        ? (origLetters[chosenIdx] || letters[chosenIdx] || String(chosenIdx + 1))
-                        : '-';
-                    answerLabels.push(`${q.id || (idx + 1)}: ${chosenLabel}`);
-                    if (chosenIdx !== null && chosenIdx !== undefined && (chosenIdx + 1) === Number(q.answer)) {
+                    const chosenLabel = (chosenIdx !== null && chosenIdx !== undefined) ? (letters[chosenIdx] || String(chosenIdx + 1)) : '-';
+                    answerLabels.push(`${idx + 1}: ${chosenLabel}`);
+                    const expectedIdx = (typeof q.correctIndex === 'number')
+                        ? q.correctIndex
+                        : Math.max(0, (Number(q.answer) || 1) - 1);
+                    if (chosenIdx !== null && chosenIdx !== undefined && chosenIdx === expectedIdx) {
                         correctCount++;
                     }
                 });
@@ -2298,6 +2893,435 @@
                     info.classList.remove('hidden');
                 } else {
                     info.classList.add('hidden');
+                }
+            },
+
+            getTeacherSignatureDataUrl() {
+                // Menghasilkan gambar tanda tangan guru mapel (tinta biru khas sesuai gambar TTD)
+                const c = document.createElement('canvas');
+                c.width = 480;
+                c.height = 200;
+                const ctx = c.getContext('2d');
+                ctx.clearRect(0, 0, c.width, c.height);
+
+                ctx.strokeStyle = '#0062c4';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // 1. Goresan naik dari kiri bawah melengkung tajam ke puncak lalu turun ke palang
+                ctx.beginPath();
+                ctx.moveTo(22, 188);
+                ctx.bezierCurveTo(64, 134, 112, 74, 156, 26);
+                ctx.bezierCurveTo(180, 4, 212, 10, 208, 42);
+                ctx.bezierCurveTo(204, 70, 166, 92, 122, 98);
+                ctx.stroke();
+
+                // 2. Garis horizontal silang yang memotong bagian tengah
+                ctx.beginPath();
+                ctx.moveTo(92, 86);
+                ctx.bezierCurveTo(138, 76, 192, 66, 232, 60);
+                ctx.moveTo(116, 114);
+                ctx.bezierCurveTo(154, 110, 190, 98, 210, 84);
+                ctx.stroke();
+
+                // 3. Rangkaian gelombang huruf kecil berulang di bagian tengah-bawah
+                ctx.beginPath();
+                ctx.moveTo(188, 116);
+                ctx.bezierCurveTo(194, 92, 212, 86, 216, 106);
+                ctx.bezierCurveTo(220, 122, 228, 122, 234, 102);
+                ctx.bezierCurveTo(240, 86, 248, 90, 250, 108);
+                ctx.bezierCurveTo(252, 122, 260, 122, 266, 102);
+                ctx.bezierCurveTo(272, 86, 280, 90, 282, 108);
+                ctx.bezierCurveTo(284, 122, 292, 122, 298, 102);
+                ctx.bezierCurveTo(304, 88, 312, 92, 316, 108);
+                ctx.bezierCurveTo(320, 122, 328, 116, 336, 102);
+                ctx.stroke();
+
+                // 4. Tarikan naik ke kanan atas lalu turun menjulur ke kanan bawah
+                ctx.beginPath();
+                ctx.moveTo(328, 112);
+                ctx.bezierCurveTo(360, 82, 396, 44, 428, 20);
+                ctx.bezierCurveTo(438, 14, 444, 24, 432, 46);
+                ctx.bezierCurveTo(410, 88, 386, 128, 372, 156);
+                ctx.stroke();
+
+                // 5. Ekor garis vertikal pendek di bagian kanan bawah
+                ctx.beginPath();
+                ctx.moveTo(354, 112);
+                ctx.lineTo(350, 138);
+                ctx.stroke();
+
+                return c.toDataURL('image/png');
+            },
+
+            getKopSuratHtml() {
+                // Menggunakan gambar kop jika tersedia di folder yang sama (kop-sman1tejakula.jpg / kop-sman1tejakula.png),
+                // dengan tampilan kop resmi SMA Negeri 1 Tejakula yang rapi dan tajam saat dicetak ke PDF
+                return `
+  <div class="kop-wrap">
+    <img src="kop-sman1tejakula.jpg" alt="Kop SMA Negeri 1 Tejakula" class="kop-img" onerror="this.onerror=null; this.src='kop-sman1tejakula.png'; this.style.display='none'; document.getElementById('kopFallback').style.display='block';">
+    <div id="kopFallback" class="kop-fallback">
+      <div class="kop-aksara-top">ᬧᬾᬫᭂᬃᬦᭂᬢᬄ ᬧᭂᬃᭀᬧᬶᬦ᭄ᬲᬶ ᬩᬮᬶ</div>
+      <div class="kop-prov">PEMERINTAH PROVINSI BALI</div>
+      <div class="kop-aksara-mid">ᬲ᭄ᬫᬦ᭄ ᬫᭂᬕᬭᬶ ᭱ ᬢᬾᬚᬓᬸᬮ</div>
+      <div class="kop-school">SMA NEGERI 1 TEJAKULA</div>
+      <div class="kop-aksara-sub">ᬚᬮᬦ᭄ ᬲᬶᬂᬕᬭᬚ ᬳᬫ᭄ᬮᬧᬸᬭ ᬤᬾᬲ ᬢᬾᬚᬓᬸᬮ ᬓᬾᬘᬫᬢᬦ᭄ ᬢᬾᬚᬓᬸᬮ ᬓᬩᬹᬧᬢᬾᬦ᭄ ᬩᬸᬮᬾᬮᬾᬂ</div>
+      <div class="kop-addr">Jalan Singaraja-Amlapura Desa Tejakula Kecamatan Tejakula Kabupaten Buleleng Provinsi Bali</div>
+      <div class="kop-contact">Laman : <u>www.smanegerisaturtejakula.sch.id</u> &nbsp;E-Mail : <u>smanegeri1tejakula@gmail.com</u></div>
+      <div class="kop-meta">NPSN : 50100282 &nbsp;NSS : 30.1.22.01.00.037 &nbsp;Telp : (0362)3304516 &nbsp;Kode Pos : 81173</div>
+    </div>
+  </div>`;
+            },
+
+            downloadKesepakatanPDF() {
+                if (!this.state.progress.kesepakatanAgreed || !this.state.progress.kesepakatanSignature) {
+                    showModal('Belum Disetujui', 'Silakan bubuhkan tanda tangan dan klik tombol "Saya Setuju" terlebih dahulu sebelum mengunduh dokumen.', '<i class="fa-solid fa-file-pdf text-amber-400"></i>');
+                    return;
+                }
+
+                const d = this.state.dashboardData || {};
+                const list = d.kesepakatan || [];
+                const studentName = this.state.studentName || 'Murid';
+                const className = this.state.className || '-';
+                const materialTitle = (d.materi && d.materi.judul) ? d.materi.judul : (this.state.materialTitle || '-');
+                const studentSig = this.state.progress.kesepakatanSignature;
+                const teacherSig = this.getTeacherSignatureDataUrl();
+                const kopHtml = this.getKopSuratHtml();
+                const dateStr = new Date().toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const itemsHtml = list.length > 0
+                    ? list.map((item, idx) => `
+                        <tr>
+                            <td style="border:1px solid #cbd5e1;padding:8px 10px;text-align:center;font-weight:bold;width:44px;">${item.no || (idx + 1)}</td>
+                            <td style="border:1px solid #cbd5e1;padding:8px 10px;">
+                                <div style="font-weight:bold;color:#0f172a;margin-bottom:2px;">${item.title}</div>
+                                <div style="color:#334155;font-size:12px;line-height:1.45;">${item.desc}</div>
+                            </td>
+                        </tr>
+                    `).join('')
+                    : `<tr><td colspan="2" style="border:1px solid #cbd5e1;padding:10px;text-align:center;color:#64748b;">Kesepakatan kelas PJOK telah disetujui bersama.</td></tr>`;
+
+                const printHtml = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kesepakatan Kelas - ${studentName}</title>
+<style>
+  @page { size: A4 portrait; margin: 14mm 16mm; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; margin: 0; padding: 0; background: #ffffff; }
+  .kop-wrap { border-bottom: 3px double #0f172a; padding-bottom: 8px; margin-bottom: 14px; text-align: center; }
+  .kop-img { width: 100%; max-height: 115px; object-fit: contain; display: block; margin: 0 auto; }
+  .kop-fallback { text-align: center; line-height: 1.25; }
+  .kop-aksara-top { font-size: 11px; color: #1e293b; letter-spacing: 0.5px; }
+  .kop-prov { font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 1px; }
+  .kop-aksara-mid { font-size: 12px; color: #1e293b; margin-top: 2px; }
+  .kop-school { font-size: 17px; font-weight: 900; color: #0f172a; letter-spacing: 0.5px; margin-top: 1px; }
+  .kop-aksara-sub { font-size: 9px; color: #334155; margin-top: 2px; }
+  .kop-addr { font-size: 10px; color: #0f172a; margin-top: 2px; }
+  .kop-contact { font-size: 9.5px; color: #0f172a; margin-top: 1px; }
+  .kop-meta { font-size: 9.5px; font-weight: bold; color: #0f172a; margin-top: 1px; }
+  .doc-title { text-align: center; margin-bottom: 12px; }
+  .doc-title h2 { font-size: 15px; margin: 0 0 2px 0; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: underline; }
+  .doc-title p { font-size: 11.5px; color: #475569; margin: 0; }
+  .meta-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 14px; margin-bottom: 12px; font-size: 12px; line-height: 1.55; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
+  .statement { font-size: 12px; line-height: 1.5; margin-bottom: 16px; text-align: justify; }
+  .sig-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  .sig-cell { width: 50%; vertical-align: bottom; text-align: center; padding: 4px 12px; }
+  .sig-role { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+  .sig-img-wrap { height: 74px; display: flex; align-items: center; justify-content: center; margin: 4px auto; }
+  .sig-img-wrap img { max-height: 72px; max-width: 190px; object-fit: contain; }
+  .sig-name { font-size: 12px; font-weight: bold; text-decoration: underline; margin-top: 4px; }
+  .sig-nip { font-size: 11px; color: #334155; margin-top: 2px; }
+</style>
+</head>
+<body>
+  ${kopHtml}
+
+  <div class="doc-title">
+    <h2>Lembar Kesepakatan Kelas PJOK</h2>
+    <p>Pendidikan Jasmani, Olahraga, dan Kesehatan — PJOK Digital Learning</p>
+  </div>
+
+  <div class="meta-box">
+    <strong>Nama Murid:</strong> ${studentName}<br>
+    <strong>Kelas:</strong> ${className}<br>
+    <strong>Materi Pembelajaran:</strong> ${materialTitle}<br>
+    <strong>Tanggal Persetujuan:</strong> ${dateStr}
+  </div>
+
+  <table>
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <th style="border:1px solid #cbd5e1;padding:8px 10px;width:44px;">No</th>
+        <th style="border:1px solid #cbd5e1;padding:8px 10px;text-align:left;">Butir Kesepakatan Kelas</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${itemsHtml}
+    </tbody>
+  </table>
+
+  <p class="statement">
+    Saya menyatakan telah membaca, memahami, dan menyetujui seluruh butir kesepakatan kelas di atas untuk dilaksanakan dengan penuh disiplin, tanggung jawab, dan sportivitas selama proses pembelajaran berlangsung.
+  </p>
+
+  <table class="sig-table">
+    <tr>
+      <td class="sig-cell">
+        <div class="sig-role">Menyetujui,<br>Murid</div>
+        <div class="sig-img-wrap">
+          <img src="${studentSig}" alt="Tanda Tangan Murid">
+        </div>
+        <div class="sig-name">${studentName}</div>
+        <div class="sig-nip">Kelas ${className}</div>
+      </td>
+      <td class="sig-cell">
+        <div class="sig-role">Mengetahui,<br>Guru Mata Pelajaran PJOK</div>
+        <div class="sig-img-wrap">
+          <img src="${teacherSig}" alt="Tanda Tangan Guru Mata Pelajaran">
+        </div>
+        <div class="sig-name">I Ketut Agus Nova Anggarawan, S.Pd.</div>
+        <div class="sig-nip">NIPPPK. 198811152022211012</div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+                const printWin = window.open('', '_blank', 'width=820,height=960');
+                if (!printWin) {
+                    showModal('Pop-up Diblokir', 'Izinkan jendela pop-up pada browser untuk mengunduh/mencetak PDF Kesepakatan Kelas.', '<i class="fa-solid fa-window-restore text-amber-400"></i>');
+                    return;
+                }
+                printWin.document.open();
+                printWin.document.write(printHtml);
+                printWin.document.close();
+                printWin.focus();
+                setTimeout(() => {
+                    printWin.print();
+                }, 350);
+            },
+
+            async uploadKesepakatanPdfToSpreadsheet(pdfBase64, fileName, dateStr) {
+                try {
+                    const d = this.state.dashboardData || {};
+                    const materialTitle = (d.materi && d.materi.judul) ? d.materi.judul : (this.state.materialTitle || '-');
+                    await this.api({
+                        action: 'submitData',
+                        type: 'kesepakatan_pdf',
+                        studentName: this.state.studentName || 'Murid',
+                        className: this.state.className || '-',
+                        materialId: this.state.materialId || '',
+                        materialTitle: materialTitle,
+                        agreedDate: dateStr,
+                        fileName: fileName,
+                        pdfBase64: pdfBase64
+                    });
+                } catch (err) {
+                    console.warn('Gagal mengunggah PDF ke Spreadsheet:', err);
+                }
+            },
+
+            async downloadKesepakatanPDF() {
+                if (!this.state.progress.kesepakatanAgreed || !this.state.progress.kesepakatanSignature) {
+                    showModal('Belum Disetujui', 'Silakan bubuhkan tanda tangan dan klik tombol "Saya Setuju" terlebih dahulu sebelum mengunduh dokumen.', '<i class="fa-solid fa-file-pdf text-amber-400"></i>');
+                    return;
+                }
+
+                const d = this.state.dashboardData || {};
+                const list = d.kesepakatan || [];
+                const studentName = this.state.studentName || 'Murid';
+                const className = this.state.className || '-';
+                const materialTitle = (d.materi && d.materi.judul) ? d.materi.judul : (this.state.materialTitle || '-');
+                const studentSig = this.state.progress.kesepakatanSignature;
+                const teacherSig = this.getTeacherSignatureDataUrl();
+                const kopHtml = this.getKopSuratHtml();
+                const dateStr = new Date().toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const safeSlug = `${studentName}_${className}`.replace(/[^a-zA-Z0-9_-]+/g, '_');
+                const fileName = `Kesepakatan_Kelas_${safeSlug}.pdf`;
+
+                const itemsHtml = list.length > 0
+                    ? list.map((item, idx) => `
+                        <tr>
+                            <td style="border:1px solid #cbd5e1;padding:7px 9px;text-align:center;font-weight:bold;width:40px;">${item.no || (idx + 1)}</td>
+                            <td style="border:1px solid #cbd5e1;padding:7px 9px;">
+                                <div style="font-weight:bold;color:#0f172a;margin-bottom:2px;font-size:12px;">${item.title}</div>
+                                <div style="color:#334155;font-size:11px;line-height:1.4;">${item.desc}</div>
+                            </td>
+                        </tr>
+                    `).join('')
+                    : `<tr><td colspan="2" style="border:1px solid #cbd5e1;padding:10px;text-align:center;color:#64748b;">Kesepakatan kelas PJOK telah disetujui bersama.</td></tr>`;
+
+                const sheetBodyHtml = `
+                  ${kopHtml}
+                  <div class="doc-title">
+                    <h2>Lembar Kesepakatan Kelas PJOK</h2>
+                    <p>Pendidikan Jasmani, Olahraga, dan Kesehatan — PJOK Digital Learning</p>
+                  </div>
+                  <div class="meta-box">
+                    <strong>Nama Murid:</strong> ${studentName}<br>
+                    <strong>Kelas:</strong> ${className}<br>
+                    <strong>Materi Pembelajaran:</strong> ${materialTitle}<br>
+                    <strong>Tanggal Persetujuan:</strong> ${dateStr}
+                  </div>
+                  <table>
+                    <thead>
+                      <tr style="background:#f1f5f9;">
+                        <th style="border:1px solid #cbd5e1;padding:7px 9px;width:40px;">No</th>
+                        <th style="border:1px solid #cbd5e1;padding:7px 9px;text-align:left;">Butir Kesepakatan Kelas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${itemsHtml}
+                    </tbody>
+                  </table>
+                  <p class="statement">
+                    Saya menyatakan telah membaca, memahami, dan menyetujui seluruh butir kesepakatan kelas di atas untuk dilaksanakan dengan penuh disiplin, tanggung jawab, dan sportivitas selama proses pembelajaran berlangsung.
+                  </p>
+                  <table class="sig-table">
+                    <tr>
+                      <td class="sig-cell">
+                        <div class="sig-role">Menyetujui,<br>Murid</div>
+                        <div class="sig-img-wrap">
+                          <img src="${studentSig}" alt="Tanda Tangan Murid">
+                        </div>
+                        <div class="sig-name">${studentName}</div>
+                        <div class="sig-nip">Kelas ${className}</div>
+                      </td>
+                      <td class="sig-cell">
+                        <div class="sig-role">Mengetahui,<br>Guru Mata Pelajaran PJOK</div>
+                        <div class="sig-img-wrap">
+                          <img src="${teacherSig}" alt="Tanda Tangan Guru Mata Pelajaran">
+                        </div>
+                        <div class="sig-name">I Ketut Agus Nova Anggarawan, S.Pd.</div>
+                        <div class="sig-nip">NIPPPK. 198811152022211012</div>
+                      </td>
+                    </tr>
+                  </table>
+                `;
+
+                const renderHost = document.createElement('div');
+                renderHost.style.position = 'fixed';
+                renderHost.style.left = '-9999px';
+                renderHost.style.top = '0';
+                renderHost.style.width = '794px';
+                renderHost.style.background = '#ffffff';
+                renderHost.style.color = '#0f172a';
+                renderHost.style.padding = '24px 32px';
+                renderHost.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                renderHost.innerHTML = `
+                  <style>
+                    .kop-wrap { border-bottom: 3px double #0f172a; padding-bottom: 8px; margin-bottom: 12px; text-align: center; }
+                    .kop-img { width: 100%; max-height: 110px; object-fit: contain; display: block; margin: 0 auto; }
+                    .kop-fallback { text-align: center; line-height: 1.25; }
+                    .kop-aksara-top { font-size: 11px; color: #1e293b; }
+                    .kop-prov { font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 1px; }
+                    .kop-aksara-mid { font-size: 12px; color: #1e293b; margin-top: 2px; }
+                    .kop-school { font-size: 17px; font-weight: 900; color: #0f172a; margin-top: 1px; }
+                    .kop-aksara-sub { font-size: 9px; color: #334155; margin-top: 2px; }
+                    .kop-addr { font-size: 10px; color: #0f172a; margin-top: 2px; }
+                    .kop-contact { font-size: 9.5px; color: #0f172a; margin-top: 1px; }
+                    .kop-meta { font-size: 9.5px; font-weight: bold; color: #0f172a; margin-top: 1px; }
+                    .doc-title { text-align: center; margin-bottom: 10px; }
+                    .doc-title h2 { font-size: 15px; margin: 0 0 2px 0; text-transform: uppercase; text-decoration: underline; }
+                    .doc-title p { font-size: 11px; color: #475569; margin: 0; }
+                    .meta-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 11.5px; line-height: 1.5; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11.5px; }
+                    .statement { font-size: 11.5px; line-height: 1.45; margin-bottom: 14px; text-align: justify; }
+                    .sig-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+                    .sig-cell { width: 50%; vertical-align: bottom; text-align: center; padding: 4px 10px; }
+                    .sig-role { font-size: 11.5px; font-weight: bold; margin-bottom: 4px; }
+                    .sig-img-wrap { height: 70px; display: flex; align-items: center; justify-content: center; margin: 4px auto; }
+                    .sig-img-wrap img { max-height: 68px; max-width: 185px; object-fit: contain; }
+                    .sig-name { font-size: 11.5px; font-weight: bold; text-decoration: underline; margin-top: 4px; }
+                    .sig-nip { font-size: 10.5px; color: #334155; margin-top: 2px; }
+                  </style>
+                  ${sheetBodyHtml}
+                `;
+                document.body.appendChild(renderHost);
+
+                showLoading(true);
+                try {
+                    if (window.html2canvas && window.jspdf && window.jspdf.jsPDF) {
+                        const canvas = await window.html2canvas(renderHost, {
+                            scale: 2,
+                            useCORS: true,
+                            backgroundColor: '#ffffff'
+                        });
+                        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+                        const { jsPDF } = window.jspdf;
+                        const pdf = new jsPDF({
+                            orientation: 'portrait',
+                            unit: 'mm',
+                            format: 'a4'
+                        });
+
+                        const pageWidth = pdf.internal.pageSize.getWidth();
+                        const pageHeight = pdf.internal.pageSize.getHeight();
+                        const margin = 8;
+                        const usableWidth = pageWidth - margin * 2;
+                        const usableHeight = pageHeight - margin * 2;
+                        const imgProps = pdf.getImageProperties(imgData);
+                        const pdfHeight = (imgProps.height * usableWidth) / imgProps.width;
+
+                        let heightLeft = pdfHeight;
+                        let position = margin;
+
+                        pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, pdfHeight);
+                        heightLeft -= usableHeight;
+
+                        while (heightLeft > 0) {
+                            position = heightLeft - pdfHeight + margin;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, pdfHeight);
+                            heightLeft -= usableHeight;
+                        }
+
+                        // 1. Unduh langsung file PDF ke HP/perangkat murid
+                        pdf.save(fileName);
+
+                        // 2. Kirim & simpan file PDF ke Google Drive dan catat link-nya di Spreadsheet
+                        const dataUri = pdf.output('datauristring');
+                        const base64Pdf = dataUri.split(',')[1] || '';
+                        if (base64Pdf) {
+                            await this.uploadKesepakatanPdfToSpreadsheet(base64Pdf, fileName, dateStr);
+                        }
+
+                        showModal(
+                            'PDF Tersimpan',
+                            `File "${fileName}" telah diunduh ke perangkat Anda dan otomatis tersimpan ke Spreadsheet/Drive.`,
+                            '<i class="fa-solid fa-file-pdf text-emerald-400"></i>'
+                        );
+                    } else {
+                        const printWin = window.open('', '_blank', 'width=820,height=960');
+                        if (!printWin) {
+                            showModal('Pop-up Diblokir', 'Izinkan jendela pop-up pada browser untuk mengunduh/mencetak PDF Kesepakatan Kelas.', '<i class="fa-solid fa-window-restore text-amber-400"></i>');
+                            return;
+                        }
+                        printWin.document.open();
+                        printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${fileName}</title></head><body>${renderHost.innerHTML}</body></html>`);
+                        printWin.document.close();
+                        printWin.focus();
+                        setTimeout(() => printWin.print(), 350);
+                    }
+                } catch (err) {
+                    showModal('Gagal Membuat PDF', 'Terjadi kendala saat membuat file PDF: ' + err.message, '<i class="fa-solid fa-triangle-exclamation text-red-500"></i>');
+                } finally {
+                    if (renderHost.parentNode) {
+                        renderHost.parentNode.removeChild(renderHost);
+                    }
+                    showLoading(false);
                 }
             },
 
