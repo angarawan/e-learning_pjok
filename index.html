@@ -1466,18 +1466,30 @@
 
             formatMediaEmbed(url) {
                 if (!url) return '';
-                const clean = url.trim();
+                const clean = url.trim().replace(/^["']|["']$/g, '');
                 const ytMatch = clean.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
                 if (ytMatch) {
                     return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
                 }
-                const gdMatch = clean.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+
+                // Ekstrak ID file Google Drive dari berbagai format URL (drive.google.com/file/d/ID/..., open?id=ID, uc?id=ID)
+                const gdMatch = clean.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                                clean.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+
+                const isImageExt = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(clean);
+                const hasImgHint = /(gambar|foto|image|img|poster|ilustrasi|diagram|chart)/i.test(clean);
+
+                if (isImageExt || hasImgHint) {
+                    const imgSrc = gdMatch ? `https://lh3.googleusercontent.com/d/${gdMatch[1]}` : clean;
+                    const fallbackSrc = gdMatch ? `https://drive.google.com/uc?export=view&id=${gdMatch[1]}` : 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800';
+                    return `<img src="${imgSrc}" alt="Gambar Materi Pembelajaran" class="rounded-xl max-w-full h-auto mx-auto shadow-lg" onerror="this.onerror=null; this.src='${fallbackSrc}';">`;
+                }
+
                 if (gdMatch) {
-                    return `<iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" allowfullscreen></iframe>`;
+                    // Tampilkan sebagai gambar langsung terlebih dahulu; jika bukan gambar, tampilkan iframe preview Drive
+                    return `<img src="https://lh3.googleusercontent.com/d/${gdMatch[1]}" alt="Media Materi" class="rounded-xl max-w-full h-auto mx-auto shadow-lg" onerror="this.style.display='none'; const nextEl=this.nextElementSibling; if(nextEl) nextEl.style.display='block';"><iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" style="display:none;" allowfullscreen></iframe>`;
                 }
-                if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(clean)) {
-                    return `<img src="${clean}" alt="Media Pembelajaran">`;
-                }
+
                 return `<a href="${clean}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-brand-orange underline text-xs md:text-sm font-semibold"><i class="fa-solid fa-up-right-from-square"></i> Buka Media Pendukung</a>`;
             },
 
@@ -1491,6 +1503,25 @@
                     if (!line) {
                         if (inHighlightBox) html += '<div class="h-2"></div>';
                         return;
+                    }
+
+                    // Dukungan tag khusus gambar/media di dalam teks subbab: [img: URL], [gambar: URL], [foto: URL], [media: URL]
+                    const tagMatch = line.match(/^\[(?:img|gambar|foto|image|media)\s*:\s*(.+?)\]$/i);
+                    if (tagMatch) {
+                        const mediaHtml = this.formatMediaEmbed(tagMatch[1].trim());
+                        html += `<div class="media-container my-3">${mediaHtml}</div>`;
+                        return;
+                    }
+
+                    // Jika satu baris penuh hanya berisi URL gambar atau link Google Drive, render langsung sebagai media/gambar
+                    if (/^https?:\/\/\S+$/i.test(line)) {
+                        const isImgUrl = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(line) ||
+                                         /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)/i.test(line) ||
+                                         /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)/i.test(line);
+                        if (isImgUrl) {
+                            html += `<div class="media-container my-3">${this.formatMediaEmbed(line)}</div>`;
+                            return;
+                        }
                     }
 
                     const boldHeaderMatch = line.match(/^\*\*(.+?)\*\*:?$/);
