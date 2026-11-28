@@ -216,7 +216,7 @@
     </div>
 
     <!-- MAIN APP WRAPPER -->
-    <div id="view-main" class="hidden h-screen w-full max-w-full bg-dashboard flex flex-col md:flex-row overflow-hidden">
+    <div id="view-main" class="hidden min-h-screen md:h-screen w-screen max-w-full bg-dashboard flex flex-col md:flex-row overflow-x-hidden md:overflow-hidden">
         
         <div id="sidebarOverlay" onclick="app.toggleSidebar()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"></div>
 
@@ -269,10 +269,10 @@
         </div>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 min-w-0 max-w-full p-4 md:p-8 h-full overflow-y-auto overflow-x-hidden relative">
+        <main class="flex-1 w-full min-w-0 max-w-full p-4 md:p-8 min-h-[calc(100vh-72px)] md:min-h-0 md:h-full overflow-y-auto overflow-x-hidden relative flex flex-col">
             
             <!-- DASHBOARD CONTENT -->
-            <div id="content-dashboard" class="content-section max-w-full">
+            <div id="content-dashboard" class="content-section w-full max-w-full my-auto md:my-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
                     <div class="min-w-0 max-w-full">
                         <h2 class="text-xl md:text-3xl font-bold text-white mb-1 break-words">Selamat Datang, <span id="lblStudentName" class="text-brand-orange">Murid</span>!</h2>
@@ -322,7 +322,7 @@
             </div>
 
             <!-- MATERI CONTENT -->
-            <div id="content-materi" class="content-section hidden max-w-4xl mx-auto">
+            <div id="content-materi" class="content-section hidden w-full max-w-5xl mx-auto">
                 <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
                     <div class="relative h-48 md:h-72">
                         <img id="materiCover" src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1000" class="w-full h-full object-cover">
@@ -377,7 +377,7 @@
             </div>
 
             <!-- LKM CONTENT -->
-            <div id="content-lkm" class="content-section hidden max-w-3xl mx-auto">
+            <div id="content-lkm" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="glass-card p-5 md:p-8 rounded-3xl shadow-xl">
                     <div class="text-center mb-6">
                         <div class="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"><i class="fa-solid fa-file-signature"></i></div>
@@ -448,7 +448,7 @@
             </div>
 
             <!-- TUGAS CONTENT -->
-            <div id="content-tugas" class="content-section hidden max-w-3xl mx-auto">
+            <div id="content-tugas" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="flex items-center gap-4 mb-6 border-b border-white/10 pb-6">
                         <div class="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-2xl flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-upload"></i></div>
@@ -491,7 +491,7 @@
             </div>
 
             <!-- FORMATIF CONTENT (PASSWORD MASUK SOAL + MODE TERKUNCI + KOTAK NOMOR + TOMBOL REFRESH & KELUAR DI POJOK KANAN ATAS) -->
-            <div id="content-formatif" class="content-section hidden max-w-4xl mx-auto">
+            <div id="content-formatif" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="flex items-center justify-end gap-2 mb-4">
                     <button type="button" onclick="app.promptRefreshFormatif()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-lg transition-all cursor-pointer">
                         <i class="fa-solid fa-arrows-rotate"></i> Refresh
@@ -628,7 +628,7 @@
             </div>
 
             <!-- REFLEKSI & UMPAN BALIK CONTENT -->
-            <div id="content-refleksi" class="content-section hidden max-w-3xl mx-auto">
+            <div id="content-refleksi" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-3"><i class="fa-solid fa-comment-dots"></i></div>
@@ -651,7 +651,7 @@
             </div>
 
             <!-- PROFIL SAYA CONTENT -->
-            <div id="content-profil" class="content-section hidden max-w-2xl mx-auto">
+            <div id="content-profil" class="content-section hidden w-full max-w-3xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl text-center">
                     <div id="profilInisial" class="w-20 h-20 rounded-full bg-brand-orange text-white text-3xl font-black flex items-center justify-center mx-auto mb-4 shadow-lg">M</div>
                     <h2 id="profName" class="text-2xl font-bold text-white mb-1">Nama Murid</h2>
@@ -678,7 +678,7 @@
             </div>
 
             <!-- KALKULATOR KEBUGARAN & IMT (BMI) CONTENT -->
-            <div id="content-kalkulator" class="content-section hidden max-w-4xl mx-auto space-y-6">
+            <div id="content-kalkulator" class="content-section hidden w-full max-w-5xl mx-auto space-y-6">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="flex items-center gap-4 mb-6 border-b border-white/10 pb-5">
                         <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl shrink-0">
@@ -787,7 +787,7 @@
             </div>
 
             <!-- GLOSARIUM / KAMUS ISTILAH PJOK CONTENT -->
-            <div id="content-glosarium" class="content-section hidden max-w-4xl mx-auto">
+            <div id="content-glosarium" class="content-section hidden w-full max-w-5xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-5">
                         <div class="flex items-center gap-4">
@@ -816,7 +816,7 @@
             </div>
 
             <!-- KISI-KISI CONTENT -->
-            <div id="content-kisikisi" class="content-section hidden max-w-5xl mx-auto">
+            <div id="content-kisikisi" class="content-section hidden w-full max-w-6xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl space-y-5">
                     <div class="flex items-center gap-4 border-b border-white/10 pb-5">
                         <div class="w-14 h-14 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center text-2xl shrink-0">
@@ -854,7 +854,7 @@
             </div>
 
             <!-- LATIHAN SOAL CONTENT -->
-            <div id="content-latihan" class="content-section hidden max-w-4xl mx-auto">
+            <div id="content-latihan" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl space-y-5">
                     <div class="flex items-center gap-4 border-b border-white/10 pb-5">
                         <div class="w-14 h-14 bg-violet-500/20 text-violet-400 rounded-2xl flex items-center justify-center text-2xl shrink-0">
@@ -886,7 +886,7 @@
             </div>
 
             <!-- KESEPAKATAN KELAS CONTENT -->
-            <div id="content-kesepakatan" class="content-section hidden max-w-3xl mx-auto">
+            <div id="content-kesepakatan" class="content-section hidden w-full max-w-4xl mx-auto">
                 <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl">
                     <div class="text-center mb-6 border-b border-white/10 pb-6">
                         <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-3">
