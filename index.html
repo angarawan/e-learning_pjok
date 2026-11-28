@@ -2,7 +2,14 @@
 <html lang="id" class="max-w-full overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PJOK Digital">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="Logo PJOK Ceria dan Dinamis.png">
+    <link rel="manifest" id="appWebManifest">
     <title>PJOK Digital Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -288,6 +295,9 @@
                             <p class="text-lg md:text-2xl font-bold text-white" id="lblTotalProgress">0%</p>
                         </div>
                         <div class="w-9 h-9 md:w-12 md:h-12 rounded-full border-2 md:border-4 border-brand-orange flex items-center justify-center text-brand-orange text-sm md:text-base"><i class="fa-solid fa-trophy"></i></div>
+                        <button type="button" id="btnToggleAppFullscreen" onclick="app.toggleAppFullscreen()" title="Mode Layar Penuh Aplikasi" class="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-gray-200 hover:text-white flex items-center justify-center transition-all cursor-pointer">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -939,6 +949,32 @@
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
+        // PWA Standalone Manifest Dinamis agar bisa di-Install ke Layar Utama HP/Laptop tanpa bar browser
+        (function setupDynamicManifest() {
+            try {
+                const manifestEl = document.getElementById('appWebManifest');
+                if (!manifestEl) return;
+                const manifestObj = {
+                    name: "PJOK Digital Learning",
+                    short_name: "PJOK Digital",
+                    start_url: window.location.href,
+                    display: "fullscreen",
+                    orientation: "any",
+                    background_color: "#0f172a",
+                    theme_color: "#0f172a",
+                    icons: [
+                        {
+                            src: new URL("Logo PJOK Ceria dan Dinamis.png", window.location.href).href,
+                            sizes: "512x512",
+                            type: "image/png"
+                        }
+                    ]
+                };
+                const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+                manifestEl.setAttribute('href', URL.createObjectURL(blob));
+            } catch (e) {}
+        })();
+
         function showModal(title, message, iconHtml) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
@@ -1031,10 +1067,21 @@
             });
 
             document.addEventListener('fullscreenchange', function() {
+                if (window.app && typeof window.app.updateFullscreenButtonIcon === 'function') {
+                    window.app.updateFullscreenButtonIcon();
+                }
                 if (!document.fullscreenElement && window.app && window.app.isExamLockActive()) {
                     window.app.handleExamViolation('Keluar dari mode layar penuh (Fullscreen)');
                 }
             });
+
+            // Otomatis masuk layar penuh pada sentuhan/klik pertama jika belum fullscreen
+            const autoEnterFullscreenOnce = function() {
+                if (window.app && typeof window.app.requestExamFullscreen === 'function' && !document.fullscreenElement) {
+                    window.app.requestExamFullscreen();
+                }
+            };
+            document.addEventListener('pointerdown', autoEnterFullscreenOnce, { once: true });
 
             if (window.app && typeof window.app.restoreSession === 'function') {
                 window.app.restoreSession();
@@ -1222,6 +1269,7 @@
             },
 
             async checkConnectionAndStart() {
+                this.requestExamFullscreen();
                 showLoading(true);
                 try {
                     let ref = this.state.refData;
@@ -1980,10 +2028,40 @@
             requestExamFullscreen() {
                 try {
                     const el = document.documentElement;
-                    if (!document.fullscreenElement && el.requestFullscreen) {
-                        el.requestFullscreen().catch(() => {});
+                    if (!document.fullscreenElement) {
+                        const reqFs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                        if (reqFs) {
+                            const p = reqFs.call(el);
+                            if (p && typeof p.catch === 'function') p.catch(() => {});
+                        }
                     }
+                    this.updateFullscreenButtonIcon();
                 } catch (e) {}
+            },
+
+            toggleAppFullscreen() {
+                try {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                        this.requestExamFullscreen();
+                    } else {
+                        const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                        if (exitFs) {
+                            const p = exitFs.call(document);
+                            if (p && typeof p.catch === 'function') p.catch(() => {});
+                        }
+                    }
+                    setTimeout(() => this.updateFullscreenButtonIcon(), 120);
+                } catch (e) {}
+            },
+
+            updateFullscreenButtonIcon() {
+                const btn = document.getElementById('btnToggleAppFullscreen');
+                if (!btn) return;
+                const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+                btn.innerHTML = isFs
+                    ? '<i class="fa-solid fa-compress text-brand-orange"></i>'
+                    : '<i class="fa-solid fa-expand"></i>';
+                btn.title = isFs ? 'Keluar Mode Layar Penuh' : 'Masuk Mode Layar Penuh Aplikasi';
             },
 
             exitExamFullscreen() {
