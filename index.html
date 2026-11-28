@@ -139,7 +139,7 @@
             </div>
             <div class="flex items-center gap-2 shrink-0 ml-auto">
                 <span id="formatifOverlayViolationBadge" class="bg-slate-800 border border-slate-700 text-amber-300 px-2.5 py-1.5 rounded-xl text-[11px] font-bold">
-                    Pelanggaran: 0/2
+                    Kesempatan Mengulang: 2x
                 </span>
                 <button type="button" onclick="app.finishExternalFormatif()" class="bg-green-600 hover:bg-green-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-lg transition-all cursor-pointer">
                     <i class="fa-solid fa-circle-check"></i> Selesai & Simpan Nilai
@@ -512,7 +512,7 @@
                             <li id="formatifIntroDurationInfo" class="hidden text-amber-300 font-semibold"></li>
                             <li>Layar otomatis terkunci penuh (<em>Fullscreen</em>) saat asesmen dimulai.</li>
                             <li>Dilarang keluar layar penuh, berpindah tab, atau membuka aplikasi lain.</li>
-                            <li>Jika melanggar 2 kali, asesmen otomatis dihentikan &amp; nilai langsung tersimpan.</li>
+                            <li>Tersedia <strong>2x kesempatan mengulang</strong> jika keluar karena gangguan (seperti telepon masuk). Pada keluar ke-3, nilai otomatis terkirim &amp; tersimpan.</li>
                         </ul>
                     </div>
 
@@ -549,7 +549,7 @@
 
                     <div class="bg-red-950/40 border border-red-500/40 rounded-2xl p-4 max-w-lg mx-auto mb-6 text-left text-xs text-red-200 space-y-1">
                         <p class="font-bold text-red-300"><i class="fa-solid fa-lock mr-1"></i> Perhatian Pengawasan Ujian:</p>
-                        <p>Saat tombol ditekan, layar otomatis terkunci penuh, kode ujian otomatis dimasukkan, dan tidak diperbolehkan membuka tab baru atau keluar aplikasi.</p>
+                        <p>Saat tombol ditekan, layar otomatis terkunci penuh, kode ujian otomatis dimasukkan, dan tersedia 2x kesempatan mengulang jika keluar karena gangguan telepon masuk sebelum nilai otomatis tersimpan.</p>
                     </div>
 
                     <button type="button" onclick="app.openFormatifFullscreen()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-sm md:text-base inline-flex items-center justify-center gap-2 transition-all cursor-pointer">
@@ -568,7 +568,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span id="formatifViolationBadge" class="bg-slate-800 border border-slate-700 text-amber-300 px-3 py-1 rounded-lg text-xs font-bold">
-                                Pelanggaran: 0/2
+                                Kesempatan Mengulang: 2x
                             </span>
                             <span class="text-xs bg-red-950/60 border border-red-500/40 px-3 py-1 rounded-lg text-red-300 font-semibold">
                                 <i class="fa-solid fa-lock mr-1"></i> Layar Terkunci
@@ -613,6 +613,15 @@
                             <p class="text-[11px] text-orange-300 font-semibold">Nilai</p>
                             <p id="formatifSummaryScoreVal" class="text-xl md:text-2xl font-extrabold text-brand-orange mt-0.5">0</p>
                         </div>
+                    </div>
+                    <div id="formatifPositiveFeedbackBox" class="hidden max-w-xl mx-auto my-5 text-left bg-slate-900/90 border border-emerald-500/40 rounded-2xl p-4 md:p-5 shadow-lg space-y-2">
+                        <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+                            <span class="text-emerald-400 font-bold text-xs md:text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-star text-amber-400"></i> Umpan Balik Positif
+                            </span>
+                            <span id="formatifFeedbackBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Apresiasi</span>
+                        </div>
+                        <p id="formatifPositiveFeedbackText" class="text-xs md:text-sm text-gray-100 leading-relaxed text-justify-custom"></p>
                     </div>
                     <button type="button" onclick="app.navigateTo('dashboard')" class="mt-4 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl text-white font-semibold cursor-pointer"><i class="fa-solid fa-house mr-2"></i> Kembali ke Dashboard</button>
                 </div>
@@ -926,7 +935,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzj3rEh9k-7DuKNv5tbsvkcehTnhJL0Dwy67cm-M-wm3d2ebfGDeliC8qRIPWhcewR1/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwq2b4nSGZiuFCk_BWhYFp8yGlGYylkp294TaD9ow6XO1HJoYFKu1do_lj-4yq4DLM0/exec";
         const STORAGE_KEY = "pjok_digital_session_v1";
         window.app = window.app || {};
 
@@ -944,6 +953,9 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             if (window.app && window.app.isExamLockActive()) {
+                if (window.app.state && window.app.state.examRetryPaused) {
+                    window.app.resumeFormatifAfterRetry();
+                }
                 window.app.requestExamFullscreen();
             }
         }
@@ -1051,6 +1063,8 @@
                 quizActive: false,
                 externalFormatifActive: false,
                 examViolations: 0,
+                maxExamRetries: 2,
+                examRetryPaused: false,
                 examSubmitting: false,
                 examTimerId: null,
                 examRemainingSec: 0,
@@ -1064,6 +1078,8 @@
                     formatifScore: null,
                     formatifCorrect: null,
                     formatifWrong: null,
+                    formatifFeedbackText: '',
+                    formatifFeedbackCategory: '',
                     kesepakatanAgreed: false,
                     kesepakatanSignature: ''
                 },
@@ -1472,7 +1488,7 @@
                     return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
                 }
 
-                // Ekstrak ID file Google Drive dari berbagai format URL (drive.google.com/file/d/ID/..., open?id=ID, uc?id=ID)
+                // Ekstrak ID file Google Drive dari berbagai format URL
                 const gdMatch = clean.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
                                 clean.match(/[?&]id=([a-zA-Z0-9_-]+)/);
 
@@ -1486,7 +1502,6 @@
                 }
 
                 if (gdMatch) {
-                    // Tampilkan sebagai gambar langsung terlebih dahulu; jika bukan gambar, tampilkan iframe preview Drive
                     return `<img src="https://lh3.googleusercontent.com/d/${gdMatch[1]}" alt="Media Materi" class="rounded-xl max-w-full h-auto mx-auto shadow-lg" onerror="this.style.display='none'; const nextEl=this.nextElementSibling; if(nextEl) nextEl.style.display='block';"><iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" style="display:none;" allowfullscreen></iframe>`;
                 }
 
@@ -1505,7 +1520,6 @@
                         return;
                     }
 
-                    // Dukungan tag khusus gambar/media di dalam teks subbab: [img: URL], [gambar: URL], [foto: URL], [media: URL]
                     const tagMatch = line.match(/^\[(?:img|gambar|foto|image|media)\s*:\s*(.+?)\]$/i);
                     if (tagMatch) {
                         const mediaHtml = this.formatMediaEmbed(tagMatch[1].trim());
@@ -1513,7 +1527,6 @@
                         return;
                     }
 
-                    // Jika satu baris penuh hanya berisi URL gambar atau link Google Drive, render langsung sebagai media/gambar
                     if (/^https?:\/\/\S+$/i.test(line)) {
                         const isImgUrl = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(line) ||
                                          /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)/i.test(line) ||
@@ -1917,6 +1930,53 @@
                 return Boolean(this.state.quizActive || this.state.externalFormatifActive);
             },
 
+            resumeFormatifAfterRetry() {
+                const d = this.state.dashboardData || {};
+                if (this.state.quizActive) {
+                    const shuffled = this.buildShuffledFormatifQuestions(d.formatif || []);
+                    this.state.activeFormatifQuestions = shuffled;
+                    this.state.quizIndex = 0;
+                    this.state.quizAnswers = new Array(shuffled.length).fill(null);
+                    this.state.examRetryPaused = false;
+                    this.renderFormatifNumberBoxes();
+                    this.renderQuizQuestion();
+                } else if (this.state.externalFormatifActive) {
+                    this.state.examRetryPaused = false;
+                }
+            },
+
+            buildShuffledFormatifQuestions(questions) {
+                const shuffleArray = (arr) => {
+                    const copy = arr.slice();
+                    for (let i = copy.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        const tmp = copy[i];
+                        copy[i] = copy[j];
+                        copy[j] = tmp;
+                    }
+                    return copy;
+                };
+
+                const preparedQuestions = (questions || []).map((q) => {
+                    const originalCorrectIdx = Math.max(0, (Number(q.answer) || 1) - 1);
+                    const wrappedOptions = (q.options || []).map((optText, oIdx) => ({
+                        text: optText,
+                        isCorrect: oIdx === originalCorrectIdx
+                    }));
+                    const shuffledOptions = shuffleArray(wrappedOptions);
+                    const newCorrectIdx = shuffledOptions.findIndex(item => item.isCorrect);
+
+                    return {
+                        id: q.id,
+                        text: q.text,
+                        options: shuffledOptions.map(item => item.text),
+                        correctIndex: newCorrectIdx >= 0 ? newCorrectIdx : 0
+                    };
+                });
+
+                return shuffleArray(preparedQuestions);
+            },
+
             requestExamFullscreen() {
                 try {
                     const el = document.documentElement;
@@ -1932,6 +1992,57 @@
                         document.exitFullscreen().catch(() => {});
                     }
                 } catch (e) {}
+            },
+
+            getRandomPositiveFormatifFeedback(score) {
+                const d = this.state.dashboardData || {};
+                const numericScore = Number(score) || 0;
+                const defaultPool = [
+                    { min: 85, max: 100, category: 'Sangat Baik', message: 'Luar biasa! Penguasaan materimu sangat matang dan teliti. Pertahankan semangat belajar aktif serta sportivitasmu di setiap sesi PJOK!' },
+                    { min: 85, max: 100, category: 'Sangat Baik', message: 'Prestasi yang membanggakan! Kamu mampu memahami konsep gerak dan kesehatan dengan sangat baik. Terus jadikan ilmu ini bekal hidup sehat sehari-hari!' },
+                    { min: 85, max: 100, category: 'Sangat Baik', message: 'Hebat sekali! Hasil asesmenmu menunjukkan kesungguhan dalam menyimak materi. Pertahankan konsistensi belajar dan jadilah inspirasi bagi teman-temanmu!' },
+                    { min: 85, max: 100, category: 'Sangat Baik', message: 'Sangat memuaskan! Kamu berhasil menjawab soal dengan ketepatan tinggi. Terus bergerak aktif, sehat, dan berprestasi di kelas maupun di lapangan!' },
+                    { min: 85, max: 100, category: 'Sangat Baik', message: 'Istimewa! Pemahamanmu terhadap materi pembelajaran sudah sangat kuat. Tetap rendah hati dan terus tingkatkan keterampilan gerakmu!' },
+                    { min: 70, max: 84, category: 'Baik', message: 'Bagus sekali! Kamu sudah memahami sebagian besar konsep penting materi ini. Ulas kembali beberapa bagian kecil agar hasil berikutnya semakin sempurna!' },
+                    { min: 70, max: 84, category: 'Baik', message: 'Hasil yang baik dan patut diapresiasi! Usaha belajarmu sudah terlihat jelas—sedikit latihan tambahan akan membawamu meraih nilai maksimal!' },
+                    { min: 70, max: 84, category: 'Baik', message: 'Kerja bagus! Kamu berada di jalur pemahaman yang tepat. Terus pertahankan fokus saat membaca materi dan berlatih soal secara mandiri!' },
+                    { min: 70, max: 84, category: 'Baik', message: 'Mantap! Sebagian besar indikator pembelajaran sudah kamu kuasai dengan baik. Perhatikan detail teknik gerak pada rangkuman agar makin percaya diri!' },
+                    { min: 70, max: 84, category: 'Baik', message: 'Apresiasi atas kesungguhanmu menyelesaikan asesmen ini! Nilaimu sudah baik—terus asah ketelitianmu agar pemahamanmu semakin mendalam!' },
+                    { min: 0, max: 69, category: 'Terus Semangat', message: 'Terima kasih telah berusaha mengerjakan asesmen dengan jujur! Setiap langkah belajar adalah kemajuan—yuk baca kembali materi dan coba fitur Latihan Soal!' },
+                    { min: 0, max: 69, category: 'Terus Semangat', message: 'Jangan berkecil hati, kamu sudah berani mencoba dan menyelesaikan asesmen hari ini! Pelajari lagi rangkuman materi agar pemahamanmu semakin kuat!' },
+                    { min: 0, max: 69, category: 'Terus Semangat', message: 'Usaha yang patut dihargai! Gunakan hasil ini sebagai peta belajar untuk mengulang bagian materi yang belum dipahami—kamu pasti bisa lebih baik!' },
+                    { min: 0, max: 69, category: 'Terus Semangat', message: 'Tetap semangat berlatih! Pemahaman membutuhkan proses bertahap—manfaatkan Glosarium dan Latihan Soal Mandiri untuk memperkuat penguasaan materimu!' },
+                    { min: 0, max: 69, category: 'Terus Semangat', message: 'Apresiasi atas kejujuran dan ketekunanmu menyelesaikan soal! Baca kembali sub topik materi dengan tenang, dan bersiaplah meraih hasil yang jauh lebih baik!' }
+                ];
+
+                const sourcePool = (Array.isArray(d.formatifFeedbacks) && d.formatifFeedbacks.length > 0)
+                    ? d.formatifFeedbacks
+                    : defaultPool;
+
+                let matching = sourcePool.filter(item => numericScore >= item.min && numericScore <= item.max);
+                if (matching.length === 0) {
+                    matching = sourcePool;
+                }
+                const picked = matching[Math.floor(Math.random() * matching.length)];
+                return {
+                    category: picked.category || (numericScore >= 85 ? 'Sangat Baik' : numericScore >= 70 ? 'Baik' : 'Terus Semangat'),
+                    message: picked.message
+                };
+            },
+
+            renderFormatifFeedbackBox(fbObj) {
+                const box = document.getElementById('formatifPositiveFeedbackBox');
+                const badge = document.getElementById('formatifFeedbackBadge');
+                const textEl = document.getElementById('formatifPositiveFeedbackText');
+                if (!box || !textEl) return;
+
+                if (fbObj && fbObj.message) {
+                    box.classList.remove('hidden');
+                    if (badge) badge.innerText = fbObj.category || 'Apresiasi';
+                    textEl.innerText = fbObj.message;
+                } else {
+                    box.classList.add('hidden');
+                }
             },
 
             setupFormatif() {
@@ -1966,10 +2077,21 @@
                         } else if (statsBox) {
                             statsBox.classList.add('hidden');
                         }
+                        if (!this.state.progress.formatifFeedbackText) {
+                            const generatedFb = this.getRandomPositiveFormatifFeedback(this.state.progress.formatifScore);
+                            this.state.progress.formatifFeedbackText = generatedFb.message;
+                            this.state.progress.formatifFeedbackCategory = generatedFb.category;
+                            this.saveSession();
+                        }
+                        this.renderFormatifFeedbackBox({
+                            category: this.state.progress.formatifFeedbackCategory,
+                            message: this.state.progress.formatifFeedbackText
+                        });
                     } else {
                         scoreValEl.innerText = 'TERCATAT';
                         subtextEl.innerText = 'Sesi asesmen formatif telah selesai dan otomatis tercatat di Spreadsheet.';
                         if (statsBox) statsBox.classList.add('hidden');
+                        this.renderFormatifFeedbackBox(null);
                     }
                     return;
                 }
@@ -2024,47 +2146,17 @@
                 }
                 if (errEl) errEl.classList.add('hidden');
 
-                // Helper Fisher-Yates shuffle untuk mengacak array tanpa mengubah array asli
-                const shuffleArray = (arr) => {
-                    const copy = arr.slice();
-                    for (let i = copy.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        const tmp = copy[i];
-                        copy[i] = copy[j];
-                        copy[j] = tmp;
-                    }
-                    return copy;
-                };
-
-                // Acak urutan pilihan pada setiap soal dan simpan indeks kunci jawaban aslinya
-                const preparedQuestions = questions.map((q) => {
-                    const originalCorrectIdx = Math.max(0, (Number(q.answer) || 1) - 1);
-                    const wrappedOptions = (q.options || []).map((optText, oIdx) => ({
-                        text: optText,
-                        isCorrect: oIdx === originalCorrectIdx
-                    }));
-                    const shuffledOptions = shuffleArray(wrappedOptions);
-                    const newCorrectIdx = shuffledOptions.findIndex(item => item.isCorrect);
-
-                    return {
-                        id: q.id,
-                        text: q.text,
-                        options: shuffledOptions.map(item => item.text),
-                        correctIndex: newCorrectIdx >= 0 ? newCorrectIdx : 0
-                    };
-                });
-
-                // Acak urutan seluruh soal formatif
-                const shuffledQuestions = shuffleArray(preparedQuestions);
+                const shuffledQuestions = this.buildShuffledFormatifQuestions(questions);
 
                 this.state.activeFormatifQuestions = shuffledQuestions;
                 this.state.quizActive = true;
                 this.state.quizIndex = 0;
                 this.state.quizAnswers = new Array(shuffledQuestions.length).fill(null);
                 this.state.examViolations = 0;
+                this.state.examRetryPaused = false;
                 this.state.examSubmitting = false;
 
-                document.getElementById('formatifViolationBadge').innerText = 'Pelanggaran: 0/2';
+                document.getElementById('formatifViolationBadge').innerText = `Kesempatan Mengulang: ${this.state.maxExamRetries}x`;
                 document.getElementById('formatifIntro').classList.add('hidden');
                 document.getElementById('formatifPlayArea').classList.remove('hidden');
 
@@ -2159,7 +2251,6 @@
 
                 document.getElementById('qCurrentIdx').innerText = String(idx + 1);
                 document.getElementById('qTotal').innerText = String(questions.length);
-                // Hapus awalan nomor seperti "1. " atau "1) " jika ada pada teks soal, dan tampilkan tanpa nomor di depan
                 const cleanQuestionText = String(q.text || '').replace(/^\s*\d+\s*[\.\)]\s*/, '');
                 document.getElementById('qText').innerText = cleanQuestionText;
 
@@ -2241,9 +2332,10 @@
 
                 this.state.externalFormatifActive = true;
                 this.state.examViolations = 0;
+                this.state.examRetryPaused = false;
                 this.state.examSubmitting = false;
 
-                document.getElementById('formatifOverlayViolationBadge').innerText = 'Pelanggaran: 0/2';
+                document.getElementById('formatifOverlayViolationBadge').innerText = `Kesempatan Mengulang: ${this.state.maxExamRetries}x`;
                 document.getElementById('formatifFullscreenIframe').src = url;
                 const overlay = document.getElementById('formatifFullscreenOverlay');
                 overlay.classList.remove('hidden');
@@ -2296,26 +2388,29 @@
             },
 
             handleExamViolation(reason) {
-                if (!this.isExamLockActive() || this.state.examSubmitting) return;
+                if (!this.isExamLockActive() || this.state.examSubmitting || this.state.examRetryPaused) return;
                 this.state.examViolations++;
                 const vCount = this.state.examViolations;
+                const maxRetries = this.state.maxExamRetries || 2;
+                const remainingRetries = Math.max(0, maxRetries - vCount);
 
                 const b1 = document.getElementById('formatifViolationBadge');
                 const b2 = document.getElementById('formatifOverlayViolationBadge');
-                if (b1) b1.innerText = `Pelanggaran: ${vCount}/2`;
-                if (b2) b2.innerText = `Pelanggaran: ${vCount}/2`;
+                if (b1) b1.innerText = `Kesempatan Mengulang: ${remainingRetries}x`;
+                if (b2) b2.innerText = `Kesempatan Mengulang: ${remainingRetries}x`;
 
-                if (vCount >= 2) {
+                if (vCount > maxRetries) {
                     if (this.state.quizActive) {
-                        this.submitFormatif(true, `Pelanggaran Batas Maksimal (${reason})`);
+                        this.submitFormatif(true, `Keluar Aplikasi Melebihi 2x Kesempatan Mengulang (${reason})`);
                     } else if (this.state.externalFormatifActive) {
-                        this.finishExternalFormatif(true, `Pelanggaran Batas Maksimal (${reason})`);
+                        this.finishExternalFormatif(true, `Keluar Aplikasi Melebihi 2x Kesempatan Mengulang (${reason})`);
                     }
                 } else {
+                    this.state.examRetryPaused = true;
                     showModal(
-                        'Peringatan Pengawasan Ujian (1/2)',
-                        `Terdeteksi pelanggaran: ${reason}. Jika melanggar sekali lagi, asesmen otomatis dihentikan dan nilai langsung dikirim!`,
-                        '<i class="fa-solid fa-triangle-exclamation text-red-500"></i>'
+                        `Kesempatan Mengulang (${vCount}/${maxRetries})`,
+                        `Terdeteksi keluar dari aplikasi (${reason}). Karena ada gangguan (seperti telepon masuk), Anda masih memiliki ${remainingRetries}x kesempatan mengulang. Klik "Tutup" untuk mengulang kembali asesmen dari awal. Pada keluar ke-${maxRetries + 1}, nilai akan otomatis tersimpan!`,
+                        '<i class="fa-solid fa-rotate-left text-amber-400"></i>'
                     );
                 }
             },
@@ -2346,14 +2441,16 @@
                     const expectedIdx = (typeof q.correctIndex === 'number')
                         ? q.correctIndex
                         : Math.max(0, (Number(q.answer) || 1) - 1);
-                    if (chosenIdx !== null && chosenIdx !== undefined && chosenIdx === expectedIdx) {
+                    if (chosenIdx === expectedIdx) {
                         correctCount++;
                     }
                 });
 
-                const score = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+                const rawScore = questions.length > 0 ? (correctCount / questions.length) * 100 : 0;
+                const score = Number.isInteger(rawScore) ? rawScore : Number(rawScore.toFixed(2));
                 const wrongCount = Math.max(0, questions.length - correctCount);
-                const noteText = `${submitReason} | Benar: ${correctCount}, Salah: ${wrongCount} | Pelanggaran: ${this.state.examViolations}/2`;
+                const positiveFb = this.getRandomPositiveFormatifFeedback(score);
+                const noteText = `${submitReason} | Keluar/Ulang: ${this.state.examViolations}/${this.state.maxExamRetries || 2}`;
 
                 showLoading(true);
                 try {
@@ -2364,7 +2461,11 @@
                         className: this.state.className,
                         materialId: this.state.materialId,
                         answers: answerLabels,
+                        correctCount: correctCount,
+                        wrongCount: wrongCount,
                         score: score,
+                        feedback: positiveFb.message,
+                        feedbackCategory: positiveFb.category,
                         note: noteText
                     });
 
@@ -2372,6 +2473,8 @@
                     this.state.progress.formatifScore = score;
                     this.state.progress.formatifCorrect = correctCount;
                     this.state.progress.formatifWrong = wrongCount;
+                    this.state.progress.formatifFeedbackText = positiveFb.message;
+                    this.state.progress.formatifFeedbackCategory = positiveFb.category;
                     this.updateProgress();
                     this.saveSession();
 
@@ -2385,6 +2488,7 @@
                         document.getElementById('formatifWrongVal').innerText = wrongCount;
                         document.getElementById('formatifSummaryScoreVal').innerText = score;
                     }
+                    this.renderFormatifFeedbackBox(positiveFb);
                     document.getElementById('formatifResultSubtext').innerText = forcedAutoSubmit
                         ? `Asesmen otomatis terkunci (${submitReason}). Nilai akhir Anda otomatis tersimpan di Spreadsheet:`
                         : 'Nilai akhir Anda telah otomatis tercatat di Spreadsheet:';
@@ -2928,7 +3032,6 @@
             },
 
             getTeacherSignatureDataUrl() {
-                // Menghasilkan gambar tanda tangan guru mapel (tinta biru khas sesuai gambar TTD)
                 const c = document.createElement('canvas');
                 c.width = 480;
                 c.height = 200;
@@ -2940,7 +3043,6 @@
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
 
-                // 1. Goresan naik dari kiri bawah melengkung tajam ke puncak lalu turun ke palang
                 ctx.beginPath();
                 ctx.moveTo(22, 188);
                 ctx.bezierCurveTo(64, 134, 112, 74, 156, 26);
@@ -2948,7 +3050,6 @@
                 ctx.bezierCurveTo(204, 70, 166, 92, 122, 98);
                 ctx.stroke();
 
-                // 2. Garis horizontal silang yang memotong bagian tengah
                 ctx.beginPath();
                 ctx.moveTo(92, 86);
                 ctx.bezierCurveTo(138, 76, 192, 66, 232, 60);
@@ -2956,7 +3057,6 @@
                 ctx.bezierCurveTo(154, 110, 190, 98, 210, 84);
                 ctx.stroke();
 
-                // 3. Rangkaian gelombang huruf kecil berulang di bagian tengah-bawah
                 ctx.beginPath();
                 ctx.moveTo(188, 116);
                 ctx.bezierCurveTo(194, 92, 212, 86, 216, 106);
@@ -2969,7 +3069,6 @@
                 ctx.bezierCurveTo(320, 122, 328, 116, 336, 102);
                 ctx.stroke();
 
-                // 4. Tarikan naik ke kanan atas lalu turun menjulur ke kanan bawah
                 ctx.beginPath();
                 ctx.moveTo(328, 112);
                 ctx.bezierCurveTo(360, 82, 396, 44, 428, 20);
@@ -2977,7 +3076,6 @@
                 ctx.bezierCurveTo(410, 88, 386, 128, 372, 156);
                 ctx.stroke();
 
-                // 5. Ekor garis vertikal pendek di bagian kanan bawah
                 ctx.beginPath();
                 ctx.moveTo(354, 112);
                 ctx.lineTo(350, 138);
@@ -2987,8 +3085,6 @@
             },
 
             getKopSuratHtml() {
-                // Menggunakan gambar kop jika tersedia di folder yang sama (kop-sman1tejakula.jpg / kop-sman1tejakula.png),
-                // dengan tampilan kop resmi SMA Negeri 1 Tejakula yang rapi dan tajam saat dicetak ke PDF
                 return `
   <div class="kop-wrap">
     <img src="kop-sman1tejakula.jpg" alt="Kop SMA Negeri 1 Tejakula" class="kop-img" onerror="this.onerror=null; this.src='kop-sman1tejakula.png'; this.style.display='none'; document.getElementById('kopFallback').style.display='block';">
@@ -3003,140 +3099,6 @@
       <div class="kop-meta">NPSN : 50100282 &nbsp;NSS : 30.1.22.01.00.037 &nbsp;Telp : (0362)3304516 &nbsp;Kode Pos : 81173</div>
     </div>
   </div>`;
-            },
-
-            downloadKesepakatanPDF() {
-                if (!this.state.progress.kesepakatanAgreed || !this.state.progress.kesepakatanSignature) {
-                    showModal('Belum Disetujui', 'Silakan bubuhkan tanda tangan dan klik tombol "Saya Setuju" terlebih dahulu sebelum mengunduh dokumen.', '<i class="fa-solid fa-file-pdf text-amber-400"></i>');
-                    return;
-                }
-
-                const d = this.state.dashboardData || {};
-                const list = d.kesepakatan || [];
-                const studentName = this.state.studentName || 'Murid';
-                const className = this.state.className || '-';
-                const materialTitle = (d.materi && d.materi.judul) ? d.materi.judul : (this.state.materialTitle || '-');
-                const studentSig = this.state.progress.kesepakatanSignature;
-                const teacherSig = this.getTeacherSignatureDataUrl();
-                const kopHtml = this.getKopSuratHtml();
-                const dateStr = new Date().toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-
-                const itemsHtml = list.length > 0
-                    ? list.map((item, idx) => `
-                        <tr>
-                            <td style="border:1px solid #cbd5e1;padding:8px 10px;text-align:center;font-weight:bold;width:44px;">${item.no || (idx + 1)}</td>
-                            <td style="border:1px solid #cbd5e1;padding:8px 10px;">
-                                <div style="font-weight:bold;color:#0f172a;margin-bottom:2px;">${item.title}</div>
-                                <div style="color:#334155;font-size:12px;line-height:1.45;">${item.desc}</div>
-                            </td>
-                        </tr>
-                    `).join('')
-                    : `<tr><td colspan="2" style="border:1px solid #cbd5e1;padding:10px;text-align:center;color:#64748b;">Kesepakatan kelas PJOK telah disetujui bersama.</td></tr>`;
-
-                const printHtml = `<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<title>Kesepakatan Kelas - ${studentName}</title>
-<style>
-  @page { size: A4 portrait; margin: 14mm 16mm; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; margin: 0; padding: 0; background: #ffffff; }
-  .kop-wrap { border-bottom: 3px double #0f172a; padding-bottom: 8px; margin-bottom: 14px; text-align: center; }
-  .kop-img { width: 100%; max-height: 115px; object-fit: contain; display: block; margin: 0 auto; }
-  .kop-fallback { text-align: center; line-height: 1.25; }
-  .kop-aksara-top { font-size: 11px; color: #1e293b; letter-spacing: 0.5px; }
-  .kop-prov { font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 1px; }
-  .kop-aksara-mid { font-size: 12px; color: #1e293b; margin-top: 2px; }
-  .kop-school { font-size: 17px; font-weight: 900; color: #0f172a; letter-spacing: 0.5px; margin-top: 1px; }
-  .kop-aksara-sub { font-size: 9px; color: #334155; margin-top: 2px; }
-  .kop-addr { font-size: 10px; color: #0f172a; margin-top: 2px; }
-  .kop-contact { font-size: 9.5px; color: #0f172a; margin-top: 1px; }
-  .kop-meta { font-size: 9.5px; font-weight: bold; color: #0f172a; margin-top: 1px; }
-  .doc-title { text-align: center; margin-bottom: 12px; }
-  .doc-title h2 { font-size: 15px; margin: 0 0 2px 0; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: underline; }
-  .doc-title p { font-size: 11.5px; color: #475569; margin: 0; }
-  .meta-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 14px; margin-bottom: 12px; font-size: 12px; line-height: 1.55; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
-  .statement { font-size: 12px; line-height: 1.5; margin-bottom: 16px; text-align: justify; }
-  .sig-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-  .sig-cell { width: 50%; vertical-align: bottom; text-align: center; padding: 4px 12px; }
-  .sig-role { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
-  .sig-img-wrap { height: 74px; display: flex; align-items: center; justify-content: center; margin: 4px auto; }
-  .sig-img-wrap img { max-height: 72px; max-width: 190px; object-fit: contain; }
-  .sig-name { font-size: 12px; font-weight: bold; text-decoration: underline; margin-top: 4px; }
-  .sig-nip { font-size: 11px; color: #334155; margin-top: 2px; }
-</style>
-</head>
-<body>
-  ${kopHtml}
-
-  <div class="doc-title">
-    <h2>Lembar Kesepakatan Kelas PJOK</h2>
-    <p>Pendidikan Jasmani, Olahraga, dan Kesehatan — PJOK Digital Learning</p>
-  </div>
-
-  <div class="meta-box">
-    <strong>Nama Murid:</strong> ${studentName}<br>
-    <strong>Kelas:</strong> ${className}<br>
-    <strong>Materi Pembelajaran:</strong> ${materialTitle}<br>
-    <strong>Tanggal Persetujuan:</strong> ${dateStr}
-  </div>
-
-  <table>
-    <thead>
-      <tr style="background:#f1f5f9;">
-        <th style="border:1px solid #cbd5e1;padding:8px 10px;width:44px;">No</th>
-        <th style="border:1px solid #cbd5e1;padding:8px 10px;text-align:left;">Butir Kesepakatan Kelas</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${itemsHtml}
-    </tbody>
-  </table>
-
-  <p class="statement">
-    Saya menyatakan telah membaca, memahami, dan menyetujui seluruh butir kesepakatan kelas di atas untuk dilaksanakan dengan penuh disiplin, tanggung jawab, dan sportivitas selama proses pembelajaran berlangsung.
-  </p>
-
-  <table class="sig-table">
-    <tr>
-      <td class="sig-cell">
-        <div class="sig-role">Menyetujui,<br>Murid</div>
-        <div class="sig-img-wrap">
-          <img src="${studentSig}" alt="Tanda Tangan Murid">
-        </div>
-        <div class="sig-name">${studentName}</div>
-        <div class="sig-nip">Kelas ${className}</div>
-      </td>
-      <td class="sig-cell">
-        <div class="sig-role">Mengetahui,<br>Guru Mata Pelajaran PJOK</div>
-        <div class="sig-img-wrap">
-          <img src="${teacherSig}" alt="Tanda Tangan Guru Mata Pelajaran">
-        </div>
-        <div class="sig-name">I Ketut Agus Nova Anggarawan, S.Pd.</div>
-        <div class="sig-nip">NIPPPK. 198811152022211012</div>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-
-                const printWin = window.open('', '_blank', 'width=820,height=960');
-                if (!printWin) {
-                    showModal('Pop-up Diblokir', 'Izinkan jendela pop-up pada browser untuk mengunduh/mencetak PDF Kesepakatan Kelas.', '<i class="fa-solid fa-window-restore text-amber-400"></i>');
-                    return;
-                }
-                printWin.document.open();
-                printWin.document.write(printHtml);
-                printWin.document.close();
-                printWin.focus();
-                setTimeout(() => {
-                    printWin.print();
-                }, 350);
             },
 
             async uploadKesepakatanPdfToSpreadsheet(pdfBase64, fileName, dateStr) {
